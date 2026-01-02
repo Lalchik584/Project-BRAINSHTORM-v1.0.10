@@ -29,7 +29,7 @@ Quiz Master Platform
 Установка:
 
 1. Клонируйте репозиторий:
-git clone https://github.com/ваш-username/quiz-master.git
+git clone https://github.com/Llachik584/quiz-master.git
 cd quiz-master
 
 2.Установите зависимости:

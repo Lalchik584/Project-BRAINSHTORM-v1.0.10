@@ -1,0 +1,255 @@
+[
+  {
+    "id": "7dcf7085-55ef-48b9-a490-eda006c57631",
+    "article": "3209769",
+    "title": "TEST_QUIZ_3_DATA_BAZE_(QUIZES)",
+    "questions": [
+      {
+        "question": "100=?",
+        "correctAnswer": "64+36",
+        "wrongAnswers": [
+          "93+7,1",
+          "42+47",
+          "89+12"
+        ]
+      }
+    ],
+    "createdAt": "2025-11-18T17:36:25.405Z",
+    "plays": 0
+  },
+  {
+    "id": "9e666dd4-2d0f-4060-8e35-46e1c5e96ecb",
+    "article": "8010290",
+    "title": "TESTING QUIZ 5 Questions",
+    "questions": [
+      {
+        "question": "1",
+        "correctAnswer": "1",
+        "wrongAnswers": [
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "question": "2",
+        "correctAnswer": "2",
+        "wrongAnswers": [
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      {
+        "question": "3",
+        "correctAnswer": "3",
+        "wrongAnswers": [
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      {
+        "question": "4",
+        "correctAnswer": "4",
+        "wrongAnswers": [
+          "5",
+          "6",
+          "7"
+        ]
+      },
+      {
+        "question": "5",
+        "correctAnswer": "5",
+        "wrongAnswers": [
+          "6",
+          "7",
+          "8"
+        ]
+      }
+    ],
+    "createdAt": "2025-11-18T18:06:51.972Z",
+    "plays": 0
+  },
+  {
+    "id": "9b629117-8906-41e4-9444-df01a186a147",
+    "article": "1503330",
+    "title": "TESTING QUIZ_publish",
+    "questions": [
+      {
+        "question": "1",
+        "correctAnswer": "1",
+        "wrongAnswers": [
+          "2",
+          "3",
+          "4"
+        ]
+      }
+    ],
+    "createdAt": "2025-11-19T06:17:06.348Z",
+    "plays": 0
+  },
+  {
+    "id": "df84c078-f3b3-49d2-a372-20258e97c154",
+    "article": "3123322",
+    "title": "Test Quiz 1763567271063",
+    "questions": [
+      {
+        "question": "Test question?",
+        "correctAnswer": "Correct",
+        "wrongAnswers": [
+          "Wrong 1",
+          "Wrong 2",
+          "Wrong 3"
+        ]
+      }
+    ],
+    "createdAt": "2025-11-19T15:47:51.094Z",
+    "plays": 0
+  },
+  {
+    "id": "6289fb01-8017-46fe-9bfc-8440b749c415",
+    "article": "8540729",
+    "title": "TESTING_QUIZ_NEW_DIALOG",
+    "questions": [
+      {
+        "question": "1",
+        "correctAnswer": "1",
+        "wrongAnswers": [
+          "авдивжд",
+          "дущ",
+          "39489",
+          "345"
+        ]
+      },
+      {
+        "question": "134",
+        "correctAnswer": "134",
+        "wrongAnswers": [
+          "257457",
+          "ерлтошзк",
+          "0000000"
+        ]
+      },
+      {
+        "question": "53н2",
+        "correctAnswer": "235",
+        "wrongAnswers": [
+          "33453435",
+          "345345345345345",
+          "3453й45ц22"
+        ]
+      }
+    ],
+    "createdAt": "2025-11-19T18:32:50.129Z",
+    "plays": 0
+  },
+  {
+    "id": "297b50b7-86f1-4310-ace7-7040eab46a0b",
+    "article": "1371099",
+    "title": "TESTING QUIZ",
+    "questions": [
+      {
+        "question": "1",
+        "correctAnswer": "1",
+        "wrongAnswers": [
+          "2",
+          "3",
+          "4"
+        ]
+      }
+    ],
+    "createdAt": "2025-11-21T05:27:52.884Z",
+    "plays": 0
+  },
+  {
+    "id": "b2c52769-279b-4fd8-b0c1-77d70aaa6405",
+    "article": "7324874",
+    "title": "Test Quiz 1763703295850",
+    "questions": [
+      {
+        "question": "Test question?",
+        "correctAnswer": "Correct",
+        "wrongAnswers": [
+          "Wrong 1",
+          "Wrong 2",
+          "Wrong 3"
+        ]
+      }
+    ],
+    "createdAt": "2025-11-21T05:34:55.876Z",
+    "plays": 0
+  },
+  {
+    "id": "942d0082-a482-455c-be6e-e080860b6f2d",
+    "article": "3351794",
+    "title": "123_test",
+    "questions": [
+      {
+        "question": "test",
+        "correctAnswer": "test",
+        "wrongAnswers": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      {
+        "question": "test",
+        "correctAnswer": "test",
+        "wrongAnswers": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      {
+        "question": "test",
+        "correctAnswer": "test",
+        "wrongAnswers": [
+          "1",
+          "2",
+          "3"
+        ]
+      }
+    ],
+    "createdAt": "2025-12-27T18:43:49.978Z",
+    "plays": 0
+  },
+  {
+    "id": "abdeb7af-ee49-4b36-aef3-74a27ad2c68f",
+    "article": "8357950",
+    "title": "data base test v10.0",
+    "questions": [
+      {
+        "question": "1",
+        "correctAnswer": "1",
+        "wrongAnswers": [
+          "2",
+          "3",
+          "4"
+        ]
+      }
+    ],
+    "createdAt": "2026-01-01T08:32:08.770Z",
+    "plays": 0
+  },
+  {
+    "id": "a3d99ddd-b11e-483e-9fb2-e7b132080603",
+    "article": "8144395",
+    "title": "TESTING QUIZ123123",
+    "questions": [
+      {
+        "question": "1",
+        "correctAnswer": "1",
+        "wrongAnswers": [
+          "2",
+          "3",
+          "4"
+        ]
+      }
+    ],
+    "createdAt": "2026-01-01T13:54:45.895Z",
+    "plays": 0
+  }
+]

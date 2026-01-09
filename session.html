@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Control - Quiz Master</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .session-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .session-code {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            letter-spacing: 5px;
+        }
+        .qr-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-code {
+            border: 2px solid #333;
+            padding: 10px;
+            background: white;
+            max-width: 300px;
+        }
+        .students-list {
+            margin-top: 30px;
+        }
+        .student-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+        }
+        .btn-start {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="session-header">
+            <h1>🎮 Session Control</h1>
+            <p>Share the session code or QR code with students</p>
+            <div class="session-code" id="session-code-display">------</div>
+        </div>
+
+        <div class="qr-section">
+            <h3>📱 QR Code</h3>
+            <img id="qr-code" class="qr-code" src="" alt="QR Code">
+        </div>
+
+        <div style="text-align: center;">
+            <button id="start-quiz-btn" class="btn btn-start">🚀 Start Quiz</button>
+        </div>
+
+        <div class="students-list">
+            <h3>👨‍🎓 Connected Students (<span id="students-count">0</span>)</h3>
+            <div id="students-container">
+                <!-- Students will be listed here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionCode = urlParams.get('sessionCode');
+
+        // Элементы интерфейса
+        const sessionCodeDisplay = document.getElementById('session-code-display');
+        const qrCodeImg = document.getElementById('qr-code');
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const studentsCount = document.getElementById('students-count');
+        const studentsContainer = document.getElementById('students-container');
+
+        // Если код сессии не передан, покажем ошибку
+        if (!sessionCode) {
+            alert('Session code is missing!');
+            window.location.href = '/teacher.html';
+        } else {
+            // Устанавливаем код сессии
+            sessionCodeDisplay.textContent = sessionCode;
+            // Устанавливаем QR-код
+            qrCodeImg.src = `/qr/${sessionCode}`;
+
+            // Подключаем учителя к сессии
+            socket.emit('teacher-join', sessionCode);
+
+            // Обработчик начала квиза
+            startQuizBtn.addEventListener('click', () => {
+                socket.emit('start-quiz', sessionCode);
+                startQuizBtn.disabled = true;
+                startQuizBtn.textContent = 'Quiz Started!';
+            });
+        }
+
+        // Слушаем подключения студентов
+        socket.on('student-joined', (data) => {
+            updateStudentsList(data.student, data.totalStudents);
+        });
+
+        socket.on('student-left', (data) => {
+            removeStudent(data.studentId, data.totalStudents);
+        });
+
+        // Обновляем список студентов
+        function updateStudentsList(student, total) {
+            studentsCount.textContent = total;
+
+            const studentElement = document.createElement('div');
+            studentElement.className = 'student-item';
+            studentElement.id = `student-${student.id}`;
+            studentElement.innerHTML = `
+                <strong>👤 ${student.name}</strong>
+                <small style="color: #666;">joined at ${new Date(student.joinedAt).toLocaleTimeString()}</small>
+            `;
+            studentsContainer.appendChild(studentElement);
+        }
+
+        function removeStudent(studentId, total) {
+            const element = document.getElementById(`student-${studentId}`);
+            if (element) {
+                element.remove();
+            }
+            studentsCount.textContent = total;
+        }
+
+        // Обработчик начала квиза (для учителя, если нужно)
+        socket.on('quiz-started', (data) => {
+            // Можем показать сообщение, что квиз начат
+            console.log('Quiz started for session:', sessionCode);
+        });
+    </script>
+</body>
+</html>

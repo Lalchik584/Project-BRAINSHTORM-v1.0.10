@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Panel - Quiz Master</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            background: #667eea;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .question-block {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .search-result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+        .article-code {
+            font-family: monospace;
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👨‍🏫 Teacher Panel</h1>
+        <p>Create new quizzes or find existing ones in our database</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('create')">Create New Quiz</button>
+            <button class="tab" onclick="switchTab('find')">Find Existing Quiz</button>
+        </div>
+
+        <!-- Tab 1: Create Quiz -->
+        <div id="create-tab" class="tab-content active">
+            <div class="form-group">
+                <label for="quizTitle">Quiz Title:</label>
+                <input type="text" id="quizTitle" placeholder="Enter quiz title">
+            </div>
+            
+            <div class="form-group">
+                <label for="questionCount">Number of Questions (1-20):</label>
+                <select id="questionCount" onchange="generateQuestionFields()">
+                    <option value="">Select number of questions</option>
+                    <option value="1">1 Question</option>
+                    <option value="3">3 Questions</option>
+                    <option value="5">5 Questions</option>
+                    <option value="10">10 Questions</option>
+                    <option value="12">12 Questions</option>
+                    <option value="15">15 Questions</option>
+                    <option value="20">20 Questions</option>
+                </select>
+            </div>
+
+            <div id="questions-container">
+                <!-- Question fields will be generated here -->
+            </div>
+
+            <button class="btn" onclick="createQuiz()">Create Quiz</button>
+            
+            <div id="create-result"></div>
+        </div>
+
+        <!-- Tab 2: Find Quiz -->
+        <div id="find-tab" class="tab-content">
+            <div class="form-group">
+                <label for="searchQuery">Search by Title or Article Number:</label>
+                <input type="text" id="searchQuery" placeholder="Enter quiz title or 7-digit article number">
+            </div>
+            <button class="btn" onclick="searchQuizzes()">Search</button>
+            
+            <div id="search-results" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Generate question fields based on selected count
+        function generateQuestionFields() {
+            const count = parseInt(document.getElementById('questionCount').value);
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            if (!count || count < 1) {
+                return; // Если ничего не выбрано, выходим
+            }
+
+            for (let i = 1; i <= count; i++) {
+                const questionHTML = `
+                    <div class="question-block">
+                        <h3>Question ${i}</h3>
+                        <div class="form-group">
+                            <label>Question Text:</label>
+                            <textarea id="question-${i}" placeholder="Enter your question" rows="2" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Correct Answer:</label>
+                            <input type="text" id="correct-${i}" placeholder="Correct answer" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Wrong Answer 1:</label>
+                            <input type="text" id="wrong1-${i}" placeholder="Wrong answer" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Wrong Answer 2:</label>
+                            <input type="text" id="wrong2-${i}" placeholder="Wrong answer" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Wrong Answer 3:</label>
+                            <input type="text" id="wrong3-${i}" placeholder="Wrong answer" required>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += questionHTML;
+            }
+        }
+
+        // Switch between tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Create new quiz
+        async function createQuiz() {
+            const title = document.getElementById('quizTitle').value.trim();
+            const questionCount = parseInt(document.getElementById('questionCount').value);
+            
+            if (!title) {
+                alert('Please enter a quiz title');
+                return;
+            }
+            
+            if (!questionCount || questionCount < 1) {
+                alert('Please select number of questions');
+                return;
+            }
+
+            const questions = [];
+            let hasErrors = false;
+
+            for (let i = 1; i <= questionCount; i++) {
+                const questionText = document.getElementById(`question-${i}`).value.trim();
+                const correctAnswer = document.getElementById(`correct-${i}`).value.trim();
+                const wrongAnswers = [
+                    document.getElementById(`wrong1-${i}`).value.trim(),
+                    document.getElementById(`wrong2-${i}`).value.trim(),
+                    document.getElementById(`wrong3-${i}`).value.trim()
+                ];
+
+                // Проверяем, что все поля заполнены
+                if (!questionText || !correctAnswer || wrongAnswers.some(a => !a)) {
+                    alert(`Please fill all fields for question ${i}`);
+                    hasErrors = true;
+                    break;
+                }
+
+                questions.push({
+                    question: questionText,
+                    correctAnswer: correctAnswer,
+                    wrongAnswers: wrongAnswers
+                });
+            }
+
+            if (hasErrors) return;
+
+            try {
+                const response = await fetch('/api/quizzes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        questions: questions
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('create-result').innerHTML = `
+                        <div class="success-message">
+                            <h3>✅ Quiz Created Successfully!</h3>
+                            <p><strong>Title:</strong> ${result.quiz.title}</p>
+                            <p><strong>Article Number:</strong> <span class="article-code">${result.quiz.article}</span></p>
+                            <p><strong>Questions:</strong> ${result.quiz.questions.length}</p>
+                            <p><strong>Save this code to share with others!</strong></p>
+                        </div>
+                    `;
+                    
+                    // Clear form
+                    document.getElementById('quizTitle').value = '';
+                    document.getElementById('questionCount').value = '';
+                    document.getElementById('questions-container').innerHTML = '';
+                } else {
+                    alert('Error creating quiz: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error creating quiz. Check console for details.');
+            }
+        }
+
+        // Search for quizzes
+        async function searchQuizzes() {
+            const query = document.getElementById('searchQuery').value.trim();
+            
+            if (!query) {
+                document.getElementById('search-results').innerHTML = '<p>Please enter a search term</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/quizzes/search?query=${encodeURIComponent(query)}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displaySearchResults(result.results);
+                } else {
+                    document.getElementById('search-results').innerHTML = `<p>Error: ${result.error}</p>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('search-results').innerHTML = '<p>Error searching quizzes. Check console.</p>';
+            }
+        }
+
+        // Функция для отображения результатов поиска с кнопкой "Start Session"
+        function displaySearchResults(results) {
+            const container = document.getElementById('search-results');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<p>No quizzes found matching your search.</p>';
+                return;
+            }
+
+            container.innerHTML = '<h3>Search Results:</h3>';
+            results.forEach(quiz => {
+                const quizElement = document.createElement('div');
+                quizElement.className = 'search-result';
+                quizElement.innerHTML = `
+                    <h4>${quiz.title}</h4>
+                    <p><strong>Article:</strong> <span class="article-code">${quiz.article}</span></p>
+                    <p><strong>Questions:</strong> ${quiz.questions.length}</p>
+                    <p><strong>Plays:</strong> ${quiz.plays || 0}</p>
+                    <div class="quiz-actions" style="margin-top: 15px; text-align: center;">
+                        <button onclick="startSession('${quiz.article}')" class="btn" style="background: #17a2b8; padding: 10px 20px;">
+                            🎮 Start Quiz Session
+                        </button>
+                    </div>
+                `;
+                container.appendChild(quizElement);
+            });
+        }
+
+        // Функция для создания сессии и перехода на страницу управления
+        async function startSession(quizArticle) {
+            try {
+                console.log('Starting session for quiz:', quizArticle);
+                
+                const response = await fetch('/api/sessions', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({ 
+                        quizArticle: quizArticle 
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('Session created successfully:', result.session.code);
+                    // Переходим на страницу управления сессией
+                    window.location.href = `/session/${result.session.code}`;
+                } else {
+                    alert('Error starting session: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error starting session:', error);
+                alert('Error starting session: ' + error.message);
+            }
+        }
+
+        // Initialize question fields on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Teacher panel loaded');
+            // Можно оставить или убрать, если хотите чтобы поля не генерировались автоматически
+            // generateQuestionFields();
+        });
+    </script>
+</body>
+</html>

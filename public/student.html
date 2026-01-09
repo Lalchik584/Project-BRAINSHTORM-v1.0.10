@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Quiz - Quiz Master</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin: 10px 0;
+            padding: 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-option:hover:not(:disabled) {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        .btn-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        .btn-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+        .btn-option.wrong {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .waiting-room, .quiz-room, .results-room {
+            display: none;
+        }
+        .student-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .student-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        .quiz-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .question-container {
+            margin: 30px 0;
+        }
+        .question-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .timer {
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 3px solid #667eea;
+        }
+        .timer.warning {
+            border-color: #ffc107;
+            background: #fff3cd;
+            color: #856404;
+        }
+        .timer.danger {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        .quiz-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1;
+            margin: 0 5px;
+        }
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .answer-feedback {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .answer-correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+        .answer-wrong {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+        .results-stats {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Join Section -->
+        <div id="join-section">
+            <h1>👨‍🎓 Join Quiz Session</h1>
+            <div class="form-group">
+                <label for="sessionCode">Session Code:</label>
+                <input type="text" id="sessionCode" placeholder="Enter 6-digit session code" maxlength="6">
+            </div>
+            <div class="form-group">
+                <label for="studentName">Your Name:</label>
+                <input type="text" id="studentName" placeholder="Enter your name">
+            </div>
+            <button class="btn" onclick="joinSession()">Join Session</button>
+        </div>
+
+        <!-- Waiting Room -->
+        <div id="waiting-room" class="waiting-room">
+            <h1>⏳ Waiting Room</h1>
+            <div class="quiz-info" id="quiz-info" style="display: none;">
+                <h2 id="quiz-title"></h2>
+                <p><strong>Questions:</strong> <span id="quiz-questions-count"></span></p>
+            </div>
+            <p>Waiting for teacher to start the quiz...</p>
+            
+            <div class="quiz-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="waiting-students-count">0</div>
+                    <div>Students Connected</div>
+                </div>
+            </div>
+            
+            <div id="connected-students" class="student-list">
+                <h3>Connected Students:</h3>
+                <div id="students-list"></div>
+            </div>
+        </div>
+
+        <!-- Quiz Room -->
+        <div id="quiz-room" class="quiz-room">
+            <div class="quiz-header">
+                <h1 id="current-quiz-title">Quiz in Progress</h1>
+                <div class="quiz-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="current-score">0</div>
+                        <div>Your Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="questions-progress">0/0</div>
+                        <div>Progress</div>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="question-container" id="question-container">
+                <div class="timer" id="question-timer">30</div>
+                <div class="question-text" id="question-text"></div>
+                <div id="options-container">
+                    <!-- Options will be generated here -->
+                </div>
+                <div id="answer-feedback"></div>
+            </div>
+        </div>
+
+        <!-- Results Room -->
+        <div id="results-room" class="results-room">
+            <h1>🏁 Quiz Completed!</h1>
+            
+            <div class="results-stats">
+                <h3>📊 Your Results</h3>
+                
+                <div class="stat-row">
+                    <span><strong>Total Score:</strong></span>
+                    <span id="final-score" class="stat-number">0</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span><strong>Correct Answers:</strong></span>
+                    <span id="correct-count">0</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span><strong>Wrong Answers:</strong></span>
+                    <span id="wrong-count">0</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span><strong>Skipped Questions:</strong></span>
+                    <span id="skipped-count">0</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span><strong>Accuracy:</strong></span>
+                    <span id="accuracy-percentage">0%</span>
+                </div>
+            </div>
+
+            <button class="btn" onclick="location.reload()" style="margin-top: 20px; width: 100%;">
+                🔄 Join Another Quiz
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let currentSessionCode = '';
+        let currentStudentId = '';
+        let currentQuestionIndex = 0;
+        let totalQuestions = 0;
+        let selectedAnswer = null;
+        let studentScore = 0;
+        let userAnswers = []; // Массив для хранения ответов пользователя
+        let correctAnswersCount = 0;
+        let wrongAnswersCount = 0;
+        let skippedAnswersCount = 0;
+
+        // Join session function
+        function joinSession() {
+            const sessionCode = document.getElementById('sessionCode').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            
+            if (!sessionCode || !studentName) {
+                alert('Please enter both session code and your name');
+                return;
+            }
+
+            if (sessionCode.length !== 6) {
+                alert('Session code must be 6 digits');
+                return;
+            }
+
+            currentSessionCode = sessionCode;
+            
+            // Get session info first
+            fetch('/api/sessions/' + sessionCode)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show quiz info
+                        document.getElementById('quiz-title').textContent = data.session.quiz.title;
+                        document.getElementById('quiz-questions-count').textContent = data.session.quiz.questions.length;
+                        document.getElementById('quiz-info').style.display = 'block';
+                        totalQuestions = data.session.quiz.questions.length;
+                        
+                        // Initialize userAnswers array
+                        userAnswers = new Array(totalQuestions).fill(null);
+                        
+                        // Join the session via socket
+                        socket.emit('student-join', {
+                            sessionCode: sessionCode,
+                            studentName: studentName
+                        });
+
+                        // Show waiting room
+                        document.getElementById('join-section').style.display = 'none';
+                        document.getElementById('waiting-room').style.display = 'block';
+                        
+                        // Show already connected students
+                        data.session.students.forEach(student => {
+                            updateStudentList(student);
+                        });
+                        updateStudentsCount(data.session.students.length);
+                    } else {
+                        alert('Session not found: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Error joining session: ' + error.message);
+                });
+        }
+
+        // Socket event listeners
+        socket.on('student-joined', (data) => {
+            currentStudentId = data.student.id;
+            updateStudentList(data.student);
+            updateStudentsCount(data.totalStudents);
+        });
+
+        socket.on('student-left', (data) => {
+            removeStudent(data.studentId);
+            updateStudentsCount(data.totalStudents);
+        });
+
+        // Quiz started
+        socket.on('quiz-started', () => {
+            document.getElementById('waiting-room').style.display = 'none';
+            document.getElementById('quiz-room').style.display = 'block';
+            document.getElementById('current-quiz-title').textContent = document.getElementById('quiz-title').textContent;
+        });
+
+        // Question started
+        socket.on('question-started', (data) => {
+            currentQuestionIndex = data.questionIndex;
+            selectedAnswer = null;
+            
+            // Update progress
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('questions-progress').textContent = `${currentQuestionIndex + 1}/${totalQuestions}`;
+            
+            // Display question
+            document.getElementById('question-text').textContent = `Question ${currentQuestionIndex + 1}: ${data.question.question}`;
+            
+            // Generate options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            data.question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn-option';
+                button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+                button.onclick = () => selectAnswer(index, button);
+                optionsContainer.appendChild(button);
+            });
+            
+            // Clear previous feedback
+            document.getElementById('answer-feedback').innerHTML = '';
+            
+            // Start timer
+            startTimer(data.timeLimit);
+        });
+
+        // Timer update
+        socket.on('timer-update', (data) => {
+            updateTimerDisplay(data.timeLeft);
+        });
+
+        // Question ended
+        socket.on('question-ended', (data) => {
+            clearTimer();
+            showCorrectAnswer(data.correctAnswer);
+            
+            // Если пользователь не ответил на вопрос, считаем его пропущенным
+            if (userAnswers[currentQuestionIndex] === null) {
+                userAnswers[currentQuestionIndex] = 'skipped';
+                skippedAnswersCount++;
+            }
+            
+            // Через 5 секунд автоматически переходим к следующему вопросу
+            setTimeout(() => {
+                // Если это был последний вопрос, показываем результаты
+                if (currentQuestionIndex + 1 >= totalQuestions) {
+                    showResults();
+                }
+            }, 5000);
+        });
+
+        // Quiz ended
+        socket.on('quiz-ended', (data) => {
+            showResults();
+        });
+
+        // Student list management
+        function updateStudentList(student) {
+            const list = document.getElementById('students-list');
+            const studentElement = document.createElement('div');
+            studentElement.className = 'student-item';
+            studentElement.id = `student-${student.id}`;
+            studentElement.innerHTML = `👤 ${student.name}`;
+            list.appendChild(studentElement);
+        }
+
+        function removeStudent(studentId) {
+            const element = document.getElementById(`student-${studentId}`);
+            if (element) {
+                element.remove();
+            }
+        }
+
+        function updateStudentsCount(count) {
+            document.getElementById('waiting-students-count').textContent = count;
+        }
+
+        // Timer functions
+        let timerInterval;
+        function startTimer(timeLimit) {
+            updateTimerDisplay(timeLimit);
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const currentTime = parseInt(document.getElementById('question-timer').textContent);
+                if (currentTime > 0) {
+                    updateTimerDisplay(currentTime - 1);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay(timeLeft) {
+            const timerElement = document.getElementById('question-timer');
+            timerElement.textContent = timeLeft;
+            
+            // Update visual state
+            timerElement.classList.remove('warning', 'danger');
+            if (timeLeft <= 10) {
+                timerElement.classList.add('danger');
+            } else if (timeLeft <= 20) {
+                timerElement.classList.add('warning');
+            }
+        }
+
+        function clearTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // Answer selection
+        function selectAnswer(answerIndex, buttonElement) {
+            if (selectedAnswer !== null) return; // Prevent changing answer
+            
+            selectedAnswer = answerIndex;
+            userAnswers[currentQuestionIndex] = answerIndex;
+            
+            // Visual feedback
+            document.querySelectorAll('.btn-option').forEach(btn => {
+                btn.classList.remove('selected');
+                btn.disabled = true;
+            });
+            buttonElement.classList.add('selected');
+            
+            // Send answer to server
+            socket.emit('student-answer', {
+                sessionCode: currentSessionCode,
+                questionIndex: currentQuestionIndex,
+                answerIndex: answerIndex
+            });
+        }
+
+        function showCorrectAnswer(correctAnswer) {
+            const options = document.querySelectorAll('.btn-option');
+            let userAnswerText = '';
+            
+            options.forEach((option, index) => {
+                const optionText = option.textContent.substring(3); // Remove "A. ", "B. ", etc.
+                
+                if (optionText === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (option.classList.contains('selected') && optionText !== correctAnswer) {
+                    option.classList.add('wrong');
+                }
+                
+                // Сохраняем текст ответа пользователя
+                if (option.classList.contains('selected')) {
+                    userAnswerText = optionText;
+                }
+            });
+            
+            // Show feedback
+            const feedback = document.getElementById('answer-feedback');
+            const isCorrect = userAnswerText === correctAnswer;
+            
+            if (selectedAnswer !== null) {
+                if (isCorrect) {
+                    feedback.innerHTML = `<div class="answer-feedback answer-correct">✅ Correct! +10 points</div>`;
+                    studentScore += 10;
+                    correctAnswersCount++;
+                } else {
+                    feedback.innerHTML = `<div class="answer-feedback answer-wrong">❌ Incorrect! The correct answer was: ${correctAnswer}</div>`;
+                    wrongAnswersCount++;
+                }
+                document.getElementById('current-score').textContent = studentScore;
+            } else {
+                feedback.innerHTML = `<div class="answer-feedback answer-wrong">⏰ Time's up! The correct answer was: ${correctAnswer}</div>`;
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-room').style.display = 'none';
+            document.getElementById('results-room').style.display = 'block';
+            
+            // Calculate statistics
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswersCount / totalQuestions) * 100) : 0;
+            
+            // Update results display
+            document.getElementById('final-score').textContent = studentScore;
+            document.getElementById('correct-count').textContent = correctAnswersCount;
+            document.getElementById('wrong-count').textContent = wrongAnswersCount;
+            document.getElementById('skipped-count').textContent = skippedAnswersCount;
+            document.getElementById('accuracy-percentage').textContent = accuracy + '%';
+        }
+
+        // Auto-fill session code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionFromUrl = urlParams.get('session');
+        if (sessionFromUrl) {
+            document.getElementById('sessionCode').value = sessionFromUrl;
+            // Auto-focus on name field for better UX
+            document.getElementById('studentName').focus();
+        }
+    </script>
+</body>
+</html>

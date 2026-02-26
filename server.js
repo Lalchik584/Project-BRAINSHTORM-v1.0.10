@@ -8,32 +8,43 @@ const qr = require('qr-image');
 
 const app = express();
 const server = http.createServer(app);
-
-// Автоматически определяем порт для хостинга
-const PORT = process.env.PORT || 5000;
-
 const io = socketIo(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
-  }
+  },
+  transports: ['polling', 'websocket']
 });
 
-const DB_FILE = 'quizzes.json';
+const PORT = process.env.PORT || 5000;
+const HOST = '0.0.0.0';
+
+// ВАЖНО: Используем абсолютный путь для Render
+const DB_FILE = path.join(__dirname, 'quizzes.json');
 
 // Базы данных
 let quizzes = [];
 let usedCodes = new Set();
 let activeSessions = new Map();
 
+// ========== ФУНКЦИИ РАБОТЫ С ФАЙЛОМ ==========
+
 // Загрузка квизов из файла
 function loadQuizzesFromFile() {
     try {
+        console.log(`📂 Попытка загрузки из файла: ${DB_FILE}`);
+        
+        // Проверяем существует ли файл
         if (fs.existsSync(DB_FILE)) {
             const data = fs.readFileSync(DB_FILE, 'utf8');
             quizzes = JSON.parse(data);
             quizzes.forEach(quiz => usedCodes.add(quiz.article));
-            console.log(`✅ Загружено ${quizzes.length} квизов`);
+            console.log(`✅ Загружено ${quizzes.length} квизов из файла`);
+        } else {
+            console.log('📂 Файл quizzes.json не найден, создаем новый');
+            // Создаем пустой файл
+            fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2));
+            quizzes = [];
         }
     } catch (error) {
         console.error('❌ Ошибка загрузки квизов:', error);
@@ -41,13 +52,69 @@ function loadQuizzesFromFile() {
     }
 }
 
+// Сохранение квизов в файл
 function saveQuizzesToFile() {
     try {
+        // Проверяем директорию
+        const dir = path.dirname(DB_FILE);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        
+        // Сохраняем с форматированием
         fs.writeFileSync(DB_FILE, JSON.stringify(quizzes, null, 2));
+        console.log(`✅ Сохранено ${quizzes.length} квизов в файл`);
+        
+        // Проверяем что файл создался
+        if (fs.existsSync(DB_FILE)) {
+            const stats = fs.statSync(DB_FILE);
+            console.log(`📁 Размер файла: ${stats.size} байт`);
+        }
     } catch (error) {
         console.error('❌ Ошибка сохранения квизов:', error);
     }
 }
+
+// Функция для просмотра содержимого БД (отладка)
+function debugDatabase() {
+    console.log('\n=== 🔍 ОТЛАДКА БАЗЫ ДАННЫХ ===');
+    console.log(`📁 Файл: ${DB_FILE}`);
+    console.log(`📊 Квизов в памяти: ${quizzes.length}`);
+    
+    if (fs.existsSync(DB_FILE)) {
+        try {
+            const data = fs.readFileSync(DB_FILE, 'utf8');
+            const fileQuizzes = JSON.parse(data);
+            console.log(`📊 Квизов в файле: ${fileQuizzes.length}`);
+            
+            // Показываем первые 3 квиза
+            fileQuizzes.slice(0, 3).forEach((quiz, i) => {
+                console.log(`\n📋 Квиз ${i + 1}:`);
+                console.log(`   Название: ${quiz.title}`);
+                console.log(`   Артикул: ${quiz.article}`);
+                console.log(`   Вопросов: ${quiz.questions.length}`);
+                console.log(`   Создан: ${quiz.createdAt}`);
+            });
+            
+            if (fileQuizzes.length > 3) {
+                console.log(`   ... и еще ${fileQuizzes.length - 3}`);
+            }
+        } catch (e) {
+            console.error('❌ Ошибка чтения файла:', e.message);
+        }
+    } else {
+        console.log('❌ Файл не существует');
+    }
+    console.log('================================\n');
+}
+
+// Загружаем при старте
+loadQuizzesFromFile();
+
+// Периодически проверяем состояние БД (каждые 30 секунд)
+setInterval(debugDatabase, 30000);
+
+// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ КВИЗА ==========
 
 function generateSessionCode() {
     let code;
@@ -56,8 +123,6 @@ function generateSessionCode() {
     } while (activeSessions.has(code));
     return code;
 }
-
-// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ КВИЗА ==========
 
 // Функция начала вопроса
 function startQuestion(session, questionIndex) {
@@ -77,16 +142,15 @@ function startQuestion(session, questionIndex) {
         ...question.wrongAnswers
     ];
     
-    // Перемешиваем варианты, но запоминаем индекс правильного ответа
-    const correctAnswerIndex = 0;
+    // Перемешиваем варианты
     for (let i = options.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [options[i], options[j]] = [options[j], options[i]];
     }
     
-    const timeLimit = 30; // 30 секунд на вопрос
+    const timeLimit = 30;
     
-    // Отправляем вопрос только студентам
+    // Отправляем вопрос
     if (session.teacher) {
         io.to(session.code).except(session.teacher).emit('question-started', {
             questionIndex: questionIndex,
@@ -97,7 +161,6 @@ function startQuestion(session, questionIndex) {
             timeLimit: timeLimit
         });
         
-        // Отправляем информацию о вопросе учителю
         io.to(session.teacher).emit('question-started', {
             questionIndex: questionIndex,
             question: {
@@ -122,7 +185,6 @@ function startQuestion(session, questionIndex) {
     const timerInterval = setInterval(() => {
         timeLeft--;
         
-        // Отправляем обновление времени
         if (session.teacher) {
             io.to(session.code).except(session.teacher).emit('timer-update', { timeLeft: timeLeft });
             io.to(session.teacher).emit('timer-update', { timeLeft: timeLeft });
@@ -130,7 +192,6 @@ function startQuestion(session, questionIndex) {
             io.to(session.code).emit('timer-update', { timeLeft: timeLeft });
         }
         
-        // Отправляем статистику ответов учителю
         sendAnswerStats(session, questionIndex);
         
         if (timeLeft <= 0) {
@@ -139,9 +200,7 @@ function startQuestion(session, questionIndex) {
         }
     }, 1000);
     
-    // Сохраняем ID таймера для возможности досрочного завершения
     session.currentTimer = timerInterval;
-    
     console.log(`✅ Вопрос ${questionIndex} отправлен`);
 }
 
@@ -151,36 +210,36 @@ function endQuestion(session, questionIndex) {
     
     const question = session.quiz.questions[questionIndex];
     
-    // Останавливаем таймер
     if (session.currentTimer) {
         clearInterval(session.currentTimer);
         session.currentTimer = null;
     }
     
-    // Отправляем результаты
+    const totalCorrect = Array.from(session.answers.get(questionIndex)?.values() || [])
+        .filter(answer => answer === 0).length;
+    
     if (session.teacher) {
         io.to(session.code).except(session.teacher).emit('question-ended', {
             questionIndex: questionIndex,
             correctAnswer: question.correctAnswer,
-            totalCorrect: Array.from(session.answers.get(questionIndex)?.values() || []).filter(answer => answer === 0).length
+            totalCorrect: totalCorrect
         });
         
         io.to(session.teacher).emit('question-ended', {
             questionIndex: questionIndex,
             correctAnswer: question.correctAnswer,
-            totalCorrect: Array.from(session.answers.get(questionIndex)?.values() || []).filter(answer => answer === 0).length
+            totalCorrect: totalCorrect
         });
     } else {
         io.to(session.code).emit('question-ended', {
             questionIndex: questionIndex,
             correctAnswer: question.correctAnswer,
-            totalCorrect: Array.from(session.answers.get(questionIndex)?.values() || []).filter(answer => answer === 0).length
+            totalCorrect: totalCorrect
         });
     }
     
     console.log(`❓ Вопрос ${questionIndex + 1} завершен в сессии: ${session.code}`);
     
-    // Автоматически переходим к следующему вопросу через 5 секунд
     setTimeout(() => {
         const nextQuestionIndex = questionIndex + 1;
         if (nextQuestionIndex < session.quiz.questions.length) {
@@ -197,7 +256,6 @@ function endQuiz(session) {
     
     session.status = 'completed';
     
-    // Формируем финальные результаты
     const finalResults = Array.from(session.scores.entries())
         .map(([studentId, score]) => ({
             studentId,
@@ -206,7 +264,6 @@ function endQuiz(session) {
         }))
         .sort((a, b) => b.score - a.score);
     
-    // Отправляем финальные результаты всем
     io.to(session.code).emit('quiz-ended', { finalResults: finalResults });
     
     console.log(`🏁 Квиз завершен в сессии: ${session.code}`);
@@ -218,7 +275,6 @@ function sendAnswerStats(session, questionIndex) {
     const answersReceived = answers ? answers.size : 0;
     const correctAnswers = answers ? Array.from(answers.values()).filter(answer => answer === 0).length : 0;
     
-    // Отправляем статистику только учителю
     if (session.teacher) {
         io.to(session.teacher).emit('answer-stats', {
             questionIndex: questionIndex,
@@ -239,7 +295,6 @@ function updateLeaderboard(session) {
         }))
         .sort((a, b) => b.score - a.score);
     
-    // Отправляем лидерборд только учителю
     if (session.teacher) {
         io.to(session.teacher).emit('leaderboard-update', { leaderboard: leaderboard });
     }
@@ -255,7 +310,6 @@ function startQuizViaConsole(session) {
     session.status = 'active';
     session.currentQuestion = 0;
     
-    // Сбрасываем scores для новой игры
     session.scores.clear();
     session.students.forEach((student, studentId) => {
         session.scores.set(studentId, 0);
@@ -263,101 +317,16 @@ function startQuizViaConsole(session) {
     
     session.answers.clear();
     
-    // Отправляем начало квиза всем
     io.to(session.code).emit('quiz-started');
     console.log(`✅ Квиз "${session.quiz.title}" начат в сессии: ${session.code}`);
     
-    // Автоматически начинаем первый вопрос через 3 секунды
     setTimeout(() => {
         startQuestion(session, 0);
     }, 3000);
 }
 
-// Консольные команды
-function setupConsoleCommands() {
-    console.log('\n📟 Доступные консольные команды:');
-    console.log('  startquiz <sessionCode> - Запустить квиз в указанной сессии');
-    console.log('  listsessions - Показать все активные сессии');
-    console.log('  endquiz <sessionCode> - Завершить квиз');
-    console.log('  nextquestion <sessionCode> - Перейти к следующему вопросу\n');
-    
-    process.stdin.on('data', (data) => {
-        const input = data.toString().trim();
-        const parts = input.split(' ');
-        const command = parts[0];
-        const sessionCode = parts[1];
-        
-        switch(command) {
-            case 'startquiz':
-                if (!sessionCode) {
-                    console.log('❌ Укажите код сессии: startquiz 123456');
-                    return;
-                }
-                const session = activeSessions.get(sessionCode);
-                if (!session) {
-                    console.log(`❌ Сессия ${sessionCode} не найдена`);
-                    return;
-                }
-                console.log(`🚀 Запускаю квиз в сессии ${sessionCode}...`);
-                startQuizViaConsole(session);
-                break;
-                
-            case 'listsessions':
-                console.log('📋 Активные сессии:');
-                if (activeSessions.size === 0) {
-                    console.log('   Нет активных сессий');
-                } else {
-                    activeSessions.forEach((session, code) => {
-                        console.log(`   ${code}: ${session.quiz.title} (${session.students.size} студентов, статус: ${session.status})`);
-                    });
-                }
-                break;
-                
-            case 'endquiz':
-                if (!sessionCode) {
-                    console.log('❌ Укажите код сессии: endquiz 123456');
-                    return;
-                }
-                const sessionToEnd = activeSessions.get(sessionCode);
-                if (!sessionToEnd) {
-                    console.log(`❌ Сессия ${sessionCode} не найдена`);
-                    return;
-                }
-                endQuiz(sessionToEnd);
-                console.log(`✅ Квиз в сессии ${sessionCode} завершен`);
-                break;
-                
-            case 'nextquestion':
-                if (!sessionCode) {
-                    console.log('❌ Укажите код сессии: nextquestion 123456');
-                    return;
-                }
-                const sessionForNext = activeSessions.get(sessionCode);
-                if (!sessionForNext) {
-                    console.log(`❌ Сессия ${sessionCode} не найдена`);
-                    return;
-                }
-                const nextIndex = sessionForNext.currentQuestion + 1;
-                if (nextIndex < sessionForNext.quiz.questions.length) {
-                    startQuestion(sessionForNext, nextIndex);
-                    console.log(`✅ Переход к вопросу ${nextIndex + 1} в сессии ${sessionCode}`);
-                } else {
-                    console.log(`❌ Это был последний вопрос в сессии ${sessionCode}`);
-                }
-                break;
-                
-            default:
-                console.log(`❌ Неизвестная команда: ${command}`);
-                console.log('Доступные команды: startquiz, listsessions, endquiz, nextquestion');
-        }
-    });
-}
-
-loadQuizzesFromFile();
-
 // ========== EXPRESS ROUTES ==========
 
-// Middleware
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -373,6 +342,7 @@ app.get('/', (req, res) => {
     </head>
     <body>
         <h1>🎯 Quiz Master Platform</h1>
+        <p>Сервер запущен на Render!</p>
         <a href="/teacher.html">👨‍🏫 Teacher Panel</a> | 
         <a href="/student.html">👨‍🎓 Student Access</a>
     </body>
@@ -383,9 +353,12 @@ app.get('/', (req, res) => {
 // API для создания квиза
 app.post('/api/quizzes', (req, res) => {
     try {
+        console.log('📝 Получен запрос на создание квиза');
+        
         const { title, questions } = req.body;
         
         if (!title || !questions || questions.length === 0) {
+            console.log('❌ Неполные данные квиза');
             return res.status(400).json({ success: false, error: 'Title and questions are required' });
         }
 
@@ -398,18 +371,25 @@ app.post('/api/quizzes', (req, res) => {
             plays: 0
         };
 
+        // Добавляем в память
         quizzes.push(newQuiz);
         usedCodes.add(newQuiz.article);
+        
+        // Сохраняем в файл
         saveQuizzesToFile();
+        
+        console.log(`✅ Квиз создан: ${newQuiz.title} (артикул: ${newQuiz.article})`);
+        console.log(`📊 Всего квизов в БД: ${quizzes.length}`);
         
         res.json({ success: true, quiz: newQuiz });
         
     } catch (error) {
-        res.status(500).json({ success: false, error: 'Server error' });
+        console.error('❌ Ошибка создания квиза:', error);
+        res.status(500).json({ success: false, error: 'Server error: ' + error.message });
     }
 });
 
-// API для поиска квизов - ИСПРАВЛЕНО!
+// API для поиска квизов
 app.get('/api/quizzes/search', (req, res) => {
     try {
         const { query } = req.query;
@@ -420,7 +400,9 @@ app.get('/api/quizzes/search', (req, res) => {
         
         const searchTerm = query.trim().toLowerCase();
         
-        // Ищем по названию или артикулу
+        // Сначала загружаем свежие данные из файла
+        loadQuizzesFromFile();
+        
         const searchResults = quizzes.filter(quiz => {
             const titleMatch = quiz.title.toLowerCase().includes(searchTerm);
             const articleMatch = quiz.article === searchTerm;
@@ -447,9 +429,14 @@ app.get('/api/quizzes/search', (req, res) => {
 app.post('/api/sessions', (req, res) => {
     try {
         const { quizArticle } = req.body;
+        
+        // Обновляем данные из файла
+        loadQuizzesFromFile();
+        
         const quiz = quizzes.find(q => q.article === quizArticle);
         
         if (!quiz) {
+            console.log(`❌ Квиз с артикулом ${quizArticle} не найден`);
             return res.status(404).json({ success: false, error: 'Quiz not found' });
         }
 
@@ -524,7 +511,12 @@ app.get('/api/sessions/:code', (req, res) => {
 // Генерация QR-кода для сессии
 app.get('/qr/:sessionCode', (req, res) => {
     const sessionCode = req.params.sessionCode;
-    const url = `${req.protocol}://${req.get('host')}/student.html?session=${sessionCode}`;
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    const url = `${protocol}://${host}/student.html?session=${sessionCode}`;
+    
+    console.log(`🔗 Генерируем QR для: ${url}`);
+    
     const qr_svg = qr.image(url, { type: 'png' });
     res.type('png');
     qr_svg.pipe(res);
@@ -543,7 +535,7 @@ app.get('/session/:sessionCode', (req, res) => {
                 <meta charset="UTF-8">
                 <title>Session Not Found</title>
                 <style>
-                    body { font-family: Arial; margin: 40px; text-align: center; }
+                    body { font-family: Arial; margin: 40px; text-align: center; background: #f5f5f5; }
                     .error { color: red; font-size: 1.2em; }
                 </style>
             </head>
@@ -629,10 +621,10 @@ app.get('/session/:sessionCode', (req, res) => {
             
             <div class="info-box">
                 <h4>📱 How students can join:</h4>
-                <p>1. Go to: <code>http://${req.get('host')}/student.html</code></p>
+                <p>1. Go to: <code>${req.protocol}://${req.get('host')}/student.html</code></p>
                 <p>2. Enter session code: <strong>${sessionCode}</strong></p>
                 <p>3. Or scan QR code below:</p>
-                <img src="/qr/${sessionCode}" alt="QR Code" style="border: 1px solid #ddd; padding: 10px; background: white;">
+                <img src="/qr/${sessionCode}" alt="QR Code" style="border: 1px solid #ddd; padding: 10px; background: white; max-width: 200px;">
             </div>
         </div>
         
@@ -643,22 +635,13 @@ app.get('/session/:sessionCode', (req, res) => {
             const startBtn = document.getElementById('startBtn');
             const resultDiv = document.getElementById('result');
             
-            // Подключаем учителя
             socket.emit('teacher-join', sessionCode);
             
             function startQuiz() {
                 startBtn.disabled = true;
                 startBtn.textContent = 'Starting...';
                 resultDiv.innerHTML = '<p>Starting quiz...</p>';
-                
                 socket.emit('start-quiz', sessionCode);
-                
-                // Таймаут для ошибок
-                setTimeout(() => {
-                    if (startBtn.textContent === 'Starting...') {
-                        resultDiv.innerHTML = '<p style="color: orange;">⚠️ Taking longer than expected...</p>';
-                    }
-                }, 3000);
             }
             
             function nextQuestion() {
@@ -671,93 +654,71 @@ app.get('/session/:sessionCode', (req, res) => {
                 resultDiv.innerHTML = '<p>Ending quiz...</p>';
             }
             
-            // Обработчик успешного старта
             socket.on('quiz-started', () => {
                 startBtn.textContent = '✅ Quiz Started';
                 startBtn.className = 'btn btn-started';
                 startBtn.disabled = true;
                 resultDiv.innerHTML = '<p style="color: green;">✅ Quiz started successfully!</p>';
                 
-                // Показываем кнопки управления
                 const nextBtn = document.getElementById('nextBtn');
                 const endBtn = document.getElementById('endBtn');
                 if (nextBtn) nextBtn.style.display = 'inline-block';
                 if (endBtn) endBtn.style.display = 'inline-block';
                 
-                // Обновляем статус
                 const statusEl = document.querySelector('.status');
                 statusEl.innerHTML = 'Status: <strong>ACTIVE</strong>';
                 statusEl.className = 'status status-active';
             });
             
-            // Обработчик ошибок
             socket.on('error', (data) => {
                 startBtn.disabled = false;
                 startBtn.textContent = '🚀 Start Quiz (Retry)';
                 resultDiv.innerHTML = '<p style="color: red;">❌ Error: ' + (data.message || 'Unknown error') + '</p>';
-                console.error('Quiz start error:', data);
             });
             
-            // Обработчик студентов
             socket.on('student-joined', (data) => {
-                console.log('Student joined:', data.student.name);
-                
-                // Удаляем сообщение "No students"
                 const noStudents = document.getElementById('no-students');
                 if (noStudents) noStudents.remove();
                 
-                // Добавляем студента в список
                 const student = data.student;
-                const studentElement = document.createElement('div');
-                studentElement.className = 'student-item';
-                studentElement.id = 'student-' + student.id;
-                studentElement.innerHTML = \`
-                    <strong>\${student.name}</strong>
-                    <div style="color: #666; font-size: 0.9em;">
-                        Joined at \${new Date(student.joinedAt).toLocaleTimeString()}
-                    </div>
-                \`;
-                document.getElementById('students-container').appendChild(studentElement);
-                
-                // Обновляем счетчик
+                if (!document.getElementById('student-' + student.id)) {
+                    const studentElement = document.createElement('div');
+                    studentElement.className = 'student-item';
+                    studentElement.id = 'student-' + student.id;
+                    studentElement.innerHTML = \`
+                        <strong>\${student.name}</strong>
+                        <div style="color: #666; font-size: 0.9em;">
+                            Joined at \${new Date(student.joinedAt).toLocaleTimeString()}
+                        </div>
+                    \`;
+                    document.getElementById('students-container').appendChild(studentElement);
+                }
                 document.getElementById('students-count').textContent = data.totalStudents;
             });
             
             socket.on('student-left', (data) => {
                 const element = document.getElementById('student-' + data.studentId);
-                if (element) {
-                    element.remove();
-                }
+                if (element) element.remove();
                 document.getElementById('students-count').textContent = data.totalStudents;
-                
-                // Если студентов не осталось, показываем сообщение
-                if (data.totalStudents === 0) {
-                    const container = document.getElementById('students-container');
-                    container.innerHTML = '<p id="no-students">No students connected yet...</p>';
-                }
             });
             
-            // Обработчик завершения квиза
             socket.on('quiz-ended', () => {
                 resultDiv.innerHTML = '<p style="color: green;">✅ Quiz completed successfully!</p>';
                 const statusEl = document.querySelector('.status');
                 statusEl.innerHTML = 'Status: <strong>COMPLETED</strong>';
                 statusEl.className = 'status status-completed';
                 
-                // Скрываем кнопки управления
                 const nextBtn = document.getElementById('nextBtn');
                 const endBtn = document.getElementById('endBtn');
                 if (nextBtn) nextBtn.style.display = 'none';
                 if (endBtn) endBtn.style.display = 'none';
             });
             
-            // Функция для принудительного запуска через консоль
             window.forceStartQuiz = function() {
-                console.log('Force starting quiz via console...');
                 socket.emit('start-quiz', sessionCode);
             };
             
-            console.log('Для принудительного запуска введите: forceStartQuiz()');
+            console.log('Для принудительного запуска: forceStartQuiz()');
         </script>
     </body>
     </html>
@@ -769,19 +730,16 @@ app.get('/session/:sessionCode', (req, res) => {
 io.on('connection', (socket) => {
     console.log('🔌 Новое подключение:', socket.id);
 
-    // Учитель присоединяется к сессии
     socket.on('teacher-join', (sessionCode) => {
         const session = activeSessions.get(sessionCode);
         if (session) {
             session.teacher = socket.id;
             socket.join(sessionCode);
             socket.sessionCode = sessionCode;
-            console.log(`👨‍🏫 Учитель присоединился к сессии: ${sessionCode} (socket: ${socket.id})`);
+            console.log(`👨‍🏫 Учитель присоединился к сессии: ${sessionCode}`);
             
-            // Отправляем текущее состояние учителю
             updateLeaderboard(session);
             
-            // Отправляем текущих студентов учителю
             const students = Array.from(session.students.values());
             students.forEach(student => {
                 socket.emit('student-joined', {
@@ -789,12 +747,9 @@ io.on('connection', (socket) => {
                     totalStudents: session.students.size
                 });
             });
-        } else {
-            console.error(`❌ Сессия ${sessionCode} не найдена для teacher-join`);
         }
     });
 
-    // Студент присоединяется к сессии
     socket.on('student-join', (data) => {
         const { sessionCode, studentName } = data;
         const session = activeSessions.get(sessionCode);
@@ -814,77 +769,27 @@ io.on('connection', (socket) => {
             socket.sessionCode = sessionCode;
             socket.studentId = studentId;
             
-            // Уведомляем всех о новом студенте (включая учителя)
             io.to(sessionCode).emit('student-joined', {
                 student: student,
                 totalStudents: session.students.size
             });
             
-            // Обновляем лидерборд для учителя
             updateLeaderboard(session);
-            
             console.log(`👨‍🎓 Студент присоединился: ${studentName} к сессии: ${sessionCode}`);
-        } else {
-            console.error(`❌ Сессия не найдена: ${sessionCode}`);
-            socket.emit('error', { message: 'Session not found' });
         }
     });
 
-    // Начало квиза
     socket.on('start-quiz', (sessionCode) => {
-        console.log(`🚀 Получен запрос на начало квиза для сессии: ${sessionCode} от socket: ${socket.id}`);
         const session = activeSessions.get(sessionCode);
-        
-        if (session) {
-            console.log(`✅ Сессия найдена: ${sessionCode}`);
-            console.log(`   Статус сессии: ${session.status}`);
-            console.log(`   ID учителя: ${session.teacher}`);
-            console.log(`   ID текущего сокета: ${socket.id}`);
-            console.log(`   Студентов подключено: ${session.students.size}`);
-            
-            // Проверяем, является ли этот сокет учителем
-            if (session.teacher === socket.id) {
-                console.log(`✅ Сокет авторизован как учитель`);
-                
-                if (session.status === 'active') {
-                    console.log('⚠️ Квиз уже запущен');
-                    socket.emit('error', { message: 'Quiz is already active' });
-                    return;
-                }
-                
-                startQuizViaConsole(session);
-                
-            } else {
-                console.error(`❌ Сокет не авторизован как учитель`);
-                console.log(`   Ожидаемый ID учителя: ${session.teacher}`);
-                console.log(`   ID текущего сокета: ${socket.id}`);
-                
-                // Проверяем, может это учитель, который переподключился?
-                if (!session.teacher && session.students.size === 0) {
-                    // Если нет учителя и нет студентов, назначаем этого сокета учителем
-                    console.log(`⚠️ Назначаю сокет ${socket.id} учителем`);
-                    session.teacher = socket.id;
-                    startQuizViaConsole(session);
-                } else {
-                    socket.emit('error', { 
-                        message: 'Not authorized to start quiz',
-                        teacherId: session.teacher,
-                        yourId: socket.id
-                    });
-                }
-            }
-        } else {
-            console.error(`❌ Сессия ${sessionCode} не найдена`);
-            socket.emit('error', { message: `Session ${sessionCode} not found` });
+        if (session && session.teacher === socket.id) {
+            startQuizViaConsole(session);
         }
     });
 
-    // Следующий вопрос
     socket.on('next-question', (sessionCode) => {
         const session = activeSessions.get(sessionCode);
         if (session && session.teacher === socket.id) {
             const nextQuestionIndex = session.currentQuestion + 1;
-            
             if (nextQuestionIndex < session.quiz.questions.length) {
                 startQuestion(session, nextQuestionIndex);
             } else {
@@ -893,7 +798,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Завершение квиза
     socket.on('end-quiz', (sessionCode) => {
         const session = activeSessions.get(sessionCode);
         if (session && session.teacher === socket.id) {
@@ -901,39 +805,30 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Ответ студента
     socket.on('student-answer', (data) => {
         const { sessionCode, questionIndex, answerIndex } = data;
         const session = activeSessions.get(sessionCode);
         
         if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
             const studentId = socket.studentId;
-            const question = session.quiz.questions[questionIndex];
             
-            // Сохраняем ответ
             if (!session.answers.has(questionIndex)) {
                 session.answers.set(questionIndex, new Map());
             }
             session.answers.get(questionIndex).set(studentId, answerIndex);
             
-            // Проверяем правильность ответа
-            const isCorrect = answerIndex === 0; // Правильный ответ всегда первый (index 0)
+            const isCorrect = answerIndex === 0;
             
             if (isCorrect) {
-                // Начисляем очки
                 const currentScore = session.scores.get(studentId) || 0;
                 session.scores.set(studentId, currentScore + 10);
-                
-                // Обновляем таблицу лидеров (только для учителя)
                 updateLeaderboard(session);
             }
             
-            // Отправляем статистику ответов (только учителю)
             sendAnswerStats(session, questionIndex);
         }
     });
 
-    // Обработка отключения
     socket.on('disconnect', () => {
         if (socket.sessionCode && socket.studentId) {
             const session = activeSessions.get(socket.sessionCode);
@@ -943,12 +838,9 @@ io.on('connection', (socket) => {
                     studentId: socket.studentId,
                     totalStudents: session.students.size
                 });
-                
-                // Обновляем лидерборд для учителя
                 updateLeaderboard(session);
             }
         } else if (socket.sessionCode) {
-            // Возможно, это отключился учитель
             const session = activeSessions.get(socket.sessionCode);
             if (session && session.teacher === socket.id) {
                 console.log(`👨‍🏫 Учитель отключился от сессии: ${socket.sessionCode}`);
@@ -959,8 +851,16 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🎯 Сервер запущен: http://localhost:${PORT}`);
-    console.log(`🌐 Доступен по адресу: ${process.env.RAILWAY_PUBLIC_DOMAIN || `http://localhost:${PORT}`}`);
-    setupConsoleCommands();
+// Запускаем сервер
+server.listen(PORT, HOST, () => {
+    console.log('🎯 ====================================');
+    console.log('🎯 Quiz Master Platform запущена!');
+    console.log('🎯 ====================================');
+    console.log(`📁 База данных: ${DB_FILE}`);
+    console.log(`🌍 Публичный URL: https://${process.env.RENDER_EXTERNAL_URL || 'localhost:' + PORT}`);
+    console.log(`🚀 Сервер слушает порт: ${PORT}`);
+    console.log('🎯 ====================================\n');
+    
+    // Показываем состояние БД при старте
+    debugDatabase();
 });

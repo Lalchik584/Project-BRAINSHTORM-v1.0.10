@@ -1,42 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Panel - Quiz Master</title>
+    <title>Панель учителя - BRAINSHTORM</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: white;
+            border-radius: 20px;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
         }
         .tabs {
             display: flex;
+            gap: 10px;
             margin-bottom: 30px;
-            border-bottom: 2px solid #eee;
+            flex-wrap: wrap;
         }
         .tab {
             padding: 15px 30px;
-            background: none;
+            background: #f0f0f0;
             border: none;
-            font-size: 16px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 1.1em;
+            transition: all 0.3s;
         }
         .tab.active {
-            background: #667eea;
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
-            border-radius: 8px 8px 0 0;
         }
         .tab-content {
             display: none;
@@ -56,338 +70,627 @@
         input, select, textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
         }
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
         }
-        .btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: transform 0.3s ease;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-        }
         .question-block {
             background: #f8f9fa;
+            border-radius: 15px;
             padding: 20px;
-            border-radius: 8px;
             margin-bottom: 20px;
             border-left: 4px solid #667eea;
         }
-        .search-result {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .question-type-selector, .time-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .question-type-selector select, .time-selector select {
+            width: auto;
+            padding: 8px;
+        }
+        .options-container {
+            margin: 15px 0;
+        }
+        .option-row {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .option-input {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .btn-add-option {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .btn-remove-option {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .category-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 2px;
+        }
+        .quiz-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .quiz-card h3 {
             margin-bottom: 10px;
-            border-left: 4px solid #28a745;
+        }
+        .quiz-meta {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
         }
         .article-code {
-            font-family: monospace;
             background: #333;
-            color: #fff;
+            color: white;
             padding: 5px 10px;
-            border-radius: 4px;
-            font-weight: bold;
+            border-radius: 5px;
+            font-family: monospace;
         }
         .success-message {
             background: #d4edda;
             color: #155724;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .filter-section {
+            display: flex;
+            gap: 15px;
             margin-bottom: 20px;
-            border-left: 4px solid #28a745;
+            flex-wrap: wrap;
+        }
+        .filter-section select, .filter-section input {
+            flex: 1;
+            min-width: 200px;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .tab { padding: 12px 20px; }
+            .filter-section { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>👨‍🏫 Teacher Panel</h1>
-        <p>Create new quizzes or find existing ones in our database</p>
+        <h1>👨‍🏫 Панель учителя</h1>
+        <div class="subtitle">Создавайте и проводите интерактивные квизы по любым предметам</div>
         
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('create')">Create New Quiz</button>
-            <button class="tab" onclick="switchTab('find')">Find Existing Quiz</button>
+            <button class="tab active" onclick="switchTab('create')">📝 Создать квиз</button>
+            <button class="tab" onclick="switchTab('search')">🔍 Найти квиз</button>
+            <button class="tab" onclick="switchTab('library')">📚 Библиотека</button>
         </div>
 
-        <!-- Tab 1: Create Quiz -->
+        <!-- Вкладка создания квиза -->
         <div id="create-tab" class="tab-content active">
             <div class="form-group">
-                <label for="quizTitle">Quiz Title:</label>
-                <input type="text" id="quizTitle" placeholder="Enter quiz title">
+                <label>Название квиза:</label>
+                <input type="text" id="quizTitle" placeholder="Например: Итоговая контрольная по биологии">
             </div>
             
             <div class="form-group">
-                <label for="questionCount">Number of Questions (1-20):</label>
+                <label>Предмет:</label>
+                <select id="quizCategory" style="width: 100%; padding: 12px;">
+                    <optgroup label="📚 Основные предметы">
+                        <option value="math">📐 Математика</option>
+                        <option value="algebra">🔢 Алгебра</option>
+                        <option value="geometry">📏 Геометрия</option>
+                        <option value="russian">📖 Русский язык</option>
+                        <option value="literature">📚 Литература</option>
+                        <option value="reading">📗 Чтение</option>
+                        <option value="english">🇬🇧 Английский язык</option>
+                        <option value="french">🇫🇷 Французский язык</option>
+                        <option value="german">🇩🇪 Немецкий язык</option>
+                        <option value="history">📜 История</option>
+                        <option value="history_russia">🏛️ История России</option>
+                        <option value="social">👥 Обществознание</option>
+                        <option value="geography">🌏 География</option>
+                    </optgroup>
+                    
+                    <optgroup label="🧪 Естественные науки">
+                        <option value="biology">🧬 Биология</option>
+                        <option value="chemistry">🧪 Химия</option>
+                        <option value="physics">⚡ Физика</option>
+                        <option value="ecology">🌿 Экология</option>
+                        <option value="environment">🌍 Окружающий мир</option>
+                        <option value="astronomy">🔭 Астрономия</option>
+                    </optgroup>
+                    
+                    <optgroup label="🎨 Искусство">
+                        <option value="art">🎨 Изобразительное искусство</option>
+                        <option value="music">🎵 Музыка</option>
+                        <option value="culture">🏛️ Мировая художественная культура</option>
+                    </optgroup>
+                    
+                    <optgroup label="💪 Физическая культура">
+                        <option value="pe">⚽ Физическая культура</option>
+                        <option value="obzh">🛡️ Основы безопасности и защиты Родины</option>
+                        <option value="military">🎖️ Начальная военная подготовка</option>
+                    </optgroup>
+                    
+                    <optgroup label="🛠️ Технологии">
+                        <option value="tech">🔧 Технология</option>
+                        <option value="drafting">✏️ Черчение</option>
+                    </optgroup>
+                    
+                    <optgroup label="📊 Гуманитарные науки">
+                        <option value="philosophy">🤔 Философия</option>
+                        <option value="psychology">🧠 Психология</option>
+                        <option value="law">⚖️ Право</option>
+                        <option value="economics">📈 Экономика</option>
+                        <option value="statistics">📊 Теория вероятности и статистики</option>
+                    </optgroup>
+                    
+                    <optgroup label="🧘 Воспитание">
+                        <option value="ethics">🤝 Основы религиозных культур и светской этики</option>
+                    </optgroup>
+                    
+                    <optgroup label="🎲 Другое">
+                        <option value="other">🎲 Другое</option>
+                    </optgroup>
+                </select>
+                <small style="color: #666; display: block; margin-top: 5px;">Выберите предмет из списка</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Количество вопросов:</label>
                 <select id="questionCount" onchange="generateQuestionFields()">
-                    <option value="">Select number of questions</option>
-                    <option value="1">1 Question</option>
-                    <option value="3">3 Questions</option>
-                    <option value="5">5 Questions</option>
-                    <option value="10">10 Questions</option>
-                    <option value="12">12 Questions</option>
-                    <option value="15">15 Questions</option>
-                    <option value="20">20 Questions</option>
+                    <option value="1">1 вопрос</option>
+                    <option value="3">3 вопроса</option>
+                    <option value="5">5 вопросов</option>
+                    <option value="10">10 вопросов</option>
+                    <option value="15">15 вопросов</option>
+                    <option value="20">20 вопросов</option>
                 </select>
             </div>
 
-            <div id="questions-container">
-                <!-- Question fields will be generated here -->
-            </div>
+            <div id="questions-container"></div>
 
-            <button class="btn" onclick="createQuiz()">Create Quiz</button>
-            
+            <button class="btn" onclick="createQuiz()">✅ Создать квиз</button>
             <div id="create-result"></div>
         </div>
 
-        <!-- Tab 2: Find Quiz -->
-        <div id="find-tab" class="tab-content">
-            <div class="form-group">
-                <label for="searchQuery">Search by Title or Article Number:</label>
-                <input type="text" id="searchQuery" placeholder="Enter quiz title or 7-digit article number">
+        <!-- Вкладка поиска -->
+        <div id="search-tab" class="tab-content">
+            <div class="filter-section">
+                <input type="text" id="searchQuery" placeholder="Поиск по названию или артикулу...">
+                <select id="categoryFilter">
+                    <option value="all">📚 Все предметы</option>
+                    <optgroup label="📚 Основные предметы">
+                        <option value="math">📐 Математика</option>
+                        <option value="algebra">🔢 Алгебра</option>
+                        <option value="geometry">📏 Геометрия</option>
+                        <option value="russian">📖 Русский язык</option>
+                        <option value="literature">📚 Литература</option>
+                        <option value="english">🇬🇧 Английский язык</option>
+                        <option value="french">🇫🇷 Французский язык</option>
+                        <option value="german">🇩🇪 Немецкий язык</option>
+                        <option value="history">📜 История</option>
+                        <option value="history_russia">🏛️ История России</option>
+                        <option value="social">👥 Обществознание</option>
+                        <option value="geography">🌏 География</option>
+                    </optgroup>
+                    <optgroup label="🧪 Естественные науки">
+                        <option value="biology">🧬 Биология</option>
+                        <option value="chemistry">🧪 Химия</option>
+                        <option value="physics">⚡ Физика</option>
+                        <option value="ecology">🌿 Экология</option>
+                        <option value="environment">🌍 Окружающий мир</option>
+                    </optgroup>
+                    <optgroup label="🎨 Искусство">
+                        <option value="art">🎨 ИЗО</option>
+                        <option value="music">🎵 Музыка</option>
+                        <option value="culture">🏛️ МХК</option>
+                    </optgroup>
+                    <optgroup label="💪 Физкультура и ОБЖ">
+                        <option value="pe">⚽ Физкультура</option>
+                        <option value="obzh">🛡️ ОБЗР</option>
+                        <option value="military">🎖️ НВП</option>
+                    </optgroup>
+                    <optgroup label="🛠️ Технологии">
+                        <option value="tech">🔧 Технология</option>
+                        <option value="drafting">✏️ Черчение</option>
+                    </optgroup>
+                    <optgroup label="📊 Гуманитарные">
+                        <option value="philosophy">🤔 Философия</option>
+                        <option value="psychology">🧠 Психология</option>
+                        <option value="law">⚖️ Право</option>
+                        <option value="economics">📈 Экономика</option>
+                        <option value="statistics">📊 Теория вероятности</option>
+                    </optgroup>
+                    <optgroup label="🧘 Воспитание">
+                        <option value="ethics">🤝 ОРКСЭ</option>
+                    </optgroup>
+                </select>
+                <button class="btn" onclick="searchQuizzes()" style="padding: 12px 25px;">🔍 Найти</button>
             </div>
-            <button class="btn" onclick="searchQuizzes()">Search</button>
-            
-            <div id="search-results" style="margin-top: 20px;"></div>
+            <div id="search-results" style="margin-top: 30px;"></div>
+        </div>
+
+        <!-- Вкладка библиотеки -->
+        <div id="library-tab" class="tab-content">
+            <h3>📚 Все доступные квизы</h3>
+            <div id="library-results"></div>
         </div>
     </div>
 
     <script>
-        // Generate question fields based on selected count
+        let currentQuestionCount = 1;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'library') {
+                loadAllQuizzes();
+            }
+        }
+
         function generateQuestionFields() {
             const count = parseInt(document.getElementById('questionCount').value);
+            currentQuestionCount = count;
             const container = document.getElementById('questions-container');
             container.innerHTML = '';
 
-            if (!count || count < 1) {
-                return; // Если ничего не выбрано, выходим
-            }
-
             for (let i = 1; i <= count; i++) {
-                const questionHTML = `
-                    <div class="question-block">
-                        <h3>Question ${i}</h3>
-                        <div class="form-group">
-                            <label>Question Text:</label>
-                            <textarea id="question-${i}" placeholder="Enter your question" rows="2" required></textarea>
+                container.innerHTML += `
+                    <div class="question-block" id="q-${i}">
+                        <div class="question-header">
+                            <h3>Вопрос ${i}</h3>
+                            <div class="question-type-selector">
+                                <label>Тип:</label>
+                                <select onchange="changeType(${i})" id="type-${i}">
+                                    <option value="single">Один ответ</option>
+                                    <option value="multiple">Несколько ответов</option>
+                                </select>
+                            </div>
+                            <div class="time-selector">
+                                <label>Время:</label>
+                                <select id="time-${i}">
+                                    <option value="30">30 сек</option>
+                                    <option value="60">60 сек</option>
+                                    <option value="120">2 мин</option>
+                                    <option value="180">3 мин</option>
+                                    <option value="0">Без таймера</option>
+                                </select>
+                            </div>
                         </div>
+                        
                         <div class="form-group">
-                            <label>Correct Answer:</label>
-                            <input type="text" id="correct-${i}" placeholder="Correct answer" required>
+                            <label>Текст вопроса:</label>
+                            <textarea id="question-${i}" rows="2" placeholder="Введите вопрос"></textarea>
                         </div>
-                        <div class="form-group">
-                            <label>Wrong Answer 1:</label>
-                            <input type="text" id="wrong1-${i}" placeholder="Wrong answer" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Wrong Answer 2:</label>
-                            <input type="text" id="wrong2-${i}" placeholder="Wrong answer" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Wrong Answer 3:</label>
-                            <input type="text" id="wrong3-${i}" placeholder="Wrong answer" required>
-                        </div>
+                        
+                        <div class="options-container" id="options-${i}"></div>
+                        
+                        <button class="btn-add-option" onclick="addOption(${i})">➕ Добавить вариант</button>
+                        
+                        <div id="correct-${i}" class="correct-section" style="margin-top: 15px;"></div>
                     </div>
                 `;
-                container.innerHTML += questionHTML;
+                
+                for (let j = 0; j < 4; j++) {
+                    addOption(i);
+                }
+                updateCorrectSection(i, 'single');
             }
         }
 
-        // Switch between tabs
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Show selected tab
-            document.getElementById(tabName + '-tab').classList.add('active');
-            event.target.classList.add('active');
+        function changeType(questionNum) {
+            const type = document.getElementById(`type-${questionNum}`).value;
+            updateCorrectSection(questionNum, type);
         }
 
-        // Create new quiz
+        function addOption(questionNum) {
+            const container = document.getElementById(`options-${questionNum}`);
+            const count = container.children.length;
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option-row';
+            optionDiv.innerHTML = `
+                <input type="text" class="option-input" placeholder="Вариант ${String.fromCharCode(65 + count)}" oninput="updateCorrectSection(${questionNum})">
+                <button class="btn-remove-option" onclick="removeOption(this, ${questionNum})" ${count < 2 ? 'disabled' : ''}>✕</button>
+            `;
+            container.appendChild(optionDiv);
+            updateCorrectSection(questionNum);
+        }
+
+        function removeOption(btn, questionNum) {
+            const container = document.getElementById(`options-${questionNum}`);
+            if (container.children.length > 2) {
+                btn.parentElement.remove();
+                updateCorrectSection(questionNum);
+            }
+        }
+
+        function updateCorrectSection(questionNum) {
+            const type = document.getElementById(`type-${questionNum}`).value;
+            const options = document.querySelectorAll(`#options-${questionNum} .option-input`);
+            const container = document.getElementById(`correct-${questionNum}`);
+            
+            let html = '<label>Правильный ответ:</label><div class="correct-options">';
+            
+            if (type === 'single') {
+                options.forEach((opt, idx) => {
+                    const letter = String.fromCharCode(65 + idx);
+                    html += `
+                        <div style="margin: 5px 0;">
+                            <input type="radio" name="correct-${questionNum}" value="${idx}" id="c${questionNum}-${idx}">
+                            <label for="c${questionNum}-${idx}">${letter}. ${opt.value || 'Вариант ' + letter}</label>
+                        </div>
+                    `;
+                });
+            } else {
+                options.forEach((opt, idx) => {
+                    const letter = String.fromCharCode(65 + idx);
+                    html += `
+                        <div style="margin: 5px 0;">
+                            <input type="checkbox" name="correct-${questionNum}" value="${idx}" id="c${questionNum}-${idx}">
+                            <label for="c${questionNum}-${idx}">${letter}. ${opt.value || 'Вариант ' + letter}</label>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
         async function createQuiz() {
             const title = document.getElementById('quizTitle').value.trim();
-            const questionCount = parseInt(document.getElementById('questionCount').value);
+            const category = document.getElementById('quizCategory').value;
             
             if (!title) {
-                alert('Please enter a quiz title');
-                return;
-            }
-            
-            if (!questionCount || questionCount < 1) {
-                alert('Please select number of questions');
+                alert('Введите название квиза');
                 return;
             }
 
             const questions = [];
-            let hasErrors = false;
+            let hasError = false;
 
-            for (let i = 1; i <= questionCount; i++) {
+            for (let i = 1; i <= currentQuestionCount; i++) {
                 const questionText = document.getElementById(`question-${i}`).value.trim();
-                const correctAnswer = document.getElementById(`correct-${i}`).value.trim();
-                const wrongAnswers = [
-                    document.getElementById(`wrong1-${i}`).value.trim(),
-                    document.getElementById(`wrong2-${i}`).value.trim(),
-                    document.getElementById(`wrong3-${i}`).value.trim()
-                ];
-
-                // Проверяем, что все поля заполнены
-                if (!questionText || !correctAnswer || wrongAnswers.some(a => !a)) {
-                    alert(`Please fill all fields for question ${i}`);
-                    hasErrors = true;
+                const type = document.getElementById(`type-${i}`).value;
+                const timeLimit = parseInt(document.getElementById(`time-${i}`).value);
+                
+                const options = [];
+                document.querySelectorAll(`#options-${i} .option-input`).forEach(inp => {
+                    if (inp.value.trim()) options.push(inp.value.trim());
+                });
+                
+                if (!questionText || options.length < 2) {
+                    alert(`Заполните вопрос ${i} и минимум 2 варианта`);
+                    hasError = true;
                     break;
                 }
-
+                
+                let correct;
+                if (type === 'single') {
+                    const selected = document.querySelector(`input[name="correct-${i}"]:checked`);
+                    if (!selected) {
+                        alert(`Выберите правильный ответ для вопроса ${i}`);
+                        hasError = true;
+                        break;
+                    }
+                    correct = parseInt(selected.value);
+                } else {
+                    const selected = Array.from(document.querySelectorAll(`input[name="correct-${i}"]:checked`));
+                    if (selected.length === 0) {
+                        alert(`Выберите хотя бы один правильный ответ для вопроса ${i}`);
+                        hasError = true;
+                        break;
+                    }
+                    correct = selected.map(cb => parseInt(cb.value));
+                }
+                
                 questions.push({
                     question: questionText,
-                    correctAnswer: correctAnswer,
-                    wrongAnswers: wrongAnswers
+                    type,
+                    timeLimit,
+                    options,
+                    correctAnswer: correct
                 });
             }
-
-            if (hasErrors) return;
+            
+            if (hasError) return;
 
             try {
                 const response = await fetch('/api/quizzes', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        title: title,
-                        questions: questions
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, category, questions })
                 });
-
-                const result = await response.json();
                 
+                const result = await response.json();
                 if (result.success) {
                     document.getElementById('create-result').innerHTML = `
                         <div class="success-message">
-                            <h3>✅ Quiz Created Successfully!</h3>
-                            <p><strong>Title:</strong> ${result.quiz.title}</p>
-                            <p><strong>Article Number:</strong> <span class="article-code">${result.quiz.article}</span></p>
-                            <p><strong>Questions:</strong> ${result.quiz.questions.length}</p>
-                            <p><strong>Save this code to share with others!</strong></p>
+                            <h3>✅ Квиз создан!</h3>
+                            <p><strong>Название:</strong> ${result.quiz.title}</p>
+                            <p><strong>Предмет:</strong> ${getCategoryName(result.quiz.category)}</p>
+                            <p><strong>Артикул:</strong> <span class="article-code">${result.quiz.article}</span></p>
+                            <p><strong>Вопросов:</strong> ${result.quiz.questions.length}</p>
+                            <p><strong>Сохраните артикул для доступа!</strong></p>
                         </div>
                     `;
                     
-                    // Clear form
                     document.getElementById('quizTitle').value = '';
-                    document.getElementById('questionCount').value = '';
-                    document.getElementById('questions-container').innerHTML = '';
-                } else {
-                    alert('Error creating quiz: ' + result.error);
+                    generateQuestionFields();
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error creating quiz. Check console for details.');
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
             }
         }
 
-        // Search for quizzes
+        function getCategoryName(code) {
+            const categories = {
+                'math': '📐 Математика',
+                'algebra': '🔢 Алгебра',
+                'geometry': '📏 Геометрия',
+                'russian': '📖 Русский язык',
+                'literature': '📚 Литература',
+                'reading': '📗 Чтение',
+                'english': '🇬🇧 Английский язык',
+                'french': '🇫🇷 Французский язык',
+                'german': '🇩🇪 Немецкий язык',
+                'history': '📜 История',
+                'history_russia': '🏛️ История России',
+                'social': '👥 Обществознание',
+                'geography': '🌏 География',
+                'biology': '🧬 Биология',
+                'chemistry': '🧪 Химия',
+                'physics': '⚡ Физика',
+                'ecology': '🌿 Экология',
+                'environment': '🌍 Окружающий мир',
+                'astronomy': '🔭 Астрономия',
+                'art': '🎨 Изобразительное искусство',
+                'music': '🎵 Музыка',
+                'culture': '🏛️ Мировая художественная культура',
+                'pe': '⚽ Физическая культура',
+                'obzh': '🛡️ Основы безопасности и защиты Родины',
+                'military': '🎖️ Начальная военная подготовка',
+                'tech': '🔧 Технология',
+                'drafting': '✏️ Черчение',
+                'philosophy': '🤔 Философия',
+                'psychology': '🧠 Психология',
+                'law': '⚖️ Право',
+                'economics': '📈 Экономика',
+                'statistics': '📊 Теория вероятности и статистики',
+                'ethics': '🤝 Основы религиозных культур и светской этики',
+                'other': '🎲 Другое'
+            };
+            return categories[code] || '📌 Другое';
+        }
+
         async function searchQuizzes() {
             const query = document.getElementById('searchQuery').value.trim();
+            const category = document.getElementById('categoryFilter').value;
             
-            if (!query) {
-                document.getElementById('search-results').innerHTML = '<p>Please enter a search term</p>';
-                return;
-            }
-
+            let url = '/api/quizzes/search?';
+            if (query) url += `query=${encodeURIComponent(query)}&`;
+            if (category && category !== 'all') url += `category=${category}`;
+            
             try {
-                const response = await fetch(`/api/quizzes/search?query=${encodeURIComponent(query)}`);
-                const result = await response.json();
-                
-                if (result.success) {
-                    displaySearchResults(result.results);
-                } else {
-                    document.getElementById('search-results').innerHTML = `<p>Error: ${result.error}</p>`;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('search-results').innerHTML = '<p>Error searching quizzes. Check console.</p>';
+                const response = await fetch(url);
+                const data = await response.json();
+                displayQuizzes(data.results, 'search-results');
+            } catch (e) {
+                alert('Ошибка поиска');
             }
         }
 
-        // Функция для отображения результатов поиска с кнопкой "Start Session"
-        function displaySearchResults(results) {
-            const container = document.getElementById('search-results');
+        async function loadAllQuizzes() {
+            try {
+                const response = await fetch('/api/quizzes/all');
+                const data = await response.json();
+                displayQuizzes(data.quizzes, 'library-results');
+            } catch (e) {
+                alert('Ошибка загрузки');
+            }
+        }
+
+        function displayQuizzes(quizzes, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
             
-            if (results.length === 0) {
-                container.innerHTML = '<p>No quizzes found matching your search.</p>';
+            if (!quizzes || quizzes.length === 0) {
+                container.innerHTML = '<p>Квизы не найдены</p>';
                 return;
             }
-
-            container.innerHTML = '<h3>Search Results:</h3>';
-            results.forEach(quiz => {
-                const quizElement = document.createElement('div');
-                quizElement.className = 'search-result';
-                quizElement.innerHTML = `
-                    <h4>${quiz.title}</h4>
-                    <p><strong>Article:</strong> <span class="article-code">${quiz.article}</span></p>
-                    <p><strong>Questions:</strong> ${quiz.questions.length}</p>
-                    <p><strong>Plays:</strong> ${quiz.plays || 0}</p>
-                    <div class="quiz-actions" style="margin-top: 15px; text-align: center;">
-                        <button onclick="startSession('${quiz.article}')" class="btn" style="background: #17a2b8; padding: 10px 20px;">
-                            🎮 Start Quiz Session
-                        </button>
+            
+            quizzes.forEach(quiz => {
+                container.innerHTML += `
+                    <div class="quiz-card">
+                        <h3>${quiz.title}</h3>
+                        <div class="quiz-meta">
+                            <span class="category-badge">${quiz.categoryName || getCategoryName(quiz.category)}</span>
+                            <span class="article-code">${quiz.article}</span>
+                            <span>📊 ${quiz.questions.length} вопросов</span>
+                            <span>📅 ${new Date(quiz.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <button class="btn btn-secondary" onclick="startSession('${quiz.article}')">🚀 Начать сессию</button>
                     </div>
                 `;
-                container.appendChild(quizElement);
             });
         }
 
-        // Функция для создания сессии и перехода на страницу управления
         async function startSession(quizArticle) {
             try {
-                console.log('Starting session for quiz:', quizArticle);
-                
                 const response = await fetch('/api/sessions', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify({ 
-                        quizArticle: quizArticle 
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quizArticle })
                 });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    console.log('Session created successfully:', result.session.code);
-                    // Переходим на страницу управления сессией
-                    window.location.href = `/session/${result.session.code}`;
+                const data = await response.json();
+                if (data.success) {
+                    window.open(`/session/${data.session.code}`, '_blank');
                 } else {
-                    alert('Error starting session: ' + result.error);
+                    alert('Ошибка: ' + data.error);
                 }
-            } catch (error) {
-                console.error('Error starting session:', error);
-                alert('Error starting session: ' + error.message);
+            } catch (e) {
+                alert('Ошибка создания сессии');
             }
         }
 
-        // Initialize question fields on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Teacher panel loaded');
-            // Можно оставить или убрать, если хотите чтобы поля не генерировались автоматически
-            // generateQuestionFields();
-        });
+        generateQuestionFields();
     </script>
 </body>
 </html>

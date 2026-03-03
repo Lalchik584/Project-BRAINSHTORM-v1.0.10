@@ -1,98 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Quiz - Quiz Master</title>
+    <title>Ученик - BRAINSHTORM</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
+            border-radius: 20px;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
         }
         .form-group {
             margin-bottom: 20px;
-            text-align: left;
         }
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
+            color: #333;
         }
         input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
         }
         .btn {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
-            padding: 12px 24px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1.1em;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            width: 100%;
         }
-        .btn:hover:not(:disabled) {
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
         }
-        .btn-option {
-            display: block;
-            width: 100%;
-            text-align: left;
-            margin: 10px 0;
-            padding: 15px;
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn-option:hover:not(:disabled) {
-            border-color: #667eea;
-            background: #f8f9fa;
-        }
-        .btn-option.selected {
-            border-color: #667eea;
-            background: #667eea;
-            color: white;
-        }
-        .btn-option.correct {
-            border-color: #28a745;
-            background: #d4edda;
-            color: #155724;
-        }
-        .btn-option.wrong {
-            border-color: #dc3545;
-            background: #f8d7da;
-            color: #721c24;
-        }
         .waiting-room, .quiz-room, .results-room {
             display: none;
         }
         .student-list {
-            margin-top: 20px;
-            text-align: left;
+            margin: 20px 0;
         }
         .student-item {
             padding: 10px;
@@ -103,28 +90,20 @@
         }
         .quiz-info {
             background: #e8f4fd;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             margin: 20px 0;
         }
-        .question-container {
-            margin: 30px 0;
-        }
-        .question-text {
-            font-size: 1.3em;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-        }
         .timer {
-            font-size: 2em;
+            font-size: 3em;
             font-weight: bold;
             text-align: center;
             margin: 20px 0;
-            padding: 15px;
+            padding: 20px;
             background: #f8f9fa;
-            border-radius: 8px;
+            border-radius: 15px;
             border: 3px solid #667eea;
+            transition: all 0.3s;
         }
         .timer.warning {
             border-color: #ffc107;
@@ -142,43 +121,56 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        .progress-bar {
+        .question-text {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin: 30px 0;
+            color: #333;
+        }
+        .option-item {
+            margin: 10px 0;
+        }
+        .option-btn {
             width: 100%;
-            height: 10px;
-            background: #e9ecef;
-            border-radius: 5px;
-            margin: 20px 0;
-            overflow: hidden;
+            text-align: left;
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
         }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            transition: width 0.3s ease;
-        }
-        .quiz-stats {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            text-align: center;
-        }
-        .stat-card {
+        .option-btn:hover:not(:disabled) {
+            border-color: #667eea;
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            flex: 1;
-            margin: 0 5px;
         }
-        .stat-number {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #667eea;
+        .option-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        .option-btn.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+        .option-btn.wrong {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
         }
         .answer-feedback {
             padding: 15px;
             margin: 15px 0;
-            border-radius: 8px;
+            border-radius: 10px;
             text-align: center;
             font-weight: bold;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .answer-correct {
             background: #d4edda;
@@ -190,411 +182,405 @@
             color: #721c24;
             border: 2px solid #dc3545;
         }
-        .results-stats {
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
             margin: 20px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            overflow: hidden;
         }
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            padding: 10px;
-            background: white;
-            border-radius: 6px;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+        }
+        .change-btn {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .change-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .category-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 2em; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Join Section -->
+        <!-- Вход -->
         <div id="join-section">
-            <h1>👨‍🎓 Join Quiz Session</h1>
+            <h1>👨‍🎓 Вход в квиз</h1>
+            <div class="subtitle">Введите код сессии и ваше имя</div>
             <div class="form-group">
-                <label for="sessionCode">Session Code:</label>
-                <input type="text" id="sessionCode" placeholder="Enter 6-digit session code" maxlength="6">
+                <label>Код сессии:</label>
+                <input type="text" id="sessionCode" placeholder="6-значный код" maxlength="6">
             </div>
             <div class="form-group">
-                <label for="studentName">Your Name:</label>
-                <input type="text" id="studentName" placeholder="Enter your name">
+                <label>Ваше имя:</label>
+                <input type="text" id="studentName" placeholder="Например: Иван Петров">
             </div>
-            <button class="btn" onclick="joinSession()">Join Session</button>
+            <button class="btn" onclick="joinSession()">🔑 Войти</button>
         </div>
 
-        <!-- Waiting Room -->
+        <!-- Комната ожидания -->
         <div id="waiting-room" class="waiting-room">
-            <h1>⏳ Waiting Room</h1>
-            <div class="quiz-info" id="quiz-info" style="display: none;">
+            <h1>⏳ Ожидание начала</h1>
+            <div class="quiz-info" id="quiz-info">
                 <h2 id="quiz-title"></h2>
-                <p><strong>Questions:</strong> <span id="quiz-questions-count"></span></p>
+                <p><span id="quiz-category" class="category-badge"></span></p>
+                <p>📊 <span id="quiz-questions-count"></span> вопросов</p>
             </div>
-            <p>Waiting for teacher to start the quiz...</p>
-            
-            <div class="quiz-stats">
+            <div class="stats">
                 <div class="stat-card">
-                    <div class="stat-number" id="waiting-students-count">0</div>
-                    <div>Students Connected</div>
+                    <div class="stat-number" id="waiting-count">0</div>
+                    <div class="stat-label">учеников в сети</div>
                 </div>
             </div>
-            
-            <div id="connected-students" class="student-list">
-                <h3>Connected Students:</h3>
-                <div id="students-list"></div>
-            </div>
+            <div id="students-list" class="student-list"></div>
         </div>
 
-        <!-- Quiz Room -->
+        <!-- Комната квиза -->
         <div id="quiz-room" class="quiz-room">
             <div class="quiz-header">
-                <h1 id="current-quiz-title">Quiz in Progress</h1>
-                <div class="quiz-stats">
+                <h2 id="quiz-title-display"></h2>
+                <div class="stats">
                     <div class="stat-card">
-                        <div class="stat-number" id="current-score">0</div>
-                        <div>Your Score</div>
+                        <div class="stat-number" id="score-display">0</div>
+                        <div class="stat-label">очков</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="questions-progress">0/0</div>
-                        <div>Progress</div>
+                        <div class="stat-number" id="progress-display">0/0</div>
+                        <div class="stat-label">вопросов</div>
                     </div>
                 </div>
-                
                 <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    <div class="progress-fill" id="progress-bar" style="width: 0%"></div>
                 </div>
             </div>
 
-            <div class="question-container" id="question-container">
-                <div class="timer" id="question-timer">30</div>
-                <div class="question-text" id="question-text"></div>
-                <div id="options-container">
-                    <!-- Options will be generated here -->
-                </div>
-                <div id="answer-feedback"></div>
-            </div>
+            <div class="timer" id="timer">30</div>
+            
+            <div class="question-text" id="question-text"></div>
+            
+            <div id="options-container"></div>
+            
+            <div id="feedback-container"></div>
+            
+            <button class="change-btn" id="change-answer-btn" onclick="unlockAnswer()" style="display: none;">🔄 Изменить ответ</button>
         </div>
 
-        <!-- Results Room -->
+        <!-- Результаты -->
         <div id="results-room" class="results-room">
-            <h1>🏁 Quiz Completed!</h1>
+            <h1>🏁 Квиз завершен!</h1>
             
-            <div class="results-stats">
-                <h3>📊 Your Results</h3>
-                
-                <div class="stat-row">
-                    <span><strong>Total Score:</strong></span>
-                    <span id="final-score" class="stat-number">0</span>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="final-score">0</div>
+                    <div class="stat-label">итоговый счет</div>
                 </div>
-                
-                <div class="stat-row">
-                    <span><strong>Correct Answers:</strong></span>
-                    <span id="correct-count">0</span>
+                <div class="stat-card">
+                    <div class="stat-number" id="final-correct">0</div>
+                    <div class="stat-label">правильных</div>
                 </div>
-                
-                <div class="stat-row">
-                    <span><strong>Wrong Answers:</strong></span>
-                    <span id="wrong-count">0</span>
-                </div>
-                
-                <div class="stat-row">
-                    <span><strong>Skipped Questions:</strong></span>
-                    <span id="skipped-count">0</span>
-                </div>
-                
-                <div class="stat-row">
-                    <span><strong>Accuracy:</strong></span>
-                    <span id="accuracy-percentage">0%</span>
+                <div class="stat-card">
+                    <div class="stat-number" id="final-wrong">0</div>
+                    <div class="stat-label">ошибок</div>
                 </div>
             </div>
-
-            <button class="btn" onclick="location.reload()" style="margin-top: 20px; width: 100%;">
-                🔄 Join Another Quiz
-            </button>
+            
+            <div id="results-details" style="margin: 30px 0;"></div>
+            
+            <button class="btn" onclick="location.reload()">🔄 Новый квиз</button>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let currentSessionCode = '';
-        let currentStudentId = '';
+        let sessionCode = '';
+        let studentId = '';
+        let studentName = '';
         let currentQuestionIndex = 0;
         let totalQuestions = 0;
         let selectedAnswer = null;
-        let studentScore = 0;
-        let userAnswers = []; // Массив для хранения ответов пользователя
-        let correctAnswersCount = 0;
-        let wrongAnswersCount = 0;
-        let skippedAnswersCount = 0;
+        let answerLocked = false;
+        let questionType = 'single';
+        let score = 0;
+        let answers = [];
+        let timerInterval = null;
+        let serverTimeLeft = 0;
+        let lastServerUpdate = Date.now();
+        let timeLimit = 30;
 
-        // Join session function
         function joinSession() {
-            const sessionCode = document.getElementById('sessionCode').value.trim();
-            const studentName = document.getElementById('studentName').value.trim();
+            sessionCode = document.getElementById('sessionCode').value.trim();
+            studentName = document.getElementById('studentName').value.trim();
             
             if (!sessionCode || !studentName) {
-                alert('Please enter both session code and your name');
+                alert('Введите код и имя');
                 return;
             }
-
-            if (sessionCode.length !== 6) {
-                alert('Session code must be 6 digits');
-                return;
-            }
-
-            currentSessionCode = sessionCode;
             
-            // Get session info first
+            if (sessionCode.length !== 6) {
+                alert('Код должен быть 6-значным');
+                return;
+            }
+            
             fetch('/api/sessions/' + sessionCode)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        // Show quiz info
                         document.getElementById('quiz-title').textContent = data.session.quiz.title;
                         document.getElementById('quiz-questions-count').textContent = data.session.quiz.questions.length;
-                        document.getElementById('quiz-info').style.display = 'block';
+                        document.getElementById('quiz-category').textContent = data.session.quiz.categoryName || '📚 Предмет';
                         totalQuestions = data.session.quiz.questions.length;
                         
-                        // Initialize userAnswers array
-                        userAnswers = new Array(totalQuestions).fill(null);
+                        socket.emit('student-join', { sessionCode, studentName });
                         
-                        // Join the session via socket
-                        socket.emit('student-join', {
-                            sessionCode: sessionCode,
-                            studentName: studentName
-                        });
-
-                        // Show waiting room
                         document.getElementById('join-section').style.display = 'none';
                         document.getElementById('waiting-room').style.display = 'block';
                         
-                        // Show already connected students
-                        data.session.students.forEach(student => {
-                            updateStudentList(student);
-                        });
-                        updateStudentsCount(data.session.students.length);
+                        data.session.students.forEach(s => addStudentToList(s));
+                        document.getElementById('waiting-count').textContent = data.session.students.length;
                     } else {
-                        alert('Session not found: ' + data.error);
+                        alert('Сессия не найдена');
                     }
-                })
-                .catch(error => {
-                    alert('Error joining session: ' + error.message);
                 });
         }
 
-        // Socket event listeners
+        function addStudentToList(student) {
+            const list = document.getElementById('students-list');
+            const el = document.createElement('div');
+            el.className = 'student-item';
+            el.id = 'student-' + student.id;
+            el.textContent = `👤 ${student.name}`;
+            list.appendChild(el);
+        }
+
         socket.on('student-joined', (data) => {
-            currentStudentId = data.student.id;
-            updateStudentList(data.student);
-            updateStudentsCount(data.totalStudents);
+            if (!document.getElementById('student-' + data.student.id)) {
+                addStudentToList(data.student);
+            }
+            document.getElementById('waiting-count').textContent = data.totalStudents;
         });
 
         socket.on('student-left', (data) => {
-            removeStudent(data.studentId);
-            updateStudentsCount(data.totalStudents);
+            const el = document.getElementById('student-' + data.studentId);
+            if (el) el.remove();
+            document.getElementById('waiting-count').textContent = data.totalStudents;
         });
 
-        // Quiz started
         socket.on('quiz-started', () => {
             document.getElementById('waiting-room').style.display = 'none';
             document.getElementById('quiz-room').style.display = 'block';
-            document.getElementById('current-quiz-title').textContent = document.getElementById('quiz-title').textContent;
+            document.getElementById('quiz-title-display').textContent = document.getElementById('quiz-title').textContent;
         });
 
-        // Question started
         socket.on('question-started', (data) => {
             currentQuestionIndex = data.questionIndex;
+            questionType = data.question.type || 'single';
+            timeLimit = data.timeLimit;
+            
             selectedAnswer = null;
+            answerLocked = false;
+            document.getElementById('change-answer-btn').style.display = 'none';
             
-            // Update progress
             const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
-            document.getElementById('progress-fill').style.width = progress + '%';
-            document.getElementById('questions-progress').textContent = `${currentQuestionIndex + 1}/${totalQuestions}`;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('progress-display').textContent = `${currentQuestionIndex + 1}/${totalQuestions}`;
             
-            // Display question
-            document.getElementById('question-text').textContent = `Question ${currentQuestionIndex + 1}: ${data.question.question}`;
+            document.getElementById('question-text').innerHTML = `
+                <div style="color: #667eea; font-weight: bold; margin-bottom: 10px;">
+                    ${questionType === 'multiple' ? '📋 Выберите несколько вариантов' : '🔘 Выберите один вариант'}
+                </div>
+                ${data.question.question}
+            `;
             
-            // Generate options
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-            data.question.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.className = 'btn-option';
-                button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
-                button.onclick = () => selectAnswer(index, button);
-                optionsContainer.appendChild(button);
+            const optionsDiv = document.getElementById('options-container');
+            optionsDiv.innerHTML = '';
+            
+            data.question.options.forEach((opt, idx) => {
+                if (questionType === 'single') {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = `${String.fromCharCode(65 + idx)}. ${opt}`;
+                    btn.onclick = () => selectAnswer(idx, btn);
+                    optionsDiv.appendChild(btn);
+                }
             });
             
-            // Clear previous feedback
-            document.getElementById('answer-feedback').innerHTML = '';
-            
-            // Start timer
-            startTimer(data.timeLimit);
+            if (timeLimit > 0) {
+                serverTimeLeft = timeLimit;
+                lastServerUpdate = Date.now();
+                startLocalTimer();
+            } else {
+                document.getElementById('timer').textContent = '∞';
+            }
         });
 
-        // Timer update
         socket.on('timer-update', (data) => {
-            updateTimerDisplay(data.timeLeft);
+            serverTimeLeft = data.timeLeft;
+            lastServerUpdate = Date.now();
         });
 
-        // Question ended
-        socket.on('question-ended', (data) => {
-            clearTimer();
-            showCorrectAnswer(data.correctAnswer);
-            
-            // Если пользователь не ответил на вопрос, считаем его пропущенным
-            if (userAnswers[currentQuestionIndex] === null) {
-                userAnswers[currentQuestionIndex] = 'skipped';
-                skippedAnswersCount++;
-            }
-            
-            // Через 5 секунд автоматически переходим к следующему вопросу
-            setTimeout(() => {
-                // Если это был последний вопрос, показываем результаты
-                if (currentQuestionIndex + 1 >= totalQuestions) {
-                    showResults();
-                }
-            }, 5000);
-        });
-
-        // Quiz ended
-        socket.on('quiz-ended', (data) => {
-            showResults();
-        });
-
-        // Student list management
-        function updateStudentList(student) {
-            const list = document.getElementById('students-list');
-            const studentElement = document.createElement('div');
-            studentElement.className = 'student-item';
-            studentElement.id = `student-${student.id}`;
-            studentElement.innerHTML = `👤 ${student.name}`;
-            list.appendChild(studentElement);
-        }
-
-        function removeStudent(studentId) {
-            const element = document.getElementById(`student-${studentId}`);
-            if (element) {
-                element.remove();
-            }
-        }
-
-        function updateStudentsCount(count) {
-            document.getElementById('waiting-students-count').textContent = count;
-        }
-
-        // Timer functions
-        let timerInterval;
-        function startTimer(timeLimit) {
-            updateTimerDisplay(timeLimit);
-            
-            clearInterval(timerInterval);
+        function startLocalTimer() {
+            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                const currentTime = parseInt(document.getElementById('question-timer').textContent);
-                if (currentTime > 0) {
-                    updateTimerDisplay(currentTime - 1);
+                if (timeLimit === 0) return;
+                
+                const elapsed = Math.floor((Date.now() - lastServerUpdate) / 1000);
+                const displayTime = Math.max(0, serverTimeLeft - elapsed);
+                
+                updateTimerDisplay(displayTime);
+                
+                if (displayTime <= 0 && timerInterval) {
+                    clearInterval(timerInterval);
                 }
-            }, 1000);
+            }, 100);
         }
 
-        function updateTimerDisplay(timeLeft) {
-            const timerElement = document.getElementById('question-timer');
-            timerElement.textContent = timeLeft;
+        function updateTimerDisplay(time) {
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = time;
             
-            // Update visual state
-            timerElement.classList.remove('warning', 'danger');
-            if (timeLeft <= 10) {
-                timerElement.classList.add('danger');
-            } else if (timeLeft <= 20) {
-                timerElement.classList.add('warning');
+            timerEl.classList.remove('warning', 'danger');
+            if (time <= 10 && time > 0) {
+                timerEl.classList.add('danger');
+            } else if (time <= 20) {
+                timerEl.classList.add('warning');
             }
         }
 
-        function clearTimer() {
-            clearInterval(timerInterval);
+        function selectAnswer(index, btn) {
+            if (answerLocked) return;
+            
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedAnswer = index;
+            
+            if (timeLimit === 0) {
+                document.getElementById('change-answer-btn').style.display = 'block';
+            } else {
+                lockAnswer();
+            }
         }
 
-        // Answer selection
-        function selectAnswer(answerIndex, buttonElement) {
-            if (selectedAnswer !== null) return; // Prevent changing answer
+        function lockAnswer() {
+            answerLocked = true;
+            document.getElementById('change-answer-btn').style.display = 'none';
             
-            selectedAnswer = answerIndex;
-            userAnswers[currentQuestionIndex] = answerIndex;
+            socket.emit('student-answer', {
+                sessionCode,
+                questionIndex: currentQuestionIndex,
+                answerIndex: selectedAnswer,
+                timeLeft: serverTimeLeft
+            });
+        }
+
+        function unlockAnswer() {
+            answerLocked = false;
+            document.getElementById('change-answer-btn').style.display = 'none';
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+        }
+
+        socket.on('question-ended', (data) => {
+            clearInterval(timerInterval);
             
-            // Visual feedback
-            document.querySelectorAll('.btn-option').forEach(btn => {
-                btn.classList.remove('selected');
+            const options = document.querySelectorAll('.option-btn');
+            options.forEach((btn, idx) => {
+                const text = btn.textContent.substring(3);
+                if (text === data.correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn.classList.contains('selected')) {
+                    btn.classList.add('wrong');
+                }
                 btn.disabled = true;
             });
-            buttonElement.classList.add('selected');
             
-            // Send answer to server
-            socket.emit('student-answer', {
-                sessionCode: currentSessionCode,
-                questionIndex: currentQuestionIndex,
-                answerIndex: answerIndex
-            });
-        }
-
-        function showCorrectAnswer(correctAnswer) {
-            const options = document.querySelectorAll('.btn-option');
-            let userAnswerText = '';
+            const isCorrect = options[selectedAnswer]?.textContent.includes(data.correctAnswer);
             
-            options.forEach((option, index) => {
-                const optionText = option.textContent.substring(3); // Remove "A. ", "B. ", etc.
-                
-                if (optionText === correctAnswer) {
-                    option.classList.add('correct');
-                } else if (option.classList.contains('selected') && optionText !== correctAnswer) {
-                    option.classList.add('wrong');
-                }
-                
-                // Сохраняем текст ответа пользователя
-                if (option.classList.contains('selected')) {
-                    userAnswerText = optionText;
-                }
-            });
+            const feedback = document.getElementById('feedback-container');
             
-            // Show feedback
-            const feedback = document.getElementById('answer-feedback');
-            const isCorrect = userAnswerText === correctAnswer;
-            
-            if (selectedAnswer !== null) {
-                if (isCorrect) {
-                    feedback.innerHTML = `<div class="answer-feedback answer-correct">✅ Correct! +10 points</div>`;
-                    studentScore += 10;
-                    correctAnswersCount++;
-                } else {
-                    feedback.innerHTML = `<div class="answer-feedback answer-wrong">❌ Incorrect! The correct answer was: ${correctAnswer}</div>`;
-                    wrongAnswersCount++;
-                }
-                document.getElementById('current-score').textContent = studentScore;
+            if (isCorrect) {
+                score += 10;
+                document.getElementById('score-display').textContent = score;
+                answers[currentQuestionIndex] = true;
+                feedback.innerHTML = '<div class="answer-feedback answer-correct">✅ Правильно! +10 очков</div>';
+            } else if (selectedAnswer !== null) {
+                answers[currentQuestionIndex] = false;
+                feedback.innerHTML = `<div class="answer-feedback answer-wrong">❌ Неправильно! Правильный ответ: ${data.correctAnswer}</div>`;
             } else {
-                feedback.innerHTML = `<div class="answer-feedback answer-wrong">⏰ Time's up! The correct answer was: ${correctAnswer}</div>`;
+                answers[currentQuestionIndex] = false;
+                feedback.innerHTML = `<div class="answer-feedback answer-wrong">⏰ Время вышло! Правильный ответ: ${data.correctAnswer}</div>`;
             }
-        }
+        });
 
-        function showResults() {
+        socket.on('quiz-ended', (data) => {
             document.getElementById('quiz-room').style.display = 'none';
             document.getElementById('results-room').style.display = 'block';
             
-            // Calculate statistics
-            const accuracy = totalQuestions > 0 ? Math.round((correctAnswersCount / totalQuestions) * 100) : 0;
+            const correctCount = answers.filter(a => a).length;
+            const wrongCount = totalQuestions - correctCount;
             
-            // Update results display
-            document.getElementById('final-score').textContent = studentScore;
-            document.getElementById('correct-count').textContent = correctAnswersCount;
-            document.getElementById('wrong-count').textContent = wrongAnswersCount;
-            document.getElementById('skipped-count').textContent = skippedAnswersCount;
-            document.getElementById('accuracy-percentage').textContent = accuracy + '%';
-        }
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-correct').textContent = correctCount;
+            document.getElementById('final-wrong').textContent = wrongCount;
+            
+            let detailsHtml = '<h3>📊 Детали:</h3><div class="student-list">';
+            for (let i = 0; i < totalQuestions; i++) {
+                const answered = answers[i] !== undefined;
+                detailsHtml += `
+                    <div class="student-item">
+                        <strong>Вопрос ${i+1}:</strong> 
+                        ${answered ? (answers[i] ? '✅' : '❌') : '⏰ Пропущен'}
+                    </div>
+                `;
+            }
+            detailsHtml += '</div>';
+            document.getElementById('results-details').innerHTML = detailsHtml;
+        });
 
-        // Auto-fill session code from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const sessionFromUrl = urlParams.get('session');
-        if (sessionFromUrl) {
-            document.getElementById('sessionCode').value = sessionFromUrl;
-            // Auto-focus on name field for better UX
+        if (urlParams.get('session')) {
+            document.getElementById('sessionCode').value = urlParams.get('session');
             document.getElementById('studentName').focus();
         }
     </script>

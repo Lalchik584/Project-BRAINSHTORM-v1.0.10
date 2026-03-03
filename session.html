@@ -1,170 +1,505 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Session Control - Quiz Master</title>
+    <title>Управление сессией - BRAINSHTORM</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
+            border-radius: 20px;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
         }
         .session-header {
             text-align: center;
             margin-bottom: 30px;
         }
         .session-code {
-            font-size: 2em;
+            font-size: 3em;
             font-weight: bold;
-            color: #333;
+            color: #667eea;
             letter-spacing: 5px;
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
         }
         .qr-section {
             text-align: center;
-            margin: 20px 0;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
         }
         .qr-code {
-            border: 2px solid #333;
-            padding: 10px;
+            border: 3px solid #333;
+            padding: 15px;
             background: white;
-            max-width: 300px;
-        }
-        .students-list {
-            margin-top: 30px;
-        }
-        .student-item {
-            padding: 10px;
-            margin: 5px 0;
-            background: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #667eea;
+            max-width: 200px;
+            margin: 20px auto;
         }
         .btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
-            padding: 12px 24px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1.1em;
             font-weight: 600;
             margin: 10px;
+            transition: all 0.3s;
         }
-        .btn-start {
-            background: linear-gradient(45deg, #28a745, #20c997);
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
-        .btn:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+        }
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #e0a800);
+            color: #333;
+        }
+        .students-list {
+            margin: 30px 0;
+        }
+        .student-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .score-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .question-block {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .leaderboard {
+            margin: 30px 0;
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+        }
+        .position {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 15px;
+        }
+        .results-table {
+            overflow-x: auto;
+            margin: 30px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #667eea;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .correct {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .wrong {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .grade-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .grade-5 { background: #28a745; color: white; }
+        .grade-4 { background: #17a2b8; color: white; }
+        .grade-3 { background: #ffc107; color: #333; }
+        .grade-2 { background: #dc3545; color: white; }
+        .category-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="session-header">
-            <h1>🎮 Session Control</h1>
-            <p>Share the session code or QR code with students</p>
-            <div class="session-code" id="session-code-display">------</div>
+            <h1>🎮 Управление сессией</h1>
+            <h2 id="quiz-title"></h2>
+            <p><span id="quiz-category" class="category-badge"></span></p>
+            <div class="session-code" id="session-code">000000</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="students-count">0</div>
+                <div class="stat-label">учеников</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-questions">0</div>
+                <div class="stat-label">вопросов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="current-question">0</div>
+                <div class="stat-label">текущий вопрос</div>
+            </div>
         </div>
 
         <div class="qr-section">
-            <h3>📱 QR Code</h3>
-            <img id="qr-code" class="qr-code" src="" alt="QR Code">
+            <h3>📱 QR-код для подключения</h3>
+            <img id="qr-image" class="qr-code" src="" alt="QR Code">
+            <p>Ссылка для учеников: <code id="session-link"></code></p>
         </div>
 
-        <div style="text-align: center;">
-            <button id="start-quiz-btn" class="btn btn-start">🚀 Start Quiz</button>
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn" id="start-quiz-btn">🚀 Начать квиз</button>
+            <button class="btn btn-warning" id="next-question-btn" style="display: none;">⏭️ Следующий вопрос</button>
+            <button class="btn btn-danger" id="end-quiz-btn" style="display: none;">🏁 Завершить</button>
+        </div>
+
+        <div id="current-question-display" class="question-block" style="display: none;">
+            <h4 id="question-header"></h4>
+            <div id="question-detail"></div>
+            <div id="question-timer" style="font-size: 1.5em; font-weight: bold; margin: 10px 0;"></div>
+            <div id="answer-stats"></div>
+        </div>
+
+        <div class="leaderboard" id="leaderboard" style="display: none;">
+            <h3>🏆 Текущие результаты</h3>
+            <div id="leaderboard-container"></div>
+        </div>
+
+        <div class="results-table" id="detailed-results" style="display: none;">
+            <h3>📊 Детальная статистика</h3>
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th>Ученик</th>
+                        <th>Баллы</th>
+                        <th>% прав.</th>
+                        <th>Оценка</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+            
+            <h4 style="margin-top: 30px;">📝 Детали по вопросам</h4>
+            <div id="question-details"></div>
         </div>
 
         <div class="students-list">
-            <h3>👨‍🎓 Connected Students (<span id="students-count">0</span>)</h3>
-            <div id="students-container">
-                <!-- Students will be listed here -->
-            </div>
+            <h3>👨‍🎓 Подключенные ученики</h3>
+            <div id="students-container"></div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionCode = urlParams.get('sessionCode');
+        const sessionCode = window.location.pathname.split('/').pop();
+        
+        let currentQuestionIndex = 0;
+        let totalQuestions = 0;
+        let questionTimeLeft = 0;
+        let timerInterval = null;
+        let studentDetails = [];
 
-        // Элементы интерфейса
-        const sessionCodeDisplay = document.getElementById('session-code-display');
-        const qrCodeImg = document.getElementById('qr-code');
-        const startQuizBtn = document.getElementById('start-quiz-btn');
-        const studentsCount = document.getElementById('students-count');
-        const studentsContainer = document.getElementById('students-container');
+        socket.emit('teacher-join', sessionCode);
 
-        // Если код сессии не передан, покажем ошибку
-        if (!sessionCode) {
-            alert('Session code is missing!');
-            window.location.href = '/teacher.html';
-        } else {
-            // Устанавливаем код сессии
-            sessionCodeDisplay.textContent = sessionCode;
-            // Устанавливаем QR-код
-            qrCodeImg.src = `/qr/${sessionCode}`;
-
-            // Подключаем учителя к сессии
-            socket.emit('teacher-join', sessionCode);
-
-            // Обработчик начала квиза
-            startQuizBtn.addEventListener('click', () => {
-                socket.emit('start-quiz', sessionCode);
-                startQuizBtn.disabled = true;
-                startQuizBtn.textContent = 'Quiz Started!';
+        fetch('/api/sessions/' + sessionCode)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('quiz-title').textContent = data.session.quiz.title;
+                    document.getElementById('quiz-category').textContent = data.session.quiz.categoryName || '📚 Предмет';
+                    document.getElementById('session-code').textContent = data.session.code;
+                    document.getElementById('total-questions').textContent = data.session.quiz.questions.length;
+                    totalQuestions = data.session.quiz.questions.length;
+                    
+                    document.getElementById('qr-image').src = '/qr/' + sessionCode;
+                    const link = `${window.location.protocol}//${window.location.host}/student.html?session=${sessionCode}`;
+                    document.getElementById('session-link').textContent = link;
+                    
+                    updateStudentsList(data.session.students);
+                    document.getElementById('students-count').textContent = data.session.students.length;
+                }
             });
-        }
 
-        // Слушаем подключения студентов
+        document.getElementById('start-quiz-btn').addEventListener('click', () => {
+            socket.emit('start-quiz', sessionCode);
+        });
+
+        document.getElementById('next-question-btn').addEventListener('click', () => {
+            socket.emit('next-question', sessionCode);
+        });
+
+        document.getElementById('end-quiz-btn').addEventListener('click', () => {
+            socket.emit('end-quiz', sessionCode);
+        });
+
         socket.on('student-joined', (data) => {
-            updateStudentsList(data.student, data.totalStudents);
+            updateStudentsList([data.student]);
+            document.getElementById('students-count').textContent = data.totalStudents;
         });
 
         socket.on('student-left', (data) => {
-            removeStudent(data.studentId, data.totalStudents);
+            const el = document.getElementById('student-' + data.studentId);
+            if (el) el.remove();
+            document.getElementById('students-count').textContent = data.totalStudents;
         });
 
-        // Обновляем список студентов
-        function updateStudentsList(student, total) {
-            studentsCount.textContent = total;
+        socket.on('quiz-started', () => {
+            document.getElementById('start-quiz-btn').style.display = 'none';
+            document.getElementById('next-question-btn').style.display = 'inline-block';
+            document.getElementById('end-quiz-btn').style.display = 'inline-block';
+            document.getElementById('leaderboard').style.display = 'block';
+        });
 
-            const studentElement = document.createElement('div');
-            studentElement.className = 'student-item';
-            studentElement.id = `student-${student.id}`;
-            studentElement.innerHTML = `
-                <strong>👤 ${student.name}</strong>
-                <small style="color: #666;">joined at ${new Date(student.joinedAt).toLocaleTimeString()}</small>
+        socket.on('question-started', (data) => {
+            currentQuestionIndex = data.questionIndex;
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('current-question-display').style.display = 'block';
+            document.getElementById('question-header').innerHTML = `Вопрос ${currentQuestionIndex + 1}: ${data.question.question}`;
+            
+            questionTimeLeft = data.timeLimit;
+            startTimer();
+        });
+
+        socket.on('timer-update', (data) => {
+            questionTimeLeft = data.timeLeft;
+            updateTimerDisplay();
+        });
+
+        socket.on('answer-stats', (data) => {
+            document.getElementById('answer-stats').innerHTML = `
+                <strong>Ответили:</strong> ${data.answersReceived}/${data.totalStudents} |
+                <strong>Правильно:</strong> ${data.correctAnswers} |
+                <strong>${Math.round(data.correctAnswers / data.totalStudents * 100) || 0}%</strong>
             `;
-            studentsContainer.appendChild(studentElement);
-        }
-
-        function removeStudent(studentId, total) {
-            const element = document.getElementById(`student-${studentId}`);
-            if (element) {
-                element.remove();
-            }
-            studentsCount.textContent = total;
-        }
-
-        // Обработчик начала квиза (для учителя, если нужно)
-        socket.on('quiz-started', (data) => {
-            // Можем показать сообщение, что квиз начат
-            console.log('Quiz started for session:', sessionCode);
         });
+
+        socket.on('leaderboard-update', (data) => {
+            updateLeaderboard(data.leaderboard);
+        });
+
+        socket.on('detailed-stats', (data) => {
+            updateDetailedStats(data);
+        });
+
+        socket.on('quiz-ended', (data) => {
+            document.getElementById('next-question-btn').style.display = 'none';
+            document.getElementById('end-quiz-btn').style.display = 'none';
+            document.getElementById('current-question-display').style.display = 'none';
+            document.getElementById('detailed-results').style.display = 'block';
+            
+            if (data.finalResults) {
+                updateFinalResults(data.finalResults);
+            }
+        });
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                questionTimeLeft--;
+                updateTimerDisplay();
+                if (questionTimeLeft <= 0) clearInterval(timerInterval);
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(questionTimeLeft / 60);
+            const secs = questionTimeLeft % 60;
+            document.getElementById('question-timer').textContent = 
+                `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateStudentsList(students) {
+            const container = document.getElementById('students-container');
+            students.forEach(student => {
+                if (!document.getElementById('student-' + student.id)) {
+                    const el = document.createElement('div');
+                    el.className = 'student-item';
+                    el.id = 'student-' + student.id;
+                    el.innerHTML = `
+                        <div>
+                            <strong>${student.name}</strong>
+                            <div style="color: #666; font-size: 0.9em;">
+                                ${new Date(student.joinedAt).toLocaleTimeString()}
+                            </div>
+                        </div>
+                        <div class="score-badge" id="score-${student.id}">0</div>
+                    `;
+                    container.appendChild(el);
+                }
+            });
+        }
+
+        function updateLeaderboard(leaderboard) {
+            const container = document.getElementById('leaderboard-container');
+            container.innerHTML = '';
+            
+            leaderboard.sort((a, b) => b.score - a.score).forEach((student, idx) => {
+                const el = document.createElement('div');
+                el.className = 'leaderboard-item';
+                el.innerHTML = `
+                    <div>
+                        <span class="position">${idx + 1}.</span>
+                        ${student.name}
+                    </div>
+                    <div class="score-badge">${student.score} очков</div>
+                `;
+                container.appendChild(el);
+                
+                const scoreEl = document.getElementById('score-' + student.studentId);
+                if (scoreEl) scoreEl.textContent = student.score;
+            });
+        }
+
+        function calculateGrade(percentage) {
+            if (percentage < 25) return { text: '2 (неуд)', class: 'grade-2' };
+            if (percentage < 50) return { text: '3 (удовл)', class: 'grade-3' };
+            if (percentage < 80) return { text: '4 (хорошо)', class: 'grade-4' };
+            return { text: '5 (отлично)', class: 'grade-5' };
+        }
+
+        function updateDetailedStats(data) {
+            const tbody = document.getElementById('results-body');
+            tbody.innerHTML = '';
+            
+            data.studentDetails.forEach(student => {
+                const totalQuestions = data.questions.length;
+                const correctCount = student.answers.filter(a => a.isCorrect).length;
+                const percentage = totalQuestions > 0 ? Math.round(correctCount / totalQuestions * 100) : 0;
+                const grade = calculateGrade(percentage);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.score}</td>
+                    <td>${percentage}% (${correctCount}/${totalQuestions})</td>
+                    <td><span class="grade-badge ${grade.class}">${grade.text}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            const questionDiv = document.getElementById('question-details');
+            questionDiv.innerHTML = '<div style="overflow-x: auto;"><table><tr><th>Ученик</th>';
+            
+            data.questions.forEach((q, idx) => {
+                questionDiv.innerHTML += `<th>Вопрос ${idx+1}</th>`;
+            });
+            questionDiv.innerHTML += '</tr>';
+            
+            data.studentDetails.forEach(student => {
+                let row = `<tr><td><strong>${student.name}</strong></td>`;
+                for (let i = 0; i < data.questions.length; i++) {
+                    const answer = student.answers.find(a => a.questionIndex === i);
+                    if (answer) {
+                        row += `<td class="${answer.isCorrect ? 'correct' : 'wrong'}">${answer.isCorrect ? '✓' : '✗'}</td>`;
+                    } else {
+                        row += `<td class="wrong">—</td>`;
+                    }
+                }
+                row += '</tr>';
+                questionDiv.innerHTML += row;
+            });
+            
+            questionDiv.innerHTML += '</table></div>';
+        }
+
+        function updateFinalResults(finalResults) {
+            const tbody = document.getElementById('results-body');
+            tbody.innerHTML = '';
+            
+            finalResults.forEach(student => {
+                const totalQuestions = finalResults[0]?.answers?.length || 0;
+                const correctCount = student.answers?.filter(a => a.isCorrect).length || 0;
+                const percentage = totalQuestions > 0 ? Math.round(correctCount / totalQuestions * 100) : 0;
+                const grade = calculateGrade(percentage);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.score}</td>
+                    <td>${percentage}%</td>
+                    <td><span class="grade-badge ${grade.class}">${grade.text}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
     </script>
 </body>
 </html>

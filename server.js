@@ -63,6 +63,7 @@ function getCategoryName(categoryCode) {
         'math': '📐 Математика',
         'algebra': '🔢 Алгебра',
         'geometry': '📏 Геометрия',
+        'informatic': '🖥️ Информатика',
         'russian': '📖 Русский язык',
         'literature': '📚 Литература',
         'reading': '📗 Чтение',
@@ -572,3 +573,4 @@ server.listen(PORT, HOST, () => {
     console.log(`📊 Загружено квизов: ${quizzes.length}`);
     console.log('🎯 ================================');
 });
+

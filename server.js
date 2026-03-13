@@ -162,8 +162,36 @@ function startQuestion(session, questionIndex) {
     
     if (!question) return;
     
-    // Перемешиваем варианты
-    const options = [question.correctAnswer, ...question.wrongAnswers];
+   // ===== УНИВЕРСАЛЬНЫЙ ПАРСИНГ wrongAnswers =====
+    let wrongAnswers = [];
+    
+    if (Array.isArray(question.wrongAnswers)) {
+        // Уже массив — ок
+        wrongAnswers = question.wrongAnswers;
+    } 
+    else if (typeof question.wrongAnswers === 'string') {
+        // Строка — разбиваем по запятой
+        wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
+    } 
+    else if (question.wrongAnswers === undefined || question.wrongAnswers === null) {
+        // Если вообще нет — пустой массив
+        wrongAnswers = [];
+        console.log('⚠️ Нет wrongAnswers, вопрос будет только с правильным ответом');
+    } 
+    else {
+        // Всё остальное (число, объект и т.д.) — игнорим
+        wrongAnswers = [];
+    }
+    
+    // Если всё равно пусто — добавим заглушку, чтобы не было пустого вопроса
+    if (wrongAnswers.length === 0) {
+        wrongAnswers = ['(нет вариантов)'];
+    }
+    
+    // Собираем варианты
+    const options = [question.correctAnswer, ...wrongAnswers];
+    
+    // Перемешиваем
     for (let i = options.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [options[i], options[j]] = [options[j], options[i]];
@@ -171,7 +199,6 @@ function startQuestion(session, questionIndex) {
     
     const timeLimit = question.timeLimit || 30;
     
-    // Отправляем вопрос студентам
     io.to(session.code).emit('question-started', {
         questionIndex,
         question: {
@@ -182,7 +209,6 @@ function startQuestion(session, questionIndex) {
         timeLimit
     });
     
-    // Запускаем точный таймер
     let timeLeft = timeLimit;
     const startTime = Date.now();
     

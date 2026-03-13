@@ -495,91 +495,107 @@
             container.innerHTML = html;
         }
 
-        async function createQuiz() {
-            const title = document.getElementById('quizTitle').value.trim();
-            const category = document.getElementById('quizCategory').value;
-            
-            if (!title) {
-                alert('Введите название квиза');
-                return;
-            }
+async function createQuiz() {
+    const title = document.getElementById('quizTitle').value.trim();
+    const category = document.getElementById('quizCategory').value;
+    
+    if (!title) {
+        alert('Введите название квиза');
+        return;
+    }
 
-            const questions = [];
-            let hasError = false;
+    const questions = [];
+    let hasError = false;
 
-            for (let i = 1; i <= currentQuestionCount; i++) {
-                const questionText = document.getElementById(`question-${i}`).value.trim();
-                const type = document.getElementById(`type-${i}`).value;
-                const timeLimit = parseInt(document.getElementById(`time-${i}`).value);
-                
-                const options = [];
-                document.querySelectorAll(`#options-${i} .option-input`).forEach(inp => {
-                    if (inp.value.trim()) options.push(inp.value.trim());
-                });
-                
-                if (!questionText || options.length < 2) {
-                    alert(`Заполните вопрос ${i} и минимум 2 варианта`);
-                    hasError = true;
-                    break;
-                }
-                
-                let correct;
-                if (type === 'single') {
-                    const selected = document.querySelector(`input[name="correct-${i}"]:checked`);
-                    if (!selected) {
-                        alert(`Выберите правильный ответ для вопроса ${i}`);
-                        hasError = true;
-                        break;
-                    }
-                    correct = parseInt(selected.value);
-                } else {
-                    const selected = Array.from(document.querySelectorAll(`input[name="correct-${i}"]:checked`));
-                    if (selected.length === 0) {
-                        alert(`Выберите хотя бы один правильный ответ для вопроса ${i}`);
-                        hasError = true;
-                        break;
-                    }
-                    correct = selected.map(cb => parseInt(cb.value));
-                }
-                
-                questions.push({
-                    question: questionText,
-                    type,
-                    timeLimit,
-                    options,
-                    correctAnswer: correct
-                });
-            }
-            
-            if (hasError) return;
-
-            try {
-                const response = await fetch('/api/quizzes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, category, questions })
-                });
-                
-                const result = await response.json();
-                if (result.success) {
-                    document.getElementById('create-result').innerHTML = `
-                        <div class="success-message">
-                            <h3>✅ Квиз создан!</h3>
-                            <p><strong>Название:</strong> ${result.quiz.title}</p>
-                            <p><strong>Предмет:</strong> ${getCategoryName(result.quiz.category)}</p>
-                            <p><strong>Артикул:</strong> <span class="article-code">${result.quiz.article}</span></p>
-                            <p><strong>Вопросов:</strong> ${result.quiz.questions.length}</p>
-                            <p><strong>Сохраните артикул для доступа!</strong></p>
-                        </div>
-                    `;
-                    
-                    document.getElementById('quizTitle').value = '';
-                    generateQuestionFields();
-                }
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
+    for (let i = 1; i <= currentQuestionCount; i++) {
+        const questionText = document.getElementById(`question-${i}`).value.trim();
+        const type = document.getElementById(`type-${i}`).value;
+        const timeLimit = parseInt(document.getElementById(`time-${i}`).value);
+        
+        // Собираем все варианты
+        const optionInputs = document.querySelectorAll(`#options-${i} .option-input`);
+        const allOptions = [];
+        optionInputs.forEach(inp => {
+            if (inp.value.trim()) allOptions.push(inp.value.trim());
+        });
+        
+        if (!questionText || allOptions.length < 2) {
+            alert(`Заполните вопрос ${i} и минимум 2 варианта`);
+            hasError = true;
+            break;
         }
+        
+        // Определяем правильный ответ
+        let correctAnswerText = '';
+        if (type === 'single') {
+            const selectedIndex = document.querySelector(`input[name="correct-${i}"]:checked`);
+            if (!selectedIndex) {
+                alert(`Выберите правильный ответ для вопроса ${i}`);
+                hasError = true;
+                break;
+            }
+            const idx = parseInt(selectedIndex.value);
+            correctAnswerText = allOptions[idx];
+        } else {
+            const selectedIndices = Array.from(document.querySelectorAll(`input[name="correct-${i}"]:checked`));
+            if (selectedIndices.length === 0) {
+                alert(`Выберите хотя бы один правильный ответ для вопроса ${i}`);
+                hasError = true;
+                break;
+            }
+            // Для multiple choice будем хранить массив правильных ответов (текстом)
+            correctAnswerText = selectedIndices.map(cb => allOptions[parseInt(cb.value)]);
+        }
+        
+        // Формируем правильную структуру вопроса
+        const questionData = {
+            question: questionText,
+            type: type,
+            timeLimit: timeLimit,
+            correctAnswer: correctAnswerText,
+            wrongAnswers: []
+        };
+
+        // Заполняем wrongAnswers всеми вариантами, кроме правильных
+        if (type === 'single') {
+            questionData.wrongAnswers = allOptions.filter(opt => opt !== correctAnswerText);
+        } else {
+            // Для multiple choice правильный ответ — массив, значит wrongAnswers = все варианты не входящие в correctAnswer
+            questionData.wrongAnswers = allOptions.filter(opt => !correctAnswerText.includes(opt));
+        }
+        
+        questions.push(questionData);
+    }
+    
+    if (hasError) return;
+
+    try {
+        const response = await fetch('/api/quizzes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, category, questions })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            document.getElementById('create-result').innerHTML = `
+                <div class="success-message">
+                    <h3>✅ Квиз создан!</h3>
+                    <p><strong>Название:</strong> ${result.quiz.title}</p>
+                    <p><strong>Предмет:</strong> ${getCategoryName(result.quiz.category)}</p>
+                    <p><strong>Артикул:</strong> <span class="article-code">${result.quiz.article}</span></p>
+                    <p><strong>Вопросов:</strong> ${result.quiz.questions.length}</p>
+                    <p><strong>Сохраните артикул для доступа!</strong></p>
+                </div>
+            `;
+            
+            document.getElementById('quizTitle').value = '';
+            generateQuestionFields();
+        }
+    } catch (e) {
+        alert('Ошибка: ' + e.message);
+    }
+}
 
         function getCategoryName(code) {
             const categories = {

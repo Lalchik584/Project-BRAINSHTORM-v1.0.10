@@ -426,6 +426,12 @@ app.get('/session/:sessionCode', (req, res) => {
 io.on('connection', (socket) => {
     console.log('🔌 Новое подключение:', socket.id);
 
+  //отладочный код
+  socket.on('start-quiz', (sessionCode) => {
+    console.log(`🚀 ПОЛУЧЕН start-quiz для сессии ${sessionCode} от сокета ${socket.id}`);
+    const session = activeSessions.get(sessionCode);
+    });
+  
     socket.on('teacher-join', (sessionCode) => {
         const session = activeSessions.get(sessionCode);
         if (session) {

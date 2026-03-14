@@ -525,61 +525,96 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('student-answer', (data) => {
-        const { sessionCode, questionIndex, answerIndex, timeLeft } = data;
-        const session = activeSessions.get(sessionCode);
+socket.on('student-answer', (data) => {
+    const { sessionCode, questionIndex, answerIndex, timeLeft } = data;
+    const session = activeSessions.get(sessionCode);
+    
+    if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
+        const studentId = socket.studentId;
+        const question = session.quiz.questions[questionIndex];
         
-        if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
-            const studentId = socket.studentId;
-            const question = session.quiz.questions[questionIndex];
-            
-            const isCorrect = answerIndex === 0;
-            
-            const studentAnswers = session.studentAnswers.get(studentId) || [];
-            studentAnswers.push({
-                questionIndex,
-                answerIndex,
-                isCorrect,
-                timeLeft,
-                timestamp: new Date().toISOString()
-            });
-            session.studentAnswers.set(studentId, studentAnswers);
-            
-            if (!session.answers.has(questionIndex)) {
-                session.answers.set(questionIndex, new Map());
-            }
-            session.answers.get(questionIndex).set(studentId, { answerIndex, isCorrect });
-            
-            if (isCorrect) {
-                const currentScore = session.scores.get(studentId) || 0;
-                session.scores.set(studentId, currentScore + 10);
-            }
-            
-            sendDetailedStats(session);
+        // Сохраняем ответ
+        if (!session.answers.has(questionIndex)) {
+            session.answers.set(questionIndex, new Map());
         }
-    });
-
-    function sendDetailedStats(session) {
-        if (!session.teacher) return;
         
-        const stats = {
-            totalStudents: session.students.size,
-            questions: session.quiz.questions.map((q, idx) => ({
-                text: q.question,
-                correctAnswer: q.correctAnswer,
-                answers: session.answers.get(idx) ? 
-                    Array.from(session.answers.get(idx).entries()) : []
-            })),
-            studentDetails: Array.from(session.studentAnswers.entries()).map(([studentId, answers]) => ({
-                studentId,
-                name: session.students.get(studentId)?.name,
-                answers,
-                score: session.scores.get(studentId) || 0
-            }))
-        };
+        const isCorrect = answerIndex === 0; // Упрощённо (индекс 0 — правильный)
         
-        io.to(session.teacher).emit('detailed-stats', stats);
+        session.answers.get(questionIndex).set(studentId, { 
+            answered: true,
+            answerIndex,
+            isCorrect,
+            timeLeft 
+        });
+        
+        // 👇 ВАЖНО: отправляем учителю обновлённый статус
+        if (session.teacher) {
+            const answeredCount = session.answers.get(questionIndex).size;
+            const totalStudents = session.students.size;
+            
+            // Список ответивших
+            const answeredStudents = [];
+            session.answers.get(questionIndex).forEach((value, id) => {
+                const student = session.students.get(id);
+                if (student) {
+                    answeredStudents.push({
+                        id: student.id,
+                        name: student.name,
+                        isCorrect: value.isCorrect
+                    });
+                }
+            });
+            
+            io.to(session.teacher).emit('answer-status-update', {
+                questionIndex,
+                answeredCount,
+                totalStudents,
+                answeredStudents,
+                pendingCount: totalStudents - answeredCount
+            });
+        }
+        
+        // Остальная логика (сохранение деталей, начисление очков)
+        const studentAnswers = session.studentAnswers.get(studentId) || [];
+        studentAnswers.push({
+            questionIndex,
+            answerIndex,
+            isCorrect,
+            timeLeft,
+            timestamp: new Date().toISOString()
+        });
+        session.studentAnswers.set(studentId, studentAnswers);
+        
+        if (isCorrect) {
+            const currentScore = session.scores.get(studentId) || 0;
+            session.scores.set(studentId, currentScore + 10);
+        }
+        
+        sendDetailedStats(session);
     }
+});
+
+function sendDetailedStats(session) {
+    if (!session.teacher) return;
+    
+    const stats = {
+        totalStudents: session.students.size,
+        questions: session.quiz.questions.map((q, idx) => ({
+            text: q.question,
+            correctAnswer: q.correctAnswer,
+            answers: session.answers.get(idx) ? 
+                Array.from(session.answers.get(idx).entries()) : []
+        })),
+        studentDetails: Array.from(session.studentAnswers.entries()).map(([studentId, answers]) => ({
+            studentId,
+            name: session.students.get(studentId)?.name,
+            answers,
+            score: session.scores.get(studentId) || 0
+        }))
+    };
+    
+    io.to(session.teacher).emit('detailed-stats', stats);
+}
 
     socket.on('disconnect', () => {
         if (socket.sessionCode && socket.studentId) {

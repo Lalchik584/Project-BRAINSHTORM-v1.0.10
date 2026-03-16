@@ -104,10 +104,27 @@
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
+
+        /* 👇 НОВОЕ: стили для почты */
+        .support-text {
+            text-align: right;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(102, 126, 234, 0.3);
+            color: #666;
+            font-size: 0.95em;
+        }
+
         @media (max-width: 768px) {
             h1 { font-size: 2.5em; }
             .hero { padding: 40px 20px; }
             .subject-grid { grid-template-columns: repeat(2, 1fr); }
+            /* 👇 НОВОЕ: для мобилок */
+            .support-text {
+                text-align: center;
+                margin-top: 20px;
+                padding-top: 15px;
+            }
         }
     </style>
 </head>
@@ -136,6 +153,7 @@
             <div class="subject-item">📐 Математика</div>
             <div class="subject-item">🔢 Алгебра</div>
             <div class="subject-item">📏 Геометрия</div>
+            <div class="subject-item">🖥️ Инфофрматика</div>
             <div class="subject-item">📖 Русский язык</div>
             <div class="subject-item">📚 Литература</div>
             <div class="subject-item">🇬🇧 Английский язык</div>
@@ -170,6 +188,12 @@
             <a href="/teacher.html" class="btn teacher">👨‍🏫 Войти как учитель</a>
             <a href="/student.html" class="btn student">👨‍🎓 Войти как ученик</a>
         </div>
+
+        <!-- 👇 НОВОЕ: почта техподдержки -->
+        <div class="support-text">
+            📧 support.mozgoshtorm@ro.ru
+        </div>
+
     </div>
 </body>
 </html>

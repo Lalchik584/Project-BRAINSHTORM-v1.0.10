@@ -597,6 +597,16 @@ socket.on('student-answer', (data) => {
 function sendDetailedStats(session) {
     if (!session.teacher) return;
     
+    // Пересчитываем баллы из ответов (надёжный способ)
+    const studentScores = new Map();
+    session.studentAnswers.forEach((answers, studentId) => {
+        let total = 0;
+        answers.forEach(answer => {
+            if (answer.isCorrect) total += 10;
+        });
+        studentScores.set(studentId, total);
+    });
+    
     const stats = {
         totalStudents: session.students.size,
         questions: session.quiz.questions.map((q, idx) => ({
@@ -605,31 +615,19 @@ function sendDetailedStats(session) {
             answers: session.answers.get(idx) ? 
                 Array.from(session.answers.get(idx).entries()) : []
         })),
-        studentDetails: Array.from(session.studentAnswers.entries()).map(([studentId, answers]) => ({
-            studentId,
-            name: session.students.get(studentId)?.name,
-            answers,
-            score: session.scores.get(studentId) || 0
-        }))
+        studentDetails: Array.from(session.studentAnswers.entries()).map(([studentId, answers]) => {
+            const score = studentScores.get(studentId) || 0;
+            return {
+                studentId,
+                name: session.students.get(studentId)?.name,
+                answers,
+                score: score
+            };
+        })
     };
     
     io.to(session.teacher).emit('detailed-stats', stats);
 }
-
-    socket.on('disconnect', () => {
-        if (socket.sessionCode && socket.studentId) {
-            const session = activeSessions.get(socket.sessionCode);
-            if (session) {
-                session.students.delete(socket.studentId);
-                io.to(socket.sessionCode).emit('student-left', {
-                    studentId: socket.studentId,
-                    totalStudents: session.students.size
-                });
-            }
-        }
-        console.log('🔌 Отключился:', socket.id);
-    });
-});
 
 server.listen(PORT, HOST, () => {
     console.log('🎯 ================================');

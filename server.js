@@ -452,30 +452,6 @@ app.get('/session/:sessionCode', (req, res) => {
 io.on('connection', (socket) => {
     console.log('🔌 Новое подключение:', socket.id);
 
-  //отладочный код
-  socket.on('start-quiz', (sessionCode) => {
-    console.log(`🚀 ПОЛУЧЕН start-quiz для сессии ${sessionCode} от сокета ${socket.id}`);
-    const session = activeSessions.get(sessionCode);
-    });
-  
-    socket.on('teacher-join', (sessionCode) => {
-        const session = activeSessions.get(sessionCode);
-        if (session) {
-            session.teacher = socket.id;
-            socket.join(sessionCode);
-            socket.sessionCode = sessionCode;
-            console.log(`👨‍🏫 Учитель в сессии: ${sessionCode}`);
-            
-            const students = Array.from(session.students.values());
-            students.forEach(student => {
-                socket.emit('student-joined', {
-                    student,
-                    totalStudents: session.students.size
-                });
-            });
-        }
-    });
-
     socket.on('student-join', (data) => {
         const { sessionCode, studentName } = data;
         const session = activeSessions.get(sessionCode);

@@ -154,6 +154,8 @@
             width: 100%;
             border-collapse: collapse;
             background: white;
+            border-radius: 10px;
+            overflow: hidden;
         }
         th, td {
             padding: 12px;
@@ -161,7 +163,7 @@
             border-bottom: 1px solid #ddd;
         }
         th {
-            background: #667eea;
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
         }
         tr:hover {
@@ -191,6 +193,40 @@
             color: white;
             border-radius: 20px;
             font-size: 0.9em;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .details-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 12px;
+        }
+        .details-table td {
+            text-align: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .cell-correct {
+            background: #d4edda;
+            color: #155724;
+            font-size: 1.2em;
+        }
+        .cell-wrong {
+            background: #f8d7da;
+            color: #721c24;
+            font-size: 1.2em;
+        }
+        .cell-missed {
+            background: #fff3cd;
+            color: #856404;
+            font-size: 1.2em;
         }
     </style>
 </head>
@@ -257,7 +293,7 @@
             </table>
             
             <h4 style="margin-top: 30px;">📝 Детали по вопросам</h4>
-            <div id="question-details"></div>
+            <div id="question-details-container"></div>
         </div>
 
         <div class="students-list">
@@ -436,48 +472,68 @@
         }
 
         function updateDetailedStats(data) {
+            // Таблица с баллами
             const tbody = document.getElementById('results-body');
             tbody.innerHTML = '';
             
             data.studentDetails.forEach(student => {
-                const totalQuestions = data.questions.length;
+                const totalQuestionsCount = data.questions.length;
                 const correctCount = student.answers.filter(a => a.isCorrect).length;
-                const percentage = totalQuestions > 0 ? Math.round(correctCount / totalQuestions * 100) : 0;
+                const percentage = totalQuestionsCount > 0 ? Math.round(correctCount / totalQuestionsCount * 100) : 0;
                 const grade = calculateGrade(percentage);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${student.name}</strong></td>
                     <td>${student.score}</td>
-                    <td>${percentage}% (${correctCount}/${totalQuestions})</td>
+                    <td>${percentage}% (${correctCount}/${totalQuestionsCount})</td>
                     <td><span class="grade-badge ${grade.class}">${grade.text}</span></td>
                 `;
                 tbody.appendChild(row);
             });
             
-            const questionDiv = document.getElementById('question-details');
-            questionDiv.innerHTML = '<div style="overflow-x: auto;"><table><tr><th>Ученик</th>';
+            // Красивая таблица по вопросам
+            let tableHtml = `
+                <table class="details-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left;">Ученик</th>
+            `;
             
-            data.questions.forEach((q, idx) => {
-                questionDiv.innerHTML += `<th>Вопрос ${idx+1}</th>`;
-            });
-            questionDiv.innerHTML += '</tr>';
+            for (let i = 0; i < data.questions.length; i++) {
+                tableHtml += `<th>Вопрос ${i+1}</th>`;
+            }
+            tableHtml += `</tr></thead><tbody>`;
             
             data.studentDetails.forEach(student => {
-                let row = `<tr><td><strong>${student.name}</strong></td>`;
+                tableHtml += `<tr>`;
+                tableHtml += `<td style="text-align: left; font-weight: bold;">${student.name}</td>`;
+                
                 for (let i = 0; i < data.questions.length; i++) {
                     const answer = student.answers.find(a => a.questionIndex === i);
+                    let cell = '';
+                    let cellClass = '';
+                    
                     if (answer) {
-                        row += `<td class="${answer.isCorrect ? 'correct' : 'wrong'}">${answer.isCorrect ? '✓' : '✗'}</td>`;
+                        if (answer.isCorrect) {
+                            cell = '✅';
+                            cellClass = 'cell-correct';
+                        } else {
+                            cell = '❌';
+                            cellClass = 'cell-wrong';
+                        }
                     } else {
-                        row += `<td class="wrong">—</td>`;
+                        cell = '⏳';
+                        cellClass = 'cell-missed';
                     }
+                    
+                    tableHtml += `<td class="${cellClass}">${cell}</td>`;
                 }
-                row += '</tr>';
-                questionDiv.innerHTML += row;
+                tableHtml += `</tr>`;
             });
             
-            questionDiv.innerHTML += '</table></div>';
+            tableHtml += `</tbody></table>`;
+            document.getElementById('question-details-container').innerHTML = tableHtml;
         }
 
         function updateFinalResults(finalResults) {
@@ -485,9 +541,9 @@
             tbody.innerHTML = '';
             
             finalResults.forEach(student => {
-                const totalQuestions = finalResults[0]?.answers?.length || 0;
+                const totalQuestionsCount = finalResults[0]?.answers?.length || 0;
                 const correctCount = student.answers?.filter(a => a.isCorrect).length || 0;
-                const percentage = totalQuestions > 0 ? Math.round(correctCount / totalQuestions * 100) : 0;
+                const percentage = totalQuestionsCount > 0 ? Math.round(correctCount / totalQuestionsCount * 100) : 0;
                 const grade = calculateGrade(percentage);
                 
                 const row = document.createElement('tr');

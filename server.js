@@ -59,15 +59,12 @@ loadQuizzesFromFile();
 // ========== ФУНКЦИЯ ДЛЯ НАЗВАНИЙ КАТЕГОРИЙ ==========
 function getCategoryName(categoryCode) {
     const categories = {
-        // Основные предметы
         'math': '📐 Математика',
         'algebra': '🔢 Алгебра',
         'geometry': '📏 Геометрия',
         'informatic': '🖥️ Информатика',
         'russian': '📖 Русский язык',
         'literature': '📚 Литература',
-        'reading': '📗 Чтение',
-        'foreign': '🌍 Иностранный язык',
         'english': '🇬🇧 Английский язык',
         'french': '🇫🇷 Французский язык',
         'german': '🇩🇪 Немецкий язык',
@@ -75,70 +72,25 @@ function getCategoryName(categoryCode) {
         'history_russia': '🏛️ История России',
         'social': '👥 Обществознание',
         'geography': '🌏 География',
-        
-        // Естественные науки
         'biology': '🧬 Биология',
         'chemistry': '🧪 Химия',
         'physics': '⚡ Физика',
         'ecology': '🌿 Экология',
         'environment': '🌍 Окружающий мир',
-        'astronomy': '🔭 Астрономия',
-        
-        // Искусство
         'art': '🎨 Изобразительное искусство',
         'music': '🎵 Музыка',
         'culture': '🏛️ Мировая художественная культура',
-        'theater': '🎭 Театр',
-        
-        // Физкультура и ОБЖ
         'pe': '⚽ Физическая культура',
-        'sports': '🏆 Спорт',
         'obzh': '🛡️ Основы безопасности и защиты Родины',
         'military': '🎖️ Начальная военная подготовка',
-        'health': '❤️ Здоровье',
-        
-        // Технологии
         'tech': '🔧 Технология',
         'drafting': '✏️ Черчение',
-        'programming': '💻 Программирование',
-        'robotics': '🤖 Робототехника',
-        'engineering': '⚙️ Инженерия',
-        
-        // Гуманитарные
         'philosophy': '🤔 Философия',
         'psychology': '🧠 Психология',
-        'pedagogy': '📚 Педагогика',
-        'sociology': '👥 Социология',
         'law': '⚖️ Право',
         'economics': '📈 Экономика',
         'statistics': '📊 Теория вероятности и статистики',
-        'logic': '🧮 Логика',
-        
-        // Филология
-        'linguistics': '🗣️ Лингвистика',
-        'russian_lang': '🇷🇺 Русский язык',
-        'foreign_lang': '🌐 Иностранные языки',
-        'literature_rus': '📖 Русская литература',
-        'literature_world': '🌍 Зарубежная литература',
-        
-        // Точные науки
-        'algebra_advanced': '📊 Высшая математика',
-        'geometry_advanced': '📐 Геометрия',
-        'physics_advanced': '⚛️ Физика (углубленная)',
-        'chemistry_advanced': '🧪 Химия (углубленная)',
-        'biology_advanced': '🧬 Биология (углубленная)',
-        
-        // Воспитание
         'ethics': '🤝 Основы религиозных культур и светской этики',
-        'religion': '🕊️ Основы религиозных культур',
-        'morals': '💝 Нравственное воспитание',
-        'patriotism': '🇷🇺 Патриотическое воспитание',
-        
-        // Дополнительно
-        'career': '💼 Профориентация',
-        'finance': '💰 Финансовая грамотность',
-        'digital': '💻 Цифровая грамотность',
-        'ecology_school': '🌱 Экологическое воспитание',
         'other': '🎲 Другое'
     };
     return categories[categoryCode] || '📌 Другое';
@@ -162,36 +114,20 @@ function startQuestion(session, questionIndex) {
     
     if (!question) return;
     
-   // ===== УНИВЕРСАЛЬНЫЙ ПАРСИНГ wrongAnswers =====
     let wrongAnswers = [];
-    
     if (Array.isArray(question.wrongAnswers)) {
-        // Уже массив — ок
         wrongAnswers = question.wrongAnswers;
-    } 
-    else if (typeof question.wrongAnswers === 'string') {
-        // Строка — разбиваем по запятой
+    } else if (typeof question.wrongAnswers === 'string') {
         wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
-    } 
-    else if (question.wrongAnswers === undefined || question.wrongAnswers === null) {
-        // Если вообще нет — пустой массив
-        wrongAnswers = [];
-        console.log('⚠️ Нет wrongAnswers, вопрос будет только с правильным ответом');
-    } 
-    else {
-        // Всё остальное (число, объект и т.д.) — игнорим
+    } else {
         wrongAnswers = [];
     }
     
-    // Если всё равно пусто — добавим заглушку, чтобы не было пустого вопроса
     if (wrongAnswers.length === 0) {
         wrongAnswers = ['(нет вариантов)'];
     }
     
-    // Собираем варианты
     const options = [question.correctAnswer, ...wrongAnswers];
-    
-    // Перемешиваем
     for (let i = options.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [options[i], options[j]] = [options[j], options[i]];
@@ -243,7 +179,6 @@ function endQuestion(session, questionIndex) {
         totalCorrect
     });
     
-    // Принудительный переход через 3 секунды
     setTimeout(() => {
         const nextIndex = questionIndex + 1;
         if (nextIndex < session.quiz.questions.length) {
@@ -257,7 +192,17 @@ function endQuestion(session, questionIndex) {
 function endQuiz(session) {
     session.status = 'completed';
     
-    const finalResults = Array.from(session.scores.entries())
+    // Пересчитываем финальные баллы из детальных ответов
+    const finalScores = new Map();
+    session.studentAnswers.forEach((answers, studentId) => {
+        let total = 0;
+        answers.forEach(answer => {
+            if (answer.isCorrect) total += 10;
+        });
+        finalScores.set(studentId, total);
+    });
+    
+    const finalResults = Array.from(finalScores.entries())
         .map(([studentId, score]) => ({
             studentId,
             score,
@@ -267,18 +212,17 @@ function endQuiz(session) {
         .sort((a, b) => b.score - a.score);
     
     io.to(session.code).emit('quiz-ended', { finalResults });
+    console.log(`🏁 Квиз завершён. Результаты отправлены.`);
 }
 
 // ========== EXPRESS ROUTES ==========
 app.use(express.json());
 app.use(express.static('public'));
 
-// Главная страница
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API для создания квиза
 app.post('/api/quizzes', (req, res) => {
     try {
         const { title, questions, category } = req.body;
@@ -308,7 +252,6 @@ app.post('/api/quizzes', (req, res) => {
     }
 });
 
-// API для получения всех квизов
 app.get('/api/quizzes/all', (req, res) => {
     try {
         const quizzesWithCategoryNames = quizzes.map(quiz => ({
@@ -321,7 +264,6 @@ app.get('/api/quizzes/all', (req, res) => {
     }
 });
 
-// API для поиска квизов
 app.get('/api/quizzes/search', (req, res) => {
     try {
         const { query, category } = req.query;
@@ -352,7 +294,6 @@ app.get('/api/quizzes/search', (req, res) => {
     }
 });
 
-// API для создания сессии
 app.post('/api/sessions', (req, res) => {
     try {
         const { quizArticle } = req.body;
@@ -396,7 +337,6 @@ app.post('/api/sessions', (req, res) => {
     }
 });
 
-// API для получения информации о сессии
 app.get('/api/sessions/:code', (req, res) => {
     try {
         const { code } = req.params;
@@ -405,6 +345,16 @@ app.get('/api/sessions/:code', (req, res) => {
         if (!session) {
             return res.status(404).json({ success: false, error: 'Сессия не найдена' });
         }
+
+        // Пересчитываем баллы для ответа API
+        const studentScores = new Map();
+        session.studentAnswers.forEach((answers, studentId) => {
+            let total = 0;
+            answers.forEach(answer => {
+                if (answer.isCorrect) total += 10;
+            });
+            studentScores.set(studentId, total);
+        });
 
         res.json({ 
             success: true, 
@@ -417,7 +367,7 @@ app.get('/api/sessions/:code', (req, res) => {
                 students: Array.from(session.students.values()),
                 status: session.status,
                 currentQuestion: session.currentQuestion,
-                scores: Array.from(session.scores.entries()).map(([studentId, score]) => ({
+                scores: Array.from(studentScores.entries()).map(([studentId, score]) => ({
                     studentId,
                     score,
                     name: session.students.get(studentId)?.name
@@ -431,7 +381,6 @@ app.get('/api/sessions/:code', (req, res) => {
     }
 });
 
-// Генерация QR-кода
 app.get('/qr/:sessionCode', (req, res) => {
     const sessionCode = req.params.sessionCode;
     const protocol = req.headers['x-forwarded-proto'] || 'http';
@@ -443,7 +392,6 @@ app.get('/qr/:sessionCode', (req, res) => {
     qr_svg.pipe(res);
 });
 
-// Страница управления сессией
 app.get('/session/:sessionCode', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'session.html'));
 });
@@ -451,6 +399,24 @@ app.get('/session/:sessionCode', (req, res) => {
 // ========== SOCKET.IO ==========
 io.on('connection', (socket) => {
     console.log('🔌 Новое подключение:', socket.id);
+
+    socket.on('teacher-join', (sessionCode) => {
+        const session = activeSessions.get(sessionCode);
+        if (session) {
+            session.teacher = socket.id;
+            socket.join(sessionCode);
+            socket.sessionCode = sessionCode;
+            console.log(`👨‍🏫 Учитель в сессии: ${sessionCode}`);
+            
+            const students = Array.from(session.students.values());
+            students.forEach(student => {
+                socket.emit('student-joined', {
+                    student,
+                    totalStudents: session.students.size
+                });
+            });
+        }
+    });
 
     socket.on('student-join', (data) => {
         const { sessionCode, studentName } = data;
@@ -501,79 +467,92 @@ io.on('connection', (socket) => {
         }
     });
 
-socket.on('student-answer', (data) => {
-    const { sessionCode, questionIndex, answerIndex, timeLeft } = data;
-    const session = activeSessions.get(sessionCode);
-    
-    if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
-        const studentId = socket.studentId;
-        const question = session.quiz.questions[questionIndex];
+    socket.on('student-answer', (data) => {
+        const { sessionCode, questionIndex, answerIndex, timeLeft } = data;
+        const session = activeSessions.get(sessionCode);
         
-        // Сохраняем ответ
-        if (!session.answers.has(questionIndex)) {
-            session.answers.set(questionIndex, new Map());
-        }
-        
-        const isCorrect = answerIndex === 0; // Упрощённо (индекс 0 — правильный)
-        
-        session.answers.get(questionIndex).set(studentId, { 
-            answered: true,
-            answerIndex,
-            isCorrect,
-            timeLeft 
-        });
-        
-        // 👇 ВАЖНО: отправляем учителю обновлённый статус
-        if (session.teacher) {
-            const answeredCount = session.answers.get(questionIndex).size;
-            const totalStudents = session.students.size;
+        if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
+            const studentId = socket.studentId;
             
-            // Список ответивших
-            const answeredStudents = [];
-            session.answers.get(questionIndex).forEach((value, id) => {
-                const student = session.students.get(id);
-                if (student) {
-                    answeredStudents.push({
-                        id: student.id,
-                        name: student.name,
-                        isCorrect: value.isCorrect
-                    });
-                }
+            if (!session.answers.has(questionIndex)) {
+                session.answers.set(questionIndex, new Map());
+            }
+            
+            const isCorrect = answerIndex === 0;
+            
+            session.answers.get(questionIndex).set(studentId, { 
+                answered: true,
+                answerIndex,
+                isCorrect,
+                timeLeft 
             });
             
-            io.to(session.teacher).emit('answer-status-update', {
+            // Сохраняем детальный ответ
+            const studentAnswers = session.studentAnswers.get(studentId) || [];
+            studentAnswers.push({
                 questionIndex,
-                answeredCount,
-                totalStudents,
-                answeredStudents,
-                pendingCount: totalStudents - answeredCount
+                answerIndex,
+                isCorrect,
+                timeLeft,
+                timestamp: new Date().toISOString()
             });
-        }
-        
-        // Остальная логика (сохранение деталей, начисление очков)
-        const studentAnswers = session.studentAnswers.get(studentId) || [];
-        studentAnswers.push({
-            questionIndex,
-            answerIndex,
-            isCorrect,
-            timeLeft,
-            timestamp: new Date().toISOString()
-        });
-        session.studentAnswers.set(studentId, studentAnswers);
-        
-        if (isCorrect) {
+            session.studentAnswers.set(studentId, studentAnswers);
+            
+            // Обновляем баллы в session.scores (для совместимости)
             const currentScore = session.scores.get(studentId) || 0;
-            session.scores.set(studentId, currentScore + 10);
+            const newScore = isCorrect ? currentScore + 10 : currentScore;
+            session.scores.set(studentId, newScore);
+            
+            // Отправляем обновление учителю
+            if (session.teacher) {
+                const answeredCount = session.answers.get(questionIndex).size;
+                const totalStudents = session.students.size;
+                
+                const answeredStudents = [];
+                session.answers.get(questionIndex).forEach((value, id) => {
+                    const student = session.students.get(id);
+                    if (student) {
+                        answeredStudents.push({
+                            id: student.id,
+                            name: student.name,
+                            isCorrect: value.isCorrect
+                        });
+                    }
+                });
+                
+                io.to(session.teacher).emit('answer-status-update', {
+                    questionIndex,
+                    answeredCount,
+                    totalStudents,
+                    answeredStudents,
+                    pendingCount: totalStudents - answeredCount
+                });
+            }
+            
+            // Отправляем обновлённую статистику
+            sendDetailedStats(session);
         }
-        
-        sendDetailedStats(session);
-    }
+    });
+
+    socket.on('disconnect', () => {
+        if (socket.sessionCode && socket.studentId) {
+            const session = activeSessions.get(socket.sessionCode);
+            if (session) {
+                session.students.delete(socket.studentId);
+                io.to(socket.sessionCode).emit('student-left', {
+                    studentId: socket.studentId,
+                    totalStudents: session.students.size
+                });
+            }
+        }
+        console.log('🔌 Отключился:', socket.id);
+    });
 });
 
 function sendDetailedStats(session) {
     if (!session.teacher) return;
     
-    // Пересчитываем баллы из ответов (надёжный способ)
+    // Пересчитываем баллы из детальных ответов
     const studentScores = new Map();
     session.studentAnswers.forEach((answers, studentId) => {
         let total = 0;
@@ -602,6 +581,12 @@ function sendDetailedStats(session) {
         })
     };
     
+    // Отладочный вывод (можно убрать после проверки)
+    console.log('=== ОТПРАВКА СТАТИСТИКИ ===');
+    stats.studentDetails.forEach(s => {
+        console.log(`📊 ${s.name}: ${s.score} баллов (${s.answers.filter(a => a.isCorrect).length} правильных)`);
+    });
+    
     io.to(session.teacher).emit('detailed-stats', stats);
 }
 
@@ -614,4 +599,3 @@ server.listen(PORT, HOST, () => {
     console.log(`📊 Загружено квизов: ${quizzes.length}`);
     console.log('🎯 ================================');
 });
-

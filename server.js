@@ -470,7 +470,9 @@ io.on('connection', (socket) => {
     socket.on('student-answer', (data) => {
         const { sessionCode, questionIndex, answerIndex, timeLeft } = data;
         const session = activeSessions.get(sessionCode);
-        
+        const question = session.quiz.questions[questionIndex];
+        const isCorrect = answerText === question.correctAnswer;
+      
         if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
             const studentId = socket.studentId;
             

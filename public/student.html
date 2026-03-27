@@ -503,17 +503,18 @@
             }
         }
 
-        function lockAnswer() {
-            answerLocked = true;
-            document.getElementById('change-answer-btn').style.display = 'none';
-            
-            socket.emit('student-answer', {
-                sessionCode,
-                questionIndex: currentQuestionIndex,
-                answerIndex: selectedAnswer,
-                timeLeft: serverTimeLeft
-            });
-        }
+function lockAnswer() {
+    answerLocked = true;
+    document.getElementById('change-answer-btn').style.display = 'none';
+    
+    socket.emit('student-answer', {
+        sessionCode,
+        questionIndex: currentQuestionIndex,
+        answerIndex: selectedAnswer,
+        answerText: document.querySelector('.option-btn.selected')?.textContent.substring(3),
+        timeLeft: serverTimeLeft
+    });
+}
 
         function unlockAnswer() {
             answerLocked = false;

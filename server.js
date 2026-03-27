@@ -478,7 +478,10 @@ io.on('connection', (socket) => {
                 session.answers.set(questionIndex, new Map());
             }
             
-            const isCorrect = answerIndex === 0;
+            // Получаем текст ответа ученика
+            const studentAnswerText = question.options[answerIndex];
+            // Сравниваем с правильным ответом
+            const isCorrect = studentAnswerText === question.correctAnswer;
             
             session.answers.get(questionIndex).set(studentId, { 
                 answered: true,

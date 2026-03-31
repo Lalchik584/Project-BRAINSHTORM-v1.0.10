@@ -467,30 +467,26 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('student-answer', (data) => {
-        const { sessionCode, questionIndex, answerIndex, timeLeft } = data;
-        const session = activeSessions.get(sessionCode);
+socket.on('student-answer', (data) => {
+    const { sessionCode, questionIndex, answerIndex, answerText, timeLeft } = data;
+    const session = activeSessions.get(sessionCode);
+    
+    if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
+        const studentId = socket.studentId;
         const question = session.quiz.questions[questionIndex];
+        
+        if (!session.answers.has(questionIndex)) {
+            session.answers.set(questionIndex, new Map());
+        }
+        
         const isCorrect = answerText === question.correctAnswer;
-      
-        if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
-            const studentId = socket.studentId;
-            
-            if (!session.answers.has(questionIndex)) {
-                session.answers.set(questionIndex, new Map());
-            }
-            
-            // Получаем текст ответа ученика
-            const studentAnswerText = question.options[answerIndex];
-            // Сравниваем с правильным ответом
-            const isCorrect = studentAnswerText === question.correctAnswer;
-            
-            session.answers.get(questionIndex).set(studentId, { 
-                answered: true,
-                answerIndex,
-                isCorrect,
-                timeLeft 
-            });
+        
+        session.answers.get(questionIndex).set(studentId, { 
+            answered: true,
+            answerIndex,
+            isCorrect,
+            timeLeft 
+        });
             
             // Сохраняем детальный ответ
             const studentAnswers = session.studentAnswers.get(studentId) || [];

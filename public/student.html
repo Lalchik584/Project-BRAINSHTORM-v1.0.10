@@ -341,6 +341,7 @@
         let currentQuestionIndex = 0;
         let totalQuestions = 0;
         let selectedAnswer = null;
+        let selectedAnswerText = '';
         let answerLocked = false;
         let questionType = 'single';
         let score = 0;
@@ -420,6 +421,7 @@
             timeLimit = data.timeLimit;
             
             selectedAnswer = null;
+            selectedAnswerText = '';
             answerLocked = false;
             document.getElementById('change-answer-btn').style.display = 'none';
             
@@ -442,7 +444,7 @@
                     const btn = document.createElement('button');
                     btn.className = 'option-btn';
                     btn.textContent = `${String.fromCharCode(65 + idx)}. ${opt}`;
-                    btn.onclick = () => selectAnswer(idx, btn);
+                    btn.onclick = () => selectAnswer(idx, opt, btn);
                     optionsDiv.appendChild(btn);
                 }
             });
@@ -489,12 +491,13 @@
             }
         }
 
-        function selectAnswer(index, btn) {
+        function selectAnswer(index, text, btn) {
             if (answerLocked) return;
             
             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             selectedAnswer = index;
+            selectedAnswerText = text;
             
             if (timeLimit === 0) {
                 document.getElementById('change-answer-btn').style.display = 'block';
@@ -503,23 +506,25 @@
             }
         }
 
-function lockAnswer() {
-    answerLocked = true;
-    document.getElementById('change-answer-btn').style.display = 'none';
-    
-    socket.emit('student-answer', {
-        sessionCode,
-        questionIndex: currentQuestionIndex,
-        answerIndex: selectedAnswer,
-        answerText: document.querySelector('.option-btn.selected')?.textContent.substring(3),
-        timeLeft: serverTimeLeft
-    });
-}
+        function lockAnswer() {
+            answerLocked = true;
+            document.getElementById('change-answer-btn').style.display = 'none';
+            
+            socket.emit('student-answer', {
+                sessionCode,
+                questionIndex: currentQuestionIndex,
+                answerIndex: selectedAnswer,
+                answerText: selectedAnswerText,
+                timeLeft: serverTimeLeft
+            });
+        }
 
         function unlockAnswer() {
             answerLocked = false;
             document.getElementById('change-answer-btn').style.display = 'none';
             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            selectedAnswer = null;
+            selectedAnswerText = '';
         }
 
         socket.on('question-ended', (data) => {
@@ -536,7 +541,7 @@ function lockAnswer() {
                 btn.disabled = true;
             });
             
-            const isCorrect = options[selectedAnswer]?.textContent.includes(data.correctAnswer);
+            const isCorrect = selectedAnswerText === data.correctAnswer;
             
             const feedback = document.getElementById('feedback-container');
             
@@ -558,7 +563,7 @@ function lockAnswer() {
             document.getElementById('quiz-room').style.display = 'none';
             document.getElementById('results-room').style.display = 'block';
             
-            const correctCount = answers.filter(a => a).length;
+            const correctCount = answers.filter(a => a === true).length;
             const wrongCount = totalQuestions - correctCount;
             
             document.getElementById('final-score').textContent = score;

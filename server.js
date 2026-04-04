@@ -447,90 +447,88 @@ io.on('connection', (socket) => {
         }
     });
 
-    // ========== ВОССТАНОВЛЕНИЕ СЕССИИ УЧЕНИКА ==========
-    socket.on('student-rejoin', (data) => {
-        const { sessionCode, studentId, studentName, currentQuestionIndex, score, answers } = data;
-        const session = activeSessions.get(sessionCode);
+ socket.on('student-rejoin', (data) => {
+    const { sessionCode, studentId, studentName, currentQuestionIndex } = data;
+    const session = activeSessions.get(sessionCode);
+    
+    console.log(`🔄 Попытка переподключения ученика ${studentName} к сессии ${sessionCode}`);
+    
+    if (session) {
+        let student = session.students.get(studentId);
         
-        console.log(`🔄 Попытка переподключения ученика ${studentName} к сессии ${sessionCode}`);
-        
-        if (session) {
-            let student = session.students.get(studentId);
-            
-            if (!student) {
-    student = {
-        id: studentId,
-        name: studentName,
-        socketId: socket.id,
-        joinedAt: new Date().toISOString()
-    };
-    session.students.set(studentId, student);
-    // НЕ ПЕРЕЗАПИСЫВАЕМ БАЛЛЫ! Используем то, что на сервере
-    if (session.scores.get(studentId) === undefined) {
-        session.scores.set(studentId, 0);
-    }
-    if (session.studentAnswers.get(studentId) === undefined) {
-        session.studentAnswers.set(studentId, answers || []);
-    }
-    console.log(`🆕 Ученик ${studentName} восстановлен в сессии ${sessionCode}`);
-}
-            else {
-                student.socketId = socket.id;
-                session.students.set(studentId, student);
-                console.log(`✅ Ученик ${studentName} переподключён к сессии ${sessionCode}`);
+        if (!student) {
+            student = {
+                id: studentId,
+                name: studentName,
+                socketId: socket.id,
+                joinedAt: new Date().toISOString()
+            };
+            session.students.set(studentId, student);
+            if (session.scores.get(studentId) === undefined) {
+                session.scores.set(studentId, 0);
             }
-            
-            socket.join(sessionCode);
-            socket.sessionCode = sessionCode;
-            socket.studentId = studentId;
-            
-            if (session.status === 'active' && session.currentQuestion >= currentQuestionIndex) {
-                const question = session.quiz.questions[session.currentQuestion];
-                
-                let wrongAnswers = [];
-                if (Array.isArray(question.wrongAnswers)) {
-                    wrongAnswers = question.wrongAnswers;
-                } else if (typeof question.wrongAnswers === 'string') {
-                    wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
-                }
-                if (wrongAnswers.length === 0) wrongAnswers = ['(нет вариантов)'];
-                
-                const options = [question.correctAnswer, ...wrongAnswers];
-                for (let i = options.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [options[i], options[j]] = [options[j], options[i]];
-                }
-                
-                socket.emit('question-started', {
-                    questionIndex: session.currentQuestion,
-                    question: {
-                        question: question.question,
-                        options: options,
-                        timeLimit: question.timeLimit || 30
-                    },
-                    timeLimit: question.timeLimit || 30
-                });
-                
-                socket.emit('score-update', { score: session.scores.get(studentId) || 0 });
-                
-                console.log(`📤 Отправлен вопрос ${session.currentQuestion + 1} ученику ${studentName}`);
-            } else if (session.status === 'completed') {
-                socket.emit('quiz-ended', { finalResults: Array.from(session.scores.entries()).map(([id, s]) => ({
-                    studentId: id,
-                    name: session.students.get(id)?.name,
-                    score: s
-                })) });
-            } else {
-                socket.emit('waiting-room', { 
-                    message: 'Ожидание начала квиза',
-                    quizTitle: session.quiz.title
-                });
+            if (session.studentAnswers.get(studentId) === undefined) {
+                session.studentAnswers.set(studentId, []);
             }
+            console.log(`🆕 Ученик ${studentName} восстановлен в сессии ${sessionCode}`);
         } else {
-            console.log(`❌ Сессия ${sessionCode} не найдена для переподключения`);
-            socket.emit('error', { message: 'Сессия не найдена' });
+            student.socketId = socket.id;
+            session.students.set(studentId, student);
+            console.log(`✅ Ученик ${studentName} переподключён к сессии ${sessionCode}`);
         }
-    });
+        
+        socket.join(sessionCode);
+        socket.sessionCode = sessionCode;
+        socket.studentId = studentId;
+        
+        // Отправляем текущий счёт
+        socket.emit('score-update', { score: session.scores.get(studentId) || 0 });
+        
+        if (session.status === 'active' && session.currentQuestion >= currentQuestionIndex) {
+            const question = session.quiz.questions[session.currentQuestion];
+            
+            let wrongAnswers = [];
+            if (Array.isArray(question.wrongAnswers)) {
+                wrongAnswers = question.wrongAnswers;
+            } else if (typeof question.wrongAnswers === 'string') {
+                wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
+            }
+            if (wrongAnswers.length === 0) wrongAnswers = ['(нет вариантов)'];
+            
+            const options = [question.correctAnswer, ...wrongAnswers];
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            
+            socket.emit('question-started', {
+                questionIndex: session.currentQuestion,
+                question: {
+                    question: question.question,
+                    options: options,
+                    timeLimit: question.timeLimit || 30
+                },
+                timeLimit: question.timeLimit || 30
+            });
+            
+            console.log(`📤 Отправлен вопрос ${session.currentQuestion + 1} ученику ${studentName}`);
+        } else if (session.status === 'completed') {
+            socket.emit('quiz-ended', { finalResults: Array.from(session.scores.entries()).map(([id, s]) => ({
+                studentId: id,
+                name: session.students.get(id)?.name,
+                score: s
+            })) });
+        } else {
+            socket.emit('waiting-room', { 
+                message: 'Ожидание начала квиза',
+                quizTitle: session.quiz.title
+            });
+        }
+    } else {
+        console.log(`❌ Сессия ${sessionCode} не найдена для переподключения`);
+        socket.emit('error', { message: 'Сессия не найдена' });
+    }
+});
 
     socket.on('start-quiz', (sessionCode) => {
         const session = activeSessions.get(sessionCode);

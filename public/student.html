@@ -351,6 +351,60 @@
         let lastServerUpdate = Date.now();
         let timeLimit = 30;
 
+        // Сохранение и восстановление сессии
+function saveSessionState() {
+    const state = {
+        sessionCode: sessionCode,
+        studentName: studentName,
+        studentId: studentId,
+        currentQuestionIndex: currentQuestionIndex,
+        score: score,
+        answers: answers,
+        totalQuestions: totalQuestions
+    };
+    localStorage.setItem('quizSession', JSON.stringify(state));
+}
+
+function loadSessionState() {
+    const saved = localStorage.getItem('quizSession');
+    if (!saved) return null;
+    return JSON.parse(saved);
+}
+
+function clearSessionState() {
+    localStorage.removeItem('quizSession');
+}
+
+// При загрузке страницы проверяем сохранённую сессию
+window.addEventListener('load', () => {
+    const saved = loadSessionState();
+    if (saved && saved.sessionCode) {
+        // Восстанавливаем данные
+        sessionCode = saved.sessionCode;
+        studentName = saved.studentName;
+        studentId = saved.studentId;
+        currentQuestionIndex = saved.currentQuestionIndex;
+        score = saved.score;
+        answers = saved.answers;
+        totalQuestions = saved.totalQuestions;
+        
+        // Автоматически подключаемся к сессии
+        socket.emit('student-rejoin', {
+            sessionCode: sessionCode,
+            studentId: studentId,
+            studentName: studentName,
+            currentQuestionIndex: currentQuestionIndex,
+            score: score,
+            answers: answers
+        });
+        
+        // Показываем комнату квиза вместо входа
+        document.getElementById('join-section').style.display = 'none';
+        document.getElementById('quiz-room').style.display = 'block';
+        document.getElementById('quiz-title-display').textContent = 'Восстановление...';
+    }
+});
+        
         function joinSession() {
             sessionCode = document.getElementById('sessionCode').value.trim();
             studentName = document.getElementById('studentName').value.trim();

@@ -458,17 +458,23 @@ io.on('connection', (socket) => {
             let student = session.students.get(studentId);
             
             if (!student) {
-                student = {
-                    id: studentId,
-                    name: studentName,
-                    socketId: socket.id,
-                    joinedAt: new Date().toISOString()
-                };
-                session.students.set(studentId, student);
-                session.scores.set(studentId, score);
-                session.studentAnswers.set(studentId, answers || []);
-                console.log(`🆕 Ученик ${studentName} восстановлен в сессии ${sessionCode}`);
-            } else {
+    student = {
+        id: studentId,
+        name: studentName,
+        socketId: socket.id,
+        joinedAt: new Date().toISOString()
+    };
+    session.students.set(studentId, student);
+    // НЕ ПЕРЕЗАПИСЫВАЕМ БАЛЛЫ! Используем то, что на сервере
+    if (session.scores.get(studentId) === undefined) {
+        session.scores.set(studentId, 0);
+    }
+    if (session.studentAnswers.get(studentId) === undefined) {
+        session.studentAnswers.set(studentId, answers || []);
+    }
+    console.log(`🆕 Ученик ${studentName} восстановлен в сессии ${sessionCode}`);
+}
+            else {
                 student.socketId = socket.id;
                 session.students.set(studentId, student);
                 console.log(`✅ Ученик ${studentName} переподключён к сессии ${sessionCode}`);

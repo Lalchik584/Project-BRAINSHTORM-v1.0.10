@@ -192,7 +192,6 @@ function endQuestion(session, questionIndex) {
 function endQuiz(session) {
     session.status = 'completed';
     
-    // Пересчитываем финальные баллы из детальных ответов
     const finalScores = new Map();
     session.studentAnswers.forEach((answers, studentId) => {
         let total = 0;
@@ -346,7 +345,6 @@ app.get('/api/sessions/:code', (req, res) => {
             return res.status(404).json({ success: false, error: 'Сессия не найдена' });
         }
 
-        // Пересчитываем баллы для ответа API
         const studentScores = new Map();
         session.studentAnswers.forEach((answers, studentId) => {
             let total = 0;
@@ -447,13 +445,19 @@ io.on('connection', (socket) => {
         }
     });
 
- socket.on('student-rejoin', (data) => {
-    const { sessionCode, studentId, studentName, currentQuestionIndex } = data;
-    const session = activeSessions.get(sessionCode);
-    
-    console.log(`🔄 Попытка переподключения ученика ${studentName} к сессии ${sessionCode}`);
-    
-    if (session) {
+    // ========== ВОССТАНОВЛЕНИЕ СЕССИИ УЧЕНИКА ==========
+    socket.on('student-rejoin', (data) => {
+        const { sessionCode, studentId, studentName, currentQuestionIndex } = data;
+        const session = activeSessions.get(sessionCode);
+        
+        console.log(`🔄 Попытка переподключения ученика ${studentName} к сессии ${sessionCode}`);
+        
+        if (!session) {
+            console.log(`❌ Сессия ${sessionCode} не найдена`);
+            socket.emit('error', { message: 'Сессия не найдена' });
+            return;
+        }
+        
         let student = session.students.get(studentId);
         
         if (!student) {
@@ -481,7 +485,6 @@ io.on('connection', (socket) => {
         socket.sessionCode = sessionCode;
         socket.studentId = studentId;
         
-        // Отправляем текущий счёт
         socket.emit('score-update', { score: session.scores.get(studentId) || 0 });
         
         if (session.status === 'active' && session.currentQuestion >= currentQuestionIndex) {
@@ -513,22 +516,27 @@ io.on('connection', (socket) => {
             
             console.log(`📤 Отправлен вопрос ${session.currentQuestion + 1} ученику ${studentName}`);
         } else if (session.status === 'completed') {
-            socket.emit('quiz-ended', { finalResults: Array.from(session.scores.entries()).map(([id, s]) => ({
+            const finalResults = Array.from(session.scores.entries()).map(([id, s]) => ({
                 studentId: id,
                 name: session.students.get(id)?.name,
                 score: s
-            })) });
+            }));
+            socket.emit('quiz-ended', { finalResults });
         } else {
             socket.emit('waiting-room', { 
                 message: 'Ожидание начала квиза',
-                quizTitle: session.quiz.title
+                quizTitle: session.quiz.title,
+                studentsCount: session.students.size
+            });
+            const students = Array.from(session.students.values());
+            students.forEach(s => {
+                socket.emit('student-joined', {
+                    student: s,
+                    totalStudents: session.students.size
+                });
             });
         }
-    } else {
-        console.log(`❌ Сессия ${sessionCode} не найдена для переподключения`);
-        socket.emit('error', { message: 'Сессия не найдена' });
-    }
-});
+    });
 
     socket.on('start-quiz', (sessionCode) => {
         const session = activeSessions.get(sessionCode);
@@ -633,7 +641,6 @@ io.on('connection', (socket) => {
 function sendDetailedStats(session) {
     if (!session.teacher) return;
     
-    // Пересчитываем баллы из детальных ответов
     const studentScores = new Map();
     session.studentAnswers.forEach((answers, studentId) => {
         let total = 0;
@@ -652,21 +659,16 @@ function sendDetailedStats(session) {
                 Array.from(session.answers.get(idx).entries()) : []
         })),
         studentDetails: Array.from(session.studentAnswers.entries()).map(([studentId, answers]) => {
+            const student = session.students.get(studentId);
             const score = studentScores.get(studentId) || 0;
             return {
                 studentId,
-                name: session.students.get(studentId)?.name,
+                name: student?.name || `Ученик ${studentId.slice(0, 6)}`,
                 answers,
                 score: score
             };
         })
     };
-    
-    // Отладочный вывод (можно убрать после проверки)
-    console.log('=== ОТПРАВКА СТАТИСТИКИ ===');
-    stats.studentDetails.forEach(s => {
-        console.log(`📊 ${s.name}: ${s.score} баллов (${s.answers.filter(a => a.isCorrect).length} правильных)`);
-    });
     
     io.to(session.teacher).emit('detailed-stats', stats);
 }

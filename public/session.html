@@ -291,7 +291,6 @@
                 </thead>
                 <tbody id="results-body"></tbody>
             </table>
-            
             <h4 style="margin-top: 30px;">📝 Детали по вопросам</h4>
             <div id="question-details-container"></div>
         </div>
@@ -311,10 +310,11 @@
         let totalQuestions = 0;
         let questionTimeLeft = 0;
         let timerInterval = null;
-        let studentDetails = [];
 
+        // Подключаем учителя
         socket.emit('teacher-join', sessionCode);
 
+        // Загрузка информации о сессии
         fetch('/api/sessions/' + sessionCode)
             .then(r => r.json())
             .then(data => {
@@ -325,27 +325,30 @@
                     document.getElementById('total-questions').textContent = data.session.quiz.questions.length;
                     totalQuestions = data.session.quiz.questions.length;
                     
+                    // Генерация QR-кода
                     document.getElementById('qr-image').src = '/qr/' + sessionCode;
                     const link = `${window.location.protocol}//${window.location.host}/student.html?session=${sessionCode}`;
                     document.getElementById('session-link').textContent = link;
                     
                     updateStudentsList(data.session.students);
                     document.getElementById('students-count').textContent = data.session.students.length;
+                } else {
+                    console.error('Ошибка загрузки сессии:', data.error);
                 }
             });
 
+        // Кнопки управления
         document.getElementById('start-quiz-btn').addEventListener('click', () => {
             socket.emit('start-quiz', sessionCode);
         });
-
         document.getElementById('next-question-btn').addEventListener('click', () => {
             socket.emit('next-question', sessionCode);
         });
-
         document.getElementById('end-quiz-btn').addEventListener('click', () => {
             socket.emit('end-quiz', sessionCode);
         });
 
+        // Socket события
         socket.on('student-joined', (data) => {
             updateStudentsList([data.student]);
             document.getElementById('students-count').textContent = data.totalStudents;
@@ -369,7 +372,6 @@
             document.getElementById('current-question').textContent = currentQuestionIndex + 1;
             document.getElementById('current-question-display').style.display = 'block';
             document.getElementById('question-header').innerHTML = `Вопрос ${currentQuestionIndex + 1}: ${data.question.question}`;
-            
             questionTimeLeft = data.timeLimit;
             startTimer();
         });
@@ -387,25 +389,18 @@
             `;
         });
 
-        socket.on('leaderboard-update', (data) => {
-            updateLeaderboard(data.leaderboard);
-        });
-
-        socket.on('detailed-stats', (data) => {
-            updateDetailedStats(data);
-        });
-
+        socket.on('leaderboard-update', (data) => updateLeaderboard(data.leaderboard));
+        socket.on('detailed-stats', (data) => updateDetailedStats(data));
+        
         socket.on('quiz-ended', (data) => {
             document.getElementById('next-question-btn').style.display = 'none';
             document.getElementById('end-quiz-btn').style.display = 'none';
             document.getElementById('current-question-display').style.display = 'none';
             document.getElementById('detailed-results').style.display = 'block';
-            
-            if (data.finalResults) {
-                updateFinalResults(data.finalResults);
-            }
+            if (data.finalResults) updateFinalResults(data.finalResults);
         });
 
+        // Вспомогательные функции
         function startTimer() {
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
@@ -418,8 +413,7 @@
         function updateTimerDisplay() {
             const mins = Math.floor(questionTimeLeft / 60);
             const secs = questionTimeLeft % 60;
-            document.getElementById('question-timer').textContent = 
-                `${mins}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('question-timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
         function updateStudentsList(students) {
@@ -430,12 +424,7 @@
                     el.className = 'student-item';
                     el.id = 'student-' + student.id;
                     el.innerHTML = `
-                        <div>
-                            <strong>${student.name}</strong>
-                            <div style="color: #666; font-size: 0.9em;">
-                                ${new Date(student.joinedAt).toLocaleTimeString()}
-                            </div>
-                        </div>
+                        <div><strong>${student.name}</strong><div style="color: #666; font-size: 0.9em;">${new Date(student.joinedAt).toLocaleTimeString()}</div></div>
                         <div class="score-badge" id="score-${student.id}">0</div>
                     `;
                     container.appendChild(el);
@@ -446,19 +435,11 @@
         function updateLeaderboard(leaderboard) {
             const container = document.getElementById('leaderboard-container');
             container.innerHTML = '';
-            
             leaderboard.sort((a, b) => b.score - a.score).forEach((student, idx) => {
                 const el = document.createElement('div');
                 el.className = 'leaderboard-item';
-                el.innerHTML = `
-                    <div>
-                        <span class="position">${idx + 1}.</span>
-                        ${student.name}
-                    </div>
-                    <div class="score-badge">${student.score} очков</div>
-                `;
+                el.innerHTML = `<div><span class="position">${idx + 1}.</span> ${student.name}</div><div class="score-badge">${student.score} очков</div>`;
                 container.appendChild(el);
-                
                 const scoreEl = document.getElementById('score-' + student.studentId);
                 if (scoreEl) scoreEl.textContent = student.score;
             });
@@ -472,7 +453,6 @@
         }
 
         function updateDetailedStats(data) {
-            // Таблица с баллами
             const tbody = document.getElementById('results-body');
             tbody.innerHTML = '';
             
@@ -481,10 +461,10 @@
                 const correctCount = student.answers.filter(a => a.isCorrect).length;
                 const percentage = totalQuestionsCount > 0 ? Math.round(correctCount / totalQuestionsCount * 100) : 0;
                 const grade = calculateGrade(percentage);
-                
+                const studentName = student.name || `Ученик ${student.studentId?.slice(0, 6) || '?'}`;
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><strong>${student.name}</strong></td>
+                    <td><strong>${studentName}</strong></td>
                     <td>${student.score}</td>
                     <td>${percentage}% (${correctCount}/${totalQuestionsCount})</td>
                     <td><span class="grade-badge ${grade.class}">${grade.text}</span></td>
@@ -492,46 +472,24 @@
                 tbody.appendChild(row);
             });
             
-            // Красивая таблица по вопросам
-            let tableHtml = `
-                <table class="details-table">
-                    <thead>
-                        <tr>
-                            <th style="text-align: left;">Ученик</th>
-            `;
-            
-            for (let i = 0; i < data.questions.length; i++) {
-                tableHtml += `<th>Вопрос ${i+1}</th>`;
-            }
+            let tableHtml = `<table class="details-table"><thead><tr><th style="text-align: left;">Ученик</th>`;
+            for (let i = 0; i < data.questions.length; i++) tableHtml += `<th>Вопрос ${i+1}</th>`;
             tableHtml += `</tr></thead><tbody>`;
             
             data.studentDetails.forEach(student => {
-                tableHtml += `<tr>`;
-                tableHtml += `<td style="text-align: left; font-weight: bold;">${student.name}</td>`;
-                
+                const studentName = student.name || `Ученик ${student.studentId?.slice(0, 6) || '?'}`;
+                tableHtml += `<tr><td style="text-align: left; font-weight: bold;">${studentName}</td>`;
                 for (let i = 0; i < data.questions.length; i++) {
                     const answer = student.answers.find(a => a.questionIndex === i);
-                    let cell = '';
-                    let cellClass = '';
-                    
+                    let cell = '', cellClass = '';
                     if (answer) {
-                        if (answer.isCorrect) {
-                            cell = '✅';
-                            cellClass = 'cell-correct';
-                        } else {
-                            cell = '❌';
-                            cellClass = 'cell-wrong';
-                        }
-                    } else {
-                        cell = '⏳';
-                        cellClass = 'cell-missed';
-                    }
-                    
+                        if (answer.isCorrect) { cell = '✅'; cellClass = 'cell-correct'; }
+                        else { cell = '❌'; cellClass = 'cell-wrong'; }
+                    } else { cell = '⏳'; cellClass = 'cell-missed'; }
                     tableHtml += `<td class="${cellClass}">${cell}</td>`;
                 }
                 tableHtml += `</tr>`;
             });
-            
             tableHtml += `</tbody></table>`;
             document.getElementById('question-details-container').innerHTML = tableHtml;
         }
@@ -539,13 +497,11 @@
         function updateFinalResults(finalResults) {
             const tbody = document.getElementById('results-body');
             tbody.innerHTML = '';
-            
             finalResults.forEach(student => {
                 const totalQuestionsCount = finalResults[0]?.answers?.length || 0;
                 const correctCount = student.answers?.filter(a => a.isCorrect).length || 0;
                 const percentage = totalQuestionsCount > 0 ? Math.round(correctCount / totalQuestionsCount * 100) : 0;
                 const grade = calculateGrade(percentage);
-                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${student.name}</strong></td>

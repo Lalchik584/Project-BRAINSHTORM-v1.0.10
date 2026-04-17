@@ -280,13 +280,29 @@
             box-shadow: 2px 2px 0 #4a0252;
         }
 
-        .btn-secondary {
-            background: #6c757d;
-            box-shadow: 4px 4px 0 #3a3f44;
+        /* Кнопка НАЧАТЬ СЕССИЮ — ЖЁЛТАЯ с тёмно-фиолетовым текстом */
+        .btn-start-session {
+            font-family: 'Press Start 2P', monospace;
+            background: #ffcc00;
+            color: #4a0252;
+            padding: 10px 20px;
+            border: 2px solid #7b058c;
+            cursor: pointer;
+            font-size: 0.6em;
+            margin: 5px;
+            transition: all 0.05s linear;
+            box-shadow: 3px 3px 0 #7b058c;
         }
 
-        .btn-secondary:hover {
-            background: #5a6268;
+        .btn-start-session:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #7b058c;
+            background: #ffe066;
+        }
+
+        .btn-start-session:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #7b058c;
         }
 
         .category-badge {
@@ -318,6 +334,7 @@
             gap: 15px;
             margin: 10px 0;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .quiz-meta span {
@@ -325,13 +342,15 @@
             font-size: 0.5em;
         }
 
+        /* АРТИКУЛ — БОЛЬШОЙ И ЖИРНЫЙ */
         .article-code {
             background: #7b058c;
             color: #ffcc00;
-            padding: 5px 10px;
+            padding: 8px 12px;
             border: 2px solid #ffcc00;
             font-family: monospace;
-            font-size: 0.6em;
+            font-size: 0.8em;
+            font-weight: bold;
         }
 
         .success-message {
@@ -374,6 +393,7 @@
             .tab { padding: 8px 15px; font-size: 0.5em; }
             .filter-section { flex-direction: column; }
             select { font-size: 0.6em; }
+            .article-code { font-size: 0.6em; padding: 5px 8px; }
         }
     </style>
 </head>

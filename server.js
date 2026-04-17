@@ -192,6 +192,7 @@ function endQuestion(session, questionIndex) {
 function endQuiz(session) {
     session.status = 'completed';
     
+    // Пересчитываем финальные баллы из детальных ответов
     const finalScores = new Map();
     session.studentAnswers.forEach((answers, studentId) => {
         let total = 0;
@@ -345,6 +346,7 @@ app.get('/api/sessions/:code', (req, res) => {
             return res.status(404).json({ success: false, error: 'Сессия не найдена' });
         }
 
+        // Пересчитываем баллы для ответа API
         const studentScores = new Map();
         session.studentAnswers.forEach((answers, studentId) => {
             let total = 0;
@@ -447,94 +449,80 @@ io.on('connection', (socket) => {
 
     // ========== ВОССТАНОВЛЕНИЕ СЕССИИ УЧЕНИКА ==========
     socket.on('student-rejoin', (data) => {
-        const { sessionCode, studentId, studentName, currentQuestionIndex } = data;
+        const { sessionCode, studentId, studentName, currentQuestionIndex, score, answers } = data;
         const session = activeSessions.get(sessionCode);
         
         console.log(`🔄 Попытка переподключения ученика ${studentName} к сессии ${sessionCode}`);
         
-        if (!session) {
-            console.log(`❌ Сессия ${sessionCode} не найдена`);
-            socket.emit('error', { message: 'Сессия не найдена' });
-            return;
-        }
-        
-        let student = session.students.get(studentId);
-        
-        if (!student) {
-            student = {
-                id: studentId,
-                name: studentName,
-                socketId: socket.id,
-                joinedAt: new Date().toISOString()
-            };
-            session.students.set(studentId, student);
-            if (session.scores.get(studentId) === undefined) {
-                session.scores.set(studentId, 0);
-            }
-            if (session.studentAnswers.get(studentId) === undefined) {
-                session.studentAnswers.set(studentId, []);
-            }
-            console.log(`🆕 Ученик ${studentName} восстановлен в сессии ${sessionCode}`);
-        } else {
-            student.socketId = socket.id;
-            session.students.set(studentId, student);
-            console.log(`✅ Ученик ${studentName} переподключён к сессии ${sessionCode}`);
-        }
-        
-        socket.join(sessionCode);
-        socket.sessionCode = sessionCode;
-        socket.studentId = studentId;
-        
-        socket.emit('score-update', { score: session.scores.get(studentId) || 0 });
-        
-        if (session.status === 'active' && session.currentQuestion >= currentQuestionIndex) {
-            const question = session.quiz.questions[session.currentQuestion];
+        if (session) {
+            let student = session.students.get(studentId);
             
-            let wrongAnswers = [];
-            if (Array.isArray(question.wrongAnswers)) {
-                wrongAnswers = question.wrongAnswers;
-            } else if (typeof question.wrongAnswers === 'string') {
-                wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
-            }
-            if (wrongAnswers.length === 0) wrongAnswers = ['(нет вариантов)'];
-            
-            const options = [question.correctAnswer, ...wrongAnswers];
-            for (let i = options.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [options[i], options[j]] = [options[j], options[i]];
+            if (!student) {
+                student = {
+                    id: studentId,
+                    name: studentName,
+                    socketId: socket.id,
+                    joinedAt: new Date().toISOString()
+                };
+                session.students.set(studentId, student);
+                session.scores.set(studentId, score);
+                session.studentAnswers.set(studentId, answers || []);
+                console.log(`🆕 Ученик ${studentName} восстановлен в сессии ${sessionCode}`);
+            } else {
+                student.socketId = socket.id;
+                session.students.set(studentId, student);
+                console.log(`✅ Ученик ${studentName} переподключён к сессии ${sessionCode}`);
             }
             
-            socket.emit('question-started', {
-                questionIndex: session.currentQuestion,
-                question: {
-                    question: question.question,
-                    options: options,
+            socket.join(sessionCode);
+            socket.sessionCode = sessionCode;
+            socket.studentId = studentId;
+            
+            if (session.status === 'active' && session.currentQuestion >= currentQuestionIndex) {
+                const question = session.quiz.questions[session.currentQuestion];
+                
+                let wrongAnswers = [];
+                if (Array.isArray(question.wrongAnswers)) {
+                    wrongAnswers = question.wrongAnswers;
+                } else if (typeof question.wrongAnswers === 'string') {
+                    wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
+                }
+                if (wrongAnswers.length === 0) wrongAnswers = ['(нет вариантов)'];
+                
+                const options = [question.correctAnswer, ...wrongAnswers];
+                for (let i = options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [options[i], options[j]] = [options[j], options[i]];
+                }
+                
+                socket.emit('question-started', {
+                    questionIndex: session.currentQuestion,
+                    question: {
+                        question: question.question,
+                        options: options,
+                        timeLimit: question.timeLimit || 30
+                    },
                     timeLimit: question.timeLimit || 30
-                },
-                timeLimit: question.timeLimit || 30
-            });
-            
-            console.log(`📤 Отправлен вопрос ${session.currentQuestion + 1} ученику ${studentName}`);
-        } else if (session.status === 'completed') {
-            const finalResults = Array.from(session.scores.entries()).map(([id, s]) => ({
-                studentId: id,
-                name: session.students.get(id)?.name,
-                score: s
-            }));
-            socket.emit('quiz-ended', { finalResults });
-        } else {
-            socket.emit('waiting-room', { 
-                message: 'Ожидание начала квиза',
-                quizTitle: session.quiz.title,
-                studentsCount: session.students.size
-            });
-            const students = Array.from(session.students.values());
-            students.forEach(s => {
-                socket.emit('student-joined', {
-                    student: s,
-                    totalStudents: session.students.size
                 });
-            });
+                
+                socket.emit('score-update', { score: session.scores.get(studentId) || 0 });
+                
+                console.log(`📤 Отправлен вопрос ${session.currentQuestion + 1} ученику ${studentName}`);
+            } else if (session.status === 'completed') {
+                socket.emit('quiz-ended', { finalResults: Array.from(session.scores.entries()).map(([id, s]) => ({
+                    studentId: id,
+                    name: session.students.get(id)?.name,
+                    score: s
+                })) });
+            } else {
+                socket.emit('waiting-room', { 
+                    message: 'Ожидание начала квиза',
+                    quizTitle: session.quiz.title
+                });
+            }
+        } else {
+            console.log(`❌ Сессия ${sessionCode} не найдена для переподключения`);
+            socket.emit('error', { message: 'Сессия не найдена' });
         }
     });
 
@@ -641,6 +629,7 @@ io.on('connection', (socket) => {
 function sendDetailedStats(session) {
     if (!session.teacher) return;
     
+    // Пересчитываем баллы из детальных ответов
     const studentScores = new Map();
     session.studentAnswers.forEach((answers, studentId) => {
         let total = 0;
@@ -659,16 +648,21 @@ function sendDetailedStats(session) {
                 Array.from(session.answers.get(idx).entries()) : []
         })),
         studentDetails: Array.from(session.studentAnswers.entries()).map(([studentId, answers]) => {
-            const student = session.students.get(studentId);
             const score = studentScores.get(studentId) || 0;
             return {
                 studentId,
-                name: student?.name || `Ученик ${studentId.slice(0, 6)}`,
+                name: session.students.get(studentId)?.name,
                 answers,
                 score: score
             };
         })
     };
+    
+    // Отладочный вывод (можно убрать после проверки)
+    console.log('=== ОТПРАВКА СТАТИСТИКИ ===');
+    stats.studentDetails.forEach(s => {
+        console.log(`📊 ${s.name}: ${s.score} баллов (${s.answers.filter(a => a.isCorrect).length} правильных)`);
+    });
     
     io.to(session.teacher).emit('detailed-stats', stats);
 }

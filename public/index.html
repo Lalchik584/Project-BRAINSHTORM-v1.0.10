@@ -3,79 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>МОЗГОШТОРМ - Интерактивные квизы для образовательных организаций</title>
+    <title>МОЗГОШТОРМ - Пиксельные квизы</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
         }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Press Start 2P', monospace;
+            background: #1a0033;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
         }
+
+        /* Пиксельный фон */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    #2a0050 0px,
+                    #2a0050 2px,
+                    #1a0033 2px,
+                    #1a0033 4px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .hero {
             max-width: 1200px;
             width: 100%;
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
+            background: #0a001a;
+            border: 4px solid #ffcc00;
+            padding: 40px;
+            box-shadow: 8px 8px 0 #ffcc00;
+            position: relative;
+            z-index: 1;
+            animation: pixelFadeIn 0.3s steps(5);
         }
+
+        @keyframes pixelFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- ЛОГО (жёлтый с фиолетовой тенью) --- */
         h1 {
-            font-size: 4em;
+            font-size: 2.5em;
+            text-align: center;
+            color: #ffcc00;
+            text-shadow: 4px 4px 0 #7b058c;
             margin-bottom: 20px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
         }
+
+        /* --- ПОДЗАГОЛОВОК (белый) --- */
         .subtitle {
-            font-size: 1.3em;
-            color: #666;
-            margin-bottom: 50px;
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.8em;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #ffcc00;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 10px;
         }
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-            margin: 50px 0;
+            gap: 20px;
+            margin: 40px 0;
         }
+
         .stat {
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 15px;
-            font-size: 1.2em;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: #0a001a;
+            border: 2px solid #d70bf2;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 4px 4px 0 #d70bf2;
         }
+
+        /* Цифры и иконки в статистике — БЕЛЫЕ */
         .stat span {
             display: block;
-            font-size: 2.5em;
+            font-size: 2em;
             font-weight: bold;
-            color: #667eea;
+            color: #ffffff;
             margin-bottom: 10px;
         }
+
+        /* Подписи в статистике — ЖЁЛТЫЕ с фиолетовой тенью (как заголовок) */
+        .stat div {
+            color: #ffcc00;
+            font-size: 0.7em;
+            text-shadow: 2px 2px 0 #7b058c;
+        }
+        
+        /* Заголовок "Доступные предметы" — БЕЛЫЙ */
+        h3 {
+            text-align: center;
+            color: #ffffff;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
         .subject-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
             margin: 40px 0;
             padding: 20px;
-            background: #f0f0f0;
-            border-radius: 15px;
+            background: #0a001a;
+            border: 2px solid #d70bf2;
         }
+
         .subject-item {
-            background: white;
+            background: #1a0033;
+            border: 2px solid #ffcc00;
             padding: 10px;
-            border-radius: 10px;
-            font-size: 1em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.6em;
+            transition: all 0.05s linear;
         }
+
+        .subject-item:hover {
+            background: #d70bf2;
+            color: #000;
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 #ffcc00;
+        }
+
         .buttons {
             display: flex;
             gap: 20px;
@@ -83,48 +159,55 @@
             flex-wrap: wrap;
             margin-top: 40px;
         }
+
         .btn {
-            padding: 18px 40px;
-            border-radius: 50px;
+            font-family: 'Press Start 2P', monospace;
+            padding: 15px 30px;
             text-decoration: none;
             font-weight: bold;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
-        }
-        .btn.teacher {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-        .btn.student {
-            background: white;
-            color: #333;
-            border: 2px solid #667eea;
-        }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            font-size: 0.8em;
+            transition: all 0.05s linear;
+            border: none;
+            cursor: pointer;
         }
 
-        /* 👇 НОВОЕ: стили для почты */
+        .btn.teacher {
+            background: #d70bf2;
+            color: #fff;
+            box-shadow: 4px 4px 0 #7b058c;
+            border: 2px solid #ffcc00;
+        }
+
+        .btn.student {
+            background: #7b058c;
+            color: #fff;
+            box-shadow: 4px 4px 0 #d70bf2;
+            border: 2px solid #ffcc00;
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #ffcc00;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #ffcc00;
+        }
+
         .support-text {
-            text-align: right;
-            margin-top: 30px;
+            text-align: center;
+            margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid rgba(102, 126, 234, 0.3);
-            color: #666;
-            font-size: 0.95em;
+            border-top: 2px solid #d70bf2;
+            color: #ffffff;
+            font-size: 0.6em;
         }
 
         @media (max-width: 768px) {
-            h1 { font-size: 2.5em; }
-            .hero { padding: 40px 20px; }
-            .subject-grid { grid-template-columns: repeat(2, 1fr); }
-            /* 👇 НОВОЕ: для мобилок */
-            .support-text {
-                text-align: center;
-                margin-top: 20px;
-                padding-top: 15px;
-            }
+            .hero { padding: 20px; }
+            h1 { font-size: 1.5em; }
+            .subject-item { font-size: 0.5em; }
         }
     </style>
 </head>

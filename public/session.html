@@ -3,237 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление сессией - BRAINSHTORM</title>
+    <title>Управление сессией - МОЗГОШТОРМ</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
         }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Press Start 2P', monospace;
+            background: #1a0033;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
         }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    #2a0050 0px,
+                    #2a0050 2px,
+                    #1a0033 2px,
+                    #1a0033 4px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
+            background: #0a001a;
+            border: 4px solid #ffcc00;
             padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 8px 8px 0 #ffcc00;
+            position: relative;
+            z-index: 1;
+            animation: pixelFadeIn 0.3s steps(5);
         }
+
+        @keyframes pixelFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         h1 {
-            font-size: 2.5em;
-            color: #333;
+            font-size: 2em;
+            text-align: center;
+            color: #ffcc00;
+            text-shadow: 3px 3px 0 #7b058c;
             margin-bottom: 10px;
         }
+
+        h2, h3, h4 {
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
         .session-header {
             text-align: center;
             margin-bottom: 30px;
         }
+
         .session-code {
-            font-size: 3em;
+            font-size: 2.5em;
             font-weight: bold;
-            color: #667eea;
+            color: #ffcc00;
+            text-shadow: 3px 3px 0 #7b058c;
             letter-spacing: 5px;
-            background: #f0f0f0;
+            background: #1a0033;
+            border: 3px solid #d70bf2;
             padding: 20px;
-            border-radius: 15px;
             margin: 20px 0;
             font-family: monospace;
         }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin: 30px 0;
         }
+
         .stat-card {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
+            background: #1a0033;
+            border: 2px solid #d70bf2;
+            padding: 20px;
             text-align: center;
+            box-shadow: 4px 4px 0 #d70bf2;
         }
+
         .stat-number {
-            font-size: 2.5em;
+            font-size: 2em;
             font-weight: bold;
-            color: #667eea;
+            color: #ffcc00;
+            text-shadow: 2px 2px 0 #7b058c;
         }
+
         .stat-label {
-            color: #666;
-            margin-top: 5px;
+            color: #ffffff;
+            font-size: 0.7em;
+            margin-top: 10px;
         }
+
         .qr-section {
             text-align: center;
             margin: 30px 0;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
+            background: #1a0033;
+            border: 2px solid #d70bf2;
         }
+
+        .qr-section h3 {
+            color: #ffcc00;
+            text-shadow: 2px 2px 0 #7b058c;
+        }
+
         .qr-code {
-            border: 3px solid #333;
-            padding: 15px;
+            border: 3px solid #ffcc00;
+            padding: 10px;
             background: white;
             max-width: 200px;
             margin: 20px auto;
         }
-        .btn {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
+
+        /* Кнопка СТАРТ — ФИОЛЕТОВАЯ */
+        .btn-start {
+            font-family: 'Press Start 2P', monospace;
+            padding: 15px 35px;
+            border: 3px solid #ffcc00;
             cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 600;
+            font-size: 0.8em;
             margin: 10px;
-            transition: all 0.3s;
+            transition: all 0.05s linear;
+            background: #7b058c;
+            color: #ffcc00;
+            text-shadow: 2px 2px 0 #1a0033;
+            box-shadow: 6px 6px 0 #4a0252;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+
+        .btn-start:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0 #4a0252;
+            background: #9b0cac;
         }
-        .btn-danger {
-            background: linear-gradient(45deg, #dc3545, #c82333);
+
+        .btn-start:active {
+            transform: translate(3px, 3px);
+            box-shadow: 3px 3px 0 #4a0252;
         }
+
+        /* Остальные кнопки */
+        .btn {
+            font-family: 'Press Start 2P', monospace;
+            padding: 12px 25px;
+            border: 2px solid #ffcc00;
+            cursor: pointer;
+            font-size: 0.7em;
+            margin: 10px;
+            transition: all 0.05s linear;
+        }
+
         .btn-warning {
-            background: linear-gradient(45deg, #ffc107, #e0a800);
+            background: #ffc107;
             color: #333;
+            box-shadow: 4px 4px 0 #b8860b;
         }
-        .students-list {
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            box-shadow: 4px 4px 0 #8b1a1a;
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #ffcc00;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #ffcc00;
+        }
+
+        .students-list, .leaderboard {
             margin: 30px 0;
         }
+
         .student-item {
-            padding: 15px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin: 8px 0;
+            background: #1a0033;
+            border: 2px solid #d70bf2;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+
+        .student-item div:first-child {
+            color: #ffffff;
+            font-size: 0.7em;
+        }
+
         .score-badge {
-            background: #667eea;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
+            background: #d70bf2;
+            color: #ffcc00;
+            padding: 5px 12px;
+            border: 2px solid #ffcc00;
             font-weight: bold;
+            font-size: 0.7em;
         }
+
         .question-block {
-            background: #fff3cd;
+            background: #1a0033;
+            border: 2px solid #ffc107;
             padding: 20px;
-            border-radius: 15px;
             margin: 20px 0;
-            border-left: 4px solid #ffc107;
+            border-left: 6px solid #ffcc00;
         }
-        .leaderboard {
-            margin: 30px 0;
+
+        .question-block h4 {
+            color: #ffcc00;
+            text-shadow: 2px 2px 0 #7b058c;
         }
+
         .leaderboard-item {
             display: flex;
             justify-content: space-between;
-            padding: 15px;
+            padding: 12px;
             margin: 5px 0;
-            background: white;
-            border-radius: 10px;
-            border-left: 4px solid #ffc107;
+            background: #1a0033;
+            border: 2px solid #ffc107;
         }
+
+        .leaderboard-item div:first-child {
+            color: #ffffff;
+            font-size: 0.7em;
+        }
+
         .position {
             font-weight: bold;
-            color: #667eea;
+            color: #ffcc00;
             margin-right: 15px;
         }
+
         .results-table {
             overflow-x: auto;
             margin: 30px 0;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
+            background: #1a0033;
+            border: 2px solid #d70bf2;
         }
+
         th, td {
-            padding: 12px;
+            padding: 10px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #d70bf2;
+            color: #ffffff;
+            font-size: 0.6em;
         }
+
         th {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
+            background: #7b058c;
+            color: #ffcc00;
+            text-shadow: 1px 1px 0 #1a0033;
         }
-        tr:hover {
-            background: #f5f5f5;
-        }
-        .correct {
-            color: #28a745;
-            font-weight: bold;
-        }
-        .wrong {
-            color: #dc3545;
-            font-weight: bold;
-        }
+
         .grade-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
+            padding: 4px 8px;
+            border-radius: 0;
             font-weight: bold;
+            font-size: 0.6em;
+            border: 1px solid #ffcc00;
         }
+
         .grade-5 { background: #28a745; color: white; }
         .grade-4 { background: #17a2b8; color: white; }
         .grade-3 { background: #ffc107; color: #333; }
         .grade-2 { background: #dc3545; color: white; }
+
         .category-badge {
             display: inline-block;
             padding: 5px 10px;
-            background: #667eea;
-            color: white;
-            border-radius: 20px;
-            font-size: 0.9em;
+            background: #d70bf2;
+            color: #ffcc00;
+            border: 2px solid #ffcc00;
+            font-size: 0.6em;
+            margin: 5px;
         }
+
         .details-table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
+            background: #1a0033;
+            border: 2px solid #d70bf2;
             margin-top: 20px;
         }
+
         .details-table th {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            text-align: center;
-            padding: 12px;
-        }
-        .details-table td {
+            background: #7b058c;
+            color: #ffcc00;
             text-align: center;
             padding: 10px;
-            border-bottom: 1px solid #eee;
+            font-size: 0.6em;
         }
+
+        .details-table td {
+            text-align: center;
+            padding: 8px;
+            font-size: 0.6em;
+        }
+
         .cell-correct {
-            background: #d4edda;
-            color: #155724;
-            font-size: 1.2em;
+            background: #28a745;
+            color: white;
         }
+
         .cell-wrong {
-            background: #f8d7da;
-            color: #721c24;
-            font-size: 1.2em;
+            background: #dc3545;
+            color: white;
         }
+
         .cell-missed {
-            background: #fff3cd;
-            color: #856404;
-            font-size: 1.2em;
+            background: #ffc107;
+            color: #333;
+        }
+
+        .qr-section p {
+            color: #ffffff;
+            font-size: 0.6em;
+            margin-top: 10px;
+        }
+
+        code {
+            background: #1a0033;
+            color: #ffffff;
+            padding: 4px 8px;
+            border: 1px solid #d70bf2;
+            font-family: monospace;
+            font-size: 0.6em;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            h1 { font-size: 1.2em; }
+            .session-code { font-size: 1.2em; letter-spacing: 2px; }
+            th, td { font-size: 0.5em; padding: 5px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="session-header">
-            <h1>🎮 Управление сессией</h1>
+            <h1>🎮 УПРАВЛЕНИЕ СЕССИЕЙ</h1>
             <h2 id="quiz-title"></h2>
             <p><span id="quiz-category" class="category-badge"></span></p>
             <div class="session-code" id="session-code">000000</div>
@@ -242,62 +379,62 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="students-count">0</div>
-                <div class="stat-label">учеников</div>
+                <div class="stat-label">УЧЕНИКОВ</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="total-questions">0</div>
-                <div class="stat-label">вопросов</div>
+                <div class="stat-label">ВОПРОСОВ</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="current-question">0</div>
-                <div class="stat-label">текущий вопрос</div>
+                <div class="stat-label">ТЕКУЩИЙ ВОПРОС</div>
             </div>
         </div>
 
         <div class="qr-section">
-            <h3>📱 QR-код для подключения</h3>
+            <h3>📱 QR-КОД ДЛЯ ПОДКЛЮЧЕНИЯ</h3>
             <img id="qr-image" class="qr-code" src="" alt="QR Code">
             <p>Ссылка для учеников: <code id="session-link"></code></p>
         </div>
 
         <div style="text-align: center; margin: 20px 0;">
-            <button class="btn" id="start-quiz-btn">🚀 Начать квиз</button>
-            <button class="btn btn-warning" id="next-question-btn" style="display: none;">⏭️ Следующий вопрос</button>
-            <button class="btn btn-danger" id="end-quiz-btn" style="display: none;">🏁 Завершить</button>
+            <button class="btn-start" id="start-quiz-btn">🚀 НАЧАТЬ КВИЗ</button>
+            <button class="btn btn-warning" id="next-question-btn" style="display: none;">⏭️ СЛЕДУЮЩИЙ ВОПРОС</button>
+            <button class="btn btn-danger" id="end-quiz-btn" style="display: none;">🏁 ЗАВЕРШИТЬ</button>
         </div>
 
         <div id="current-question-display" class="question-block" style="display: none;">
             <h4 id="question-header"></h4>
             <div id="question-detail"></div>
-            <div id="question-timer" style="font-size: 1.5em; font-weight: bold; margin: 10px 0;"></div>
+            <div id="question-timer" style="font-size: 1.2em; font-weight: bold; margin: 10px 0; color: #ffcc00;"></div>
             <div id="answer-stats"></div>
         </div>
 
         <div class="leaderboard" id="leaderboard" style="display: none;">
-            <h3>🏆 Текущие результаты</h3>
+            <h3>🏆 ТЕКУЩИЕ РЕЗУЛЬТАТЫ</h3>
             <div id="leaderboard-container"></div>
         </div>
 
         <div class="results-table" id="detailed-results" style="display: none;">
-            <h3>📊 Детальная статистика</h3>
+            <h3>📊 ДЕТАЛЬНАЯ СТАТИСТИКА</h3>
             <table id="results-table">
                 <thead>
                     <tr>
-                        <th>Ученик</th>
-                        <th>Баллы</th>
-                        <th>% прав.</th>
-                        <th>Оценка</th>
+                        <th>УЧЕНИК</th>
+                        <th>БАЛЛЫ</th>
+                        <th>% ПРАВ.</th>
+                        <th>ОЦЕНКА</th>
                     </tr>
                 </thead>
                 <tbody id="results-body"></tbody>
             </table>
             
-            <h4 style="margin-top: 30px;">📝 Детали по вопросам</h4>
+            <h4 style="margin-top: 30px;">📝 ДЕТАЛИ ПО ВОПРОСАМ</h4>
             <div id="question-details-container"></div>
         </div>
 
         <div class="students-list">
-            <h3>👨‍🎓 Подключенные ученики</h3>
+            <h3>👨‍🎓 ПОДКЛЮЧЕННЫЕ УЧЕНИКИ</h3>
             <div id="students-container"></div>
         </div>
     </div>
@@ -320,7 +457,7 @@
             .then(data => {
                 if (data.success) {
                     document.getElementById('quiz-title').textContent = data.session.quiz.title;
-                    document.getElementById('quiz-category').textContent = data.session.quiz.categoryName || '📚 Предмет';
+                    document.getElementById('quiz-category').textContent = data.session.quiz.categoryName || '📚 ПРЕДМЕТ';
                     document.getElementById('session-code').textContent = data.session.code;
                     document.getElementById('total-questions').textContent = data.session.quiz.questions.length;
                     totalQuestions = data.session.quiz.questions.length;
@@ -368,7 +505,7 @@
             currentQuestionIndex = data.questionIndex;
             document.getElementById('current-question').textContent = currentQuestionIndex + 1;
             document.getElementById('current-question-display').style.display = 'block';
-            document.getElementById('question-header').innerHTML = `Вопрос ${currentQuestionIndex + 1}: ${data.question.question}`;
+            document.getElementById('question-header').innerHTML = `ВОПРОС ${currentQuestionIndex + 1}: ${data.question.question}`;
             
             questionTimeLeft = data.timeLimit;
             startTimer();
@@ -381,8 +518,8 @@
 
         socket.on('answer-stats', (data) => {
             document.getElementById('answer-stats').innerHTML = `
-                <strong>Ответили:</strong> ${data.answersReceived}/${data.totalStudents} |
-                <strong>Правильно:</strong> ${data.correctAnswers} |
+                <strong>ОТВЕТИЛИ:</strong> ${data.answersReceived}/${data.totalStudents} |
+                <strong>ПРАВИЛЬНО:</strong> ${data.correctAnswers} |
                 <strong>${Math.round(data.correctAnswers / data.totalStudents * 100) || 0}%</strong>
             `;
         });
@@ -432,7 +569,7 @@
                     el.innerHTML = `
                         <div>
                             <strong>${student.name}</strong>
-                            <div style="color: #666; font-size: 0.9em;">
+                            <div style="color: #aaa; font-size: 0.6em; margin-top: 5px;">
                                 ${new Date(student.joinedAt).toLocaleTimeString()}
                             </div>
                         </div>
@@ -455,7 +592,7 @@
                         <span class="position">${idx + 1}.</span>
                         ${student.name}
                     </div>
-                    <div class="score-badge">${student.score} очков</div>
+                    <div class="score-badge">${student.score} ОЧКОВ</div>
                 `;
                 container.appendChild(el);
                 
@@ -465,14 +602,13 @@
         }
 
         function calculateGrade(percentage) {
-            if (percentage < 25) return { text: '2 (неуд)', class: 'grade-2' };
-            if (percentage < 50) return { text: '3 (удовл)', class: 'grade-3' };
-            if (percentage < 80) return { text: '4 (хорошо)', class: 'grade-4' };
-            return { text: '5 (отлично)', class: 'grade-5' };
+            if (percentage < 25) return { text: '2 (НЕУД)', class: 'grade-2' };
+            if (percentage < 50) return { text: '3 (УДОВЛ)', class: 'grade-3' };
+            if (percentage < 80) return { text: '4 (ХОРОШО)', class: 'grade-4' };
+            return { text: '5 (ОТЛИЧНО)', class: 'grade-5' };
         }
 
         function updateDetailedStats(data) {
-            // Таблица с баллами
             const tbody = document.getElementById('results-body');
             tbody.innerHTML = '';
             
@@ -481,10 +617,11 @@
                 const correctCount = student.answers.filter(a => a.isCorrect).length;
                 const percentage = totalQuestionsCount > 0 ? Math.round(correctCount / totalQuestionsCount * 100) : 0;
                 const grade = calculateGrade(percentage);
+                const studentName = student.name || `УЧЕНИК ${student.studentId?.slice(0, 6) || '?'}`;
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><strong>${student.name}</strong></td>
+                    <td><strong>${studentName}</strong></td>
                     <td>${student.score}</td>
                     <td>${percentage}% (${correctCount}/${totalQuestionsCount})</td>
                     <td><span class="grade-badge ${grade.class}">${grade.text}</span></td>
@@ -492,22 +629,22 @@
                 tbody.appendChild(row);
             });
             
-            // Красивая таблица по вопросам
             let tableHtml = `
                 <table class="details-table">
                     <thead>
                         <tr>
-                            <th style="text-align: left;">Ученик</th>
+                            <th style="text-align: left;">УЧЕНИК</th>
             `;
             
             for (let i = 0; i < data.questions.length; i++) {
-                tableHtml += `<th>Вопрос ${i+1}</th>`;
+                tableHtml += `<th>ВОПРОС ${i+1}</th>`;
             }
-            tableHtml += `</tr></thead><tbody>`;
+            tableHtml += `<tr></thead><tbody>`;
             
             data.studentDetails.forEach(student => {
+                const studentName = student.name || `УЧЕНИК ${student.studentId?.slice(0, 6) || '?'}`;
                 tableHtml += `<tr>`;
-                tableHtml += `<td style="text-align: left; font-weight: bold;">${student.name}</td>`;
+                tableHtml += `<td style="text-align: left; font-weight: bold;">${studentName}</td>`;
                 
                 for (let i = 0; i < data.questions.length; i++) {
                     const answer = student.answers.find(a => a.questionIndex === i);

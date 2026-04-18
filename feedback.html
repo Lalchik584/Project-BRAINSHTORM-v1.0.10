@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзывы - МОЗГОШТОРМ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: #1a0033;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    #2a0050 0px,
+                    #2a0050 2px,
+                    #1a0033 2px,
+                    #1a0033 4px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #0a001a;
+            border: 4px solid #ffcc00;
+            padding: 30px;
+            box-shadow: 8px 8px 0 #ffcc00;
+            position: relative;
+            z-index: 1;
+            animation: pixelFadeIn 0.3s steps(5);
+        }
+
+        @keyframes pixelFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 1.5em;
+            text-align: center;
+            color: #ffcc00;
+            text-shadow: 3px 3px 0 #7b058c;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.5em;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: normal;
+            color: #ffcc00;
+            font-size: 0.6em;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            background: #1a0033;
+            border: 2px solid #d70bf2;
+            color: #ffffff;
+            font-family: monospace;
+            font-size: 0.7em;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #ffcc00;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn {
+            font-family: 'Press Start 2P', monospace;
+            background: #7b058c;
+            color: #ffcc00;
+            padding: 12px 25px;
+            border: 2px solid #ffcc00;
+            cursor: pointer;
+            font-size: 0.7em;
+            width: 100%;
+            transition: all 0.05s linear;
+            box-shadow: 4px 4px 0 #4a0252;
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #4a0252;
+            background: #9b0cac;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #4a0252;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.6em;
+            border: 2px solid #ffcc00;
+            display: none;
+        }
+
+        .message.success {
+            background: #28a745;
+            color: white;
+            display: block;
+        }
+
+        .message.error {
+            background: #dc3545;
+            color: white;
+            display: block;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #d70bf2;
+            font-size: 0.5em;
+            text-decoration: none;
+            border-bottom: 2px solid #d70bf2;
+            padding-bottom: 5px;
+        }
+
+        .back-link:hover {
+            color: #ffcc00;
+            border-bottom-color: #ffcc00;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 ОСТАВИТЬ ОТЗЫВ</h1>
+        <div class="subtitle">ВАШЕ МНЕНИЕ ВАЖНО ДЛЯ НАС</div>
+
+        <div class="form-group">
+            <label>ВАШЕ ИМЯ</label>
+            <input type="text" id="feedback-name" placeholder="НАПРИМЕР: ИВАН ПЕТРОВ" maxlength="50">
+        </div>
+
+        <div class="form-group">
+            <label>ТЕКСТ ОТЗЫВА</label>
+            <textarea id="feedback-text" placeholder="НАПИШИТЕ, ЧТО ВАМ ПОНРАВИЛОСЬ ИЛИ ЧТО МОЖНО УЛУЧШИТЬ..."></textarea>
+        </div>
+
+        <button class="btn" onclick="sendFeedback()">📨 ОТПРАВИТЬ</button>
+
+        <div id="result-message" class="message"></div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/" class="back-link">← НА ГЛАВНУЮ</a>
+        </div>
+    </div>
+
+    <script>
+        async function sendFeedback() {
+            const name = document.getElementById('feedback-name').value.trim();
+            const text = document.getElementById('feedback-text').value.trim();
+            const resultDiv = document.getElementById('result-message');
+
+            if (!name) {
+                resultDiv.className = 'message error';
+                resultDiv.textContent = '❌ УКАЖИТЕ ВАШЕ ИМЯ!';
+                return;
+            }
+
+            if (!text) {
+                resultDiv.className = 'message error';
+                resultDiv.textContent = '❌ ВВЕДИТЕ ТЕКСТ ОТЗЫВА!';
+                return;
+            }
+
+            if (text.length < 5) {
+                resultDiv.className = 'message error';
+                resultDiv.textContent = '❌ ОТЗЫВ СЛИШКОМ КОРОТКИЙ!';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, text })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.className = 'message success';
+                    resultDiv.textContent = '✅ СПАСИБО ЗА ОТЗЫВ!';
+                    document.getElementById('feedback-name').value = '';
+                    document.getElementById('feedback-text').value = '';
+                } else {
+                    resultDiv.className = 'message error';
+                    resultDiv.textContent = '❌ ОШИБКА: ' + (result.error || 'ПОПРОБУЙТЕ ПОЗЖЕ');
+                }
+            } catch (e) {
+                resultDiv.className = 'message error';
+                resultDiv.textContent = '❌ ОШИБКА СВЯЗИ. ПОПРОБУЙТЕ ПОЗЖЕ.';
+            }
+        }
+    </script>
+</body>
+</html>

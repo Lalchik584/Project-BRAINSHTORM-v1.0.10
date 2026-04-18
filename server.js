@@ -19,6 +19,7 @@ const io = socketIo(server, {
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 const DB_FILE = path.join(__dirname, 'quizzes.json');
+const FEEDBACK_FILE = path.join(__dirname, 'feedbacks.json');
 
 // ========== БАЗЫ ДАННЫХ ==========
 let quizzes = [];
@@ -54,6 +55,28 @@ function saveQuizzesToFile() {
     }
 }
 
+// ========== ФУНКЦИИ ДЛЯ ОТЗЫВОВ ==========
+function loadFeedbacks() {
+    try {
+        if (fs.existsSync(FEEDBACK_FILE)) {
+            const data = fs.readFileSync(FEEDBACK_FILE, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        console.error('❌ Ошибка загрузки отзывов:', error);
+    }
+    return [];
+}
+
+function saveFeedbacks(feedbacks) {
+    try {
+        fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(feedbacks, null, 2));
+        console.log(`✅ Сохранено ${feedbacks.length} отзывов`);
+    } catch (error) {
+        console.error('❌ Ошибка сохранения отзывов:', error);
+    }
+}
+
 loadQuizzesFromFile();
 
 // ========== ФУНКЦИЯ ДЛЯ НАЗВАНИЙ КАТЕГОРИЙ ==========
@@ -65,6 +88,7 @@ function getCategoryName(categoryCode) {
         'informatic': '🖥️ Информатика',
         'russian': '📖 Русский язык',
         'literature': '📚 Литература',
+        'reading': '📗 Чтение',
         'english': '🇬🇧 Английский язык',
         'french': '🇫🇷 Французский язык',
         'german': '🇩🇪 Немецкий язык',
@@ -77,6 +101,7 @@ function getCategoryName(categoryCode) {
         'physics': '⚡ Физика',
         'ecology': '🌿 Экология',
         'environment': '🌍 Окружающий мир',
+        'astronomy': '🔭 Астрономия',
         'art': '🎨 Изобразительное искусство',
         'music': '🎵 Музыка',
         'culture': '🏛️ Мировая художественная культура',
@@ -192,17 +217,7 @@ function endQuestion(session, questionIndex) {
 function endQuiz(session) {
     session.status = 'completed';
     
-    // Пересчитываем финальные баллы из детальных ответов
-    const finalScores = new Map();
-    session.studentAnswers.forEach((answers, studentId) => {
-        let total = 0;
-        answers.forEach(answer => {
-            if (answer.isCorrect) total += 10;
-        });
-        finalScores.set(studentId, total);
-    });
-    
-    const finalResults = Array.from(finalScores.entries())
+    const finalResults = Array.from(session.scores.entries())
         .map(([studentId, score]) => ({
             studentId,
             score,
@@ -212,7 +227,6 @@ function endQuiz(session) {
         .sort((a, b) => b.score - a.score);
     
     io.to(session.code).emit('quiz-ended', { finalResults });
-    console.log(`🏁 Квиз завершён. Результаты отправлены.`);
 }
 
 // ========== EXPRESS ROUTES ==========
@@ -223,6 +237,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// API для создания квиза
 app.post('/api/quizzes', (req, res) => {
     try {
         const { title, questions, category } = req.body;
@@ -252,6 +267,7 @@ app.post('/api/quizzes', (req, res) => {
     }
 });
 
+// API для получения всех квизов
 app.get('/api/quizzes/all', (req, res) => {
     try {
         const quizzesWithCategoryNames = quizzes.map(quiz => ({
@@ -264,6 +280,7 @@ app.get('/api/quizzes/all', (req, res) => {
     }
 });
 
+// API для поиска квизов
 app.get('/api/quizzes/search', (req, res) => {
     try {
         const { query, category } = req.query;
@@ -294,6 +311,7 @@ app.get('/api/quizzes/search', (req, res) => {
     }
 });
 
+// API для создания сессии
 app.post('/api/sessions', (req, res) => {
     try {
         const { quizArticle } = req.body;
@@ -337,6 +355,7 @@ app.post('/api/sessions', (req, res) => {
     }
 });
 
+// API для получения информации о сессии
 app.get('/api/sessions/:code', (req, res) => {
     try {
         const { code } = req.params;
@@ -345,16 +364,6 @@ app.get('/api/sessions/:code', (req, res) => {
         if (!session) {
             return res.status(404).json({ success: false, error: 'Сессия не найдена' });
         }
-
-        // Пересчитываем баллы для ответа API
-        const studentScores = new Map();
-        session.studentAnswers.forEach((answers, studentId) => {
-            let total = 0;
-            answers.forEach(answer => {
-                if (answer.isCorrect) total += 10;
-            });
-            studentScores.set(studentId, total);
-        });
 
         res.json({ 
             success: true, 
@@ -367,7 +376,7 @@ app.get('/api/sessions/:code', (req, res) => {
                 students: Array.from(session.students.values()),
                 status: session.status,
                 currentQuestion: session.currentQuestion,
-                scores: Array.from(studentScores.entries()).map(([studentId, score]) => ({
+                scores: Array.from(session.scores.entries()).map(([studentId, score]) => ({
                     studentId,
                     score,
                     name: session.students.get(studentId)?.name
@@ -381,6 +390,7 @@ app.get('/api/sessions/:code', (req, res) => {
     }
 });
 
+// Генерация QR-кода
 app.get('/qr/:sessionCode', (req, res) => {
     const sessionCode = req.params.sessionCode;
     const protocol = req.headers['x-forwarded-proto'] || 'http';
@@ -392,8 +402,48 @@ app.get('/qr/:sessionCode', (req, res) => {
     qr_svg.pipe(res);
 });
 
+// Страница управления сессией
 app.get('/session/:sessionCode', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'session.html'));
+});
+
+// ========== API ДЛЯ ОТЗЫВОВ ==========
+
+// Сохранение отзыва
+app.post('/api/feedback', (req, res) => {
+    try {
+        const { name, text } = req.body;
+        
+        if (!name || !text || text.length < 5) {
+            return res.status(400).json({ success: false, error: 'Некорректные данные' });
+        }
+        
+        const feedbacks = loadFeedbacks();
+        feedbacks.push({
+            id: uuidv4(),
+            name: name.trim(),
+            text: text.trim(),
+            createdAt: new Date().toISOString()
+        });
+        
+        saveFeedbacks(feedbacks);
+        console.log(`📝 Новый отзыв от ${name}`);
+        
+        res.json({ success: true });
+        
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Получение всех отзывов (для админа)
+app.get('/api/feedbacks', (req, res) => {
+    try {
+        const feedbacks = loadFeedbacks();
+        res.json({ success: true, feedbacks });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 // ========== SOCKET.IO ==========
@@ -444,85 +494,6 @@ io.on('connection', (socket) => {
             });
             
             console.log(`👨‍🎓 ${studentName} присоединился к ${sessionCode}`);
-        }
-    });
-
-    // ========== ВОССТАНОВЛЕНИЕ СЕССИИ УЧЕНИКА ==========
-    socket.on('student-rejoin', (data) => {
-        const { sessionCode, studentId, studentName, currentQuestionIndex, score, answers } = data;
-        const session = activeSessions.get(sessionCode);
-        
-        console.log(`🔄 Попытка переподключения ученика ${studentName} к сессии ${sessionCode}`);
-        
-        if (session) {
-            let student = session.students.get(studentId);
-            
-            if (!student) {
-                student = {
-                    id: studentId,
-                    name: studentName,
-                    socketId: socket.id,
-                    joinedAt: new Date().toISOString()
-                };
-                session.students.set(studentId, student);
-                session.scores.set(studentId, score);
-                session.studentAnswers.set(studentId, answers || []);
-                console.log(`🆕 Ученик ${studentName} восстановлен в сессии ${sessionCode}`);
-            } else {
-                student.socketId = socket.id;
-                session.students.set(studentId, student);
-                console.log(`✅ Ученик ${studentName} переподключён к сессии ${sessionCode}`);
-            }
-            
-            socket.join(sessionCode);
-            socket.sessionCode = sessionCode;
-            socket.studentId = studentId;
-            
-            if (session.status === 'active' && session.currentQuestion >= currentQuestionIndex) {
-                const question = session.quiz.questions[session.currentQuestion];
-                
-                let wrongAnswers = [];
-                if (Array.isArray(question.wrongAnswers)) {
-                    wrongAnswers = question.wrongAnswers;
-                } else if (typeof question.wrongAnswers === 'string') {
-                    wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
-                }
-                if (wrongAnswers.length === 0) wrongAnswers = ['(нет вариантов)'];
-                
-                const options = [question.correctAnswer, ...wrongAnswers];
-                for (let i = options.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [options[i], options[j]] = [options[j], options[i]];
-                }
-                
-                socket.emit('question-started', {
-                    questionIndex: session.currentQuestion,
-                    question: {
-                        question: question.question,
-                        options: options,
-                        timeLimit: question.timeLimit || 30
-                    },
-                    timeLimit: question.timeLimit || 30
-                });
-                
-                socket.emit('score-update', { score: session.scores.get(studentId) || 0 });
-                
-                console.log(`📤 Отправлен вопрос ${session.currentQuestion + 1} ученику ${studentName}`);
-            } else if (session.status === 'completed') {
-                socket.emit('quiz-ended', { finalResults: Array.from(session.scores.entries()).map(([id, s]) => ({
-                    studentId: id,
-                    name: session.students.get(id)?.name,
-                    score: s
-                })) });
-            } else {
-                socket.emit('waiting-room', { 
-                    message: 'Ожидание начала квиза',
-                    quizTitle: session.quiz.title
-                });
-            }
-        } else {
-            console.log(`❌ Сессия ${sessionCode} не найдена для переподключения`);
-            socket.emit('error', { message: 'Сессия не найдена' });
         }
     });
 
@@ -629,7 +600,6 @@ io.on('connection', (socket) => {
 function sendDetailedStats(session) {
     if (!session.teacher) return;
     
-    // Пересчитываем баллы из детальных ответов
     const studentScores = new Map();
     session.studentAnswers.forEach((answers, studentId) => {
         let total = 0;
@@ -648,21 +618,16 @@ function sendDetailedStats(session) {
                 Array.from(session.answers.get(idx).entries()) : []
         })),
         studentDetails: Array.from(session.studentAnswers.entries()).map(([studentId, answers]) => {
+            const student = session.students.get(studentId);
             const score = studentScores.get(studentId) || 0;
             return {
                 studentId,
-                name: session.students.get(studentId)?.name,
+                name: student?.name || `Ученик ${studentId.slice(0, 6)}`,
                 answers,
                 score: score
             };
         })
     };
-    
-    // Отладочный вывод (можно убрать после проверки)
-    console.log('=== ОТПРАВКА СТАТИСТИКИ ===');
-    stats.studentDetails.forEach(s => {
-        console.log(`📊 ${s.name}: ${s.score} баллов (${s.answers.filter(a => a.isCorrect).length} правильных)`);
-    });
     
     io.to(session.teacher).emit('detailed-stats', stats);
 }
@@ -673,6 +638,7 @@ server.listen(PORT, HOST, () => {
     console.log('🎯 ================================');
     console.log(`🌍 Локальный доступ: http://localhost:${PORT}`);
     console.log(`📁 База данных: ${DB_FILE}`);
+    console.log(`📁 Отзывы: ${FEEDBACK_FILE}`);
     console.log(`📊 Загружено квизов: ${quizzes.length}`);
     console.log('🎯 ================================');
 });

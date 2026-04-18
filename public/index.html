@@ -26,7 +26,6 @@
             position: relative;
         }
 
-        /* Пиксельный фон */
         body::before {
             content: "";
             position: fixed;
@@ -62,7 +61,6 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* --- ЛОГО (жёлтый с фиолетовой тенью) --- */
         h1 {
             font-size: 2.5em;
             text-align: center;
@@ -72,11 +70,10 @@
             letter-spacing: 2px;
         }
 
-        /* --- ПОДЗАГОЛОВОК (белый) --- */
         .subtitle {
             text-align: center;
             color: #ffffff;
-            font-size: 0.8em;
+            font-size: 0.6em;
             margin-bottom: 40px;
             border-bottom: 2px solid #ffcc00;
             display: inline-block;
@@ -101,7 +98,6 @@
             box-shadow: 4px 4px 0 #d70bf2;
         }
 
-        /* Цифры и иконки в статистике — БЕЛЫЕ */
         .stat span {
             display: block;
             font-size: 2em;
@@ -110,24 +106,22 @@
             margin-bottom: 10px;
         }
 
-        /* Подписи в статистике — ЖЁЛТЫЕ с фиолетовой тенью (как заголовок) */
         .stat div {
             color: #ffcc00;
-            font-size: 0.7em;
+            font-size: 0.5em;
             text-shadow: 2px 2px 0 #7b058c;
         }
-        
-        /* Заголовок "Доступные предметы" — БЕЛЫЙ */
+
         h3 {
             text-align: center;
             color: #ffffff;
-            font-size: 1em;
+            font-size: 0.7em;
             margin-bottom: 20px;
         }
 
         .subject-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 10px;
             margin: 40px 0;
             padding: 20px;
@@ -138,10 +132,10 @@
         .subject-item {
             background: #1a0033;
             border: 2px solid #ffcc00;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
             color: #ffffff;
-            font-size: 0.6em;
+            font-size: 0.45em;
             transition: all 0.05s linear;
         }
 
@@ -165,7 +159,7 @@
             padding: 15px 30px;
             text-decoration: none;
             font-weight: bold;
-            font-size: 0.8em;
+            font-size: 0.6em;
             transition: all 0.05s linear;
             border: none;
             cursor: pointer;
@@ -194,90 +188,117 @@
             transform: translate(2px, 2px);
             box-shadow: 2px 2px 0 #ffcc00;
         }
-        
 
-        .support-text {
-            text-align: center;
-            margin-top: 40px;
+        .footer-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
             padding-top: 20px;
             border-top: 2px solid #d70bf2;
+        }
+
+        .feedback-link {
+            font-family: 'Press Start 2P', monospace;
+            background: #ffcc00;
+            color: #4a0252;
+            padding: 5px 12px;
+            border: 2px solid #7b058c;
+            text-decoration: none;
+            font-size: 0.4em;
+            transition: all 0.05s linear;
+            box-shadow: 2px 2px 0 #7b058c;
+        }
+
+        .feedback-link:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 #7b058c;
+            background: #ffe066;
+        }
+
+        .email-text {
             color: #ffffff;
-            font-size: 0.6em;
+            font-size: 0.4em;
         }
 
         @media (max-width: 768px) {
             .hero { padding: 20px; }
             h1 { font-size: 1.5em; }
-            .subject-item { font-size: 0.5em; }
+            .subject-item { font-size: 0.35em; }
+            .btn { padding: 10px 15px; font-size: 0.45em; }
+            .feedback-link { font-size: 0.35em; padding: 4px 8px; }
+            .email-text { font-size: 0.35em; }
         }
     </style>
 </head>
 <body>
     <div class="hero">
         <h1>🧠 МОЗГОШТОРМ</h1>
-        <div class="subtitle">Интерактивная платформа для образовательных организаций</div>
-        
+        <div style="text-align: center;">
+            <div class="subtitle">ИНТЕРАКТИВНАЯ ПЛАТФОРМА ДЛЯ ОБРАЗОВАТЕЛЬНЫХ ОРГАНИЗАЦИЙ</div>
+        </div>
+
         <div class="stats">
             <div class="stat">
                 <span>30+</span>
-                <div>Школьных предметов</div>
+                <div>ШКОЛЬНЫХ ПРЕДМЕТОВ</div>
             </div>
             <div class="stat">
                 <span>⚡</span>
-                <div>Мгновенная проверка</div>
+                <div>МГНОВЕННАЯ ПРОВЕРКА</div>
             </div>
             <div class="stat">
                 <span>📊</span>
-                <div>Детальная статистика</div>
+                <div>ДЕТАЛЬНАЯ СТАТИСТИКА</div>
             </div>
         </div>
 
-        <h3>📚 Доступные предметы:</h3>
+        <h3>📚 ДОСТУПНЫЕ ПРЕДМЕТЫ</h3>
         <div class="subject-grid">
-            <div class="subject-item">📐 Математика</div>
-            <div class="subject-item">🔢 Алгебра</div>
-            <div class="subject-item">📏 Геометрия</div>
-            <div class="subject-item">🖥️ Информатика</div>
-            <div class="subject-item">📖 Русский язык</div>
-            <div class="subject-item">📚 Литература</div>
-            <div class="subject-item">🇬🇧 Английский язык</div>
-            <div class="subject-item">🇫🇷 Французский язык</div>
-            <div class="subject-item">🇩🇪 Немецкий язык</div>
-            <div class="subject-item">📜 История</div>
-            <div class="subject-item">🏛️ История России</div>
-            <div class="subject-item">👥 Обществознание</div>
-            <div class="subject-item">🌏 География</div>
-            <div class="subject-item">🧬 Биология</div>
-            <div class="subject-item">🧪 Химия</div>
-            <div class="subject-item">⚡ Физика</div>
-            <div class="subject-item">🌿 Экология</div>
-            <div class="subject-item">🌍 Окружающий мир</div>
-            <div class="subject-item">⚽ Физкультура</div>
+            <div class="subject-item">📐 МАТЕМАТИКА</div>
+            <div class="subject-item">🔢 АЛГЕБРА</div>
+            <div class="subject-item">📏 ГЕОМЕТРИЯ</div>
+            <div class="subject-item">🖥️ ИНФОРМАТИКА</div>
+            <div class="subject-item">📖 РУССКИЙ ЯЗЫК</div>
+            <div class="subject-item">📚 ЛИТЕРАТУРА</div>
+            <div class="subject-item">🇬🇧 АНГЛИЙСКИЙ</div>
+            <div class="subject-item">🇫🇷 ФРАНЦУЗСКИЙ</div>
+            <div class="subject-item">🇩🇪 НЕМЕЦКИЙ</div>
+            <div class="subject-item">📜 ИСТОРИЯ</div>
+            <div class="subject-item">🏛️ ИСТОРИЯ РОССИИ</div>
+            <div class="subject-item">👥 ОБЩЕСТВОЗНАНИЕ</div>
+            <div class="subject-item">🌏 ГЕОГРАФИЯ</div>
+            <div class="subject-item">🧬 БИОЛОГИЯ</div>
+            <div class="subject-item">🧪 ХИМИЯ</div>
+            <div class="subject-item">⚡ ФИЗИКА</div>
+            <div class="subject-item">🌿 ЭКОЛОГИЯ</div>
+            <div class="subject-item">🌍 ОКРУЖАЮЩИЙ МИР</div>
+            <div class="subject-item">⚽ ФИЗКУЛЬТУРА</div>
             <div class="subject-item">🛡️ ОБЗР</div>
             <div class="subject-item">🎖️ НВП</div>
-            <div class="subject-item">🔧 Технология</div>
-            <div class="subject-item">✏️ Черчение</div>
+            <div class="subject-item">🔧 ТЕХНОЛОГИЯ</div>
+            <div class="subject-item">✏️ ЧЕРЧЕНИЕ</div>
             <div class="subject-item">🎨 ИЗО</div>
-            <div class="subject-item">🎵 Музыка</div>
+            <div class="subject-item">🎵 МУЗЫКА</div>
             <div class="subject-item">🏛️ МХК</div>
-            <div class="subject-item">🤔 Философия</div>
-            <div class="subject-item">🧠 Психология</div>
-            <div class="subject-item">⚖️ Право</div>
-            <div class="subject-item">📈 Экономика</div>
-            <div class="subject-item">📊 Теорвер</div>
+            <div class="subject-item">🤔 ФИЛОСОФИЯ</div>
+            <div class="subject-item">🧠 ПСИХОЛОГИЯ</div>
+            <div class="subject-item">⚖️ ПРАВО</div>
+            <div class="subject-item">📈 ЭКОНОМИКА</div>
+            <div class="subject-item">📊 ТЕОРВЕР</div>
             <div class="subject-item">🤝 ОРКСЭ</div>
-                <div class="buttons">
+        </div>
+
+        <div class="buttons">
             <a href="/teacher.html" class="btn teacher">👨‍🏫 ВОЙТИ КАК УЧИТЕЛЬ</a>
             <a href="/student.html" class="btn student">👨‍🎓 ВОЙТИ КАК УЧЕНИК</a>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-top: 20px;">
-            <a href="/feedback.html" style="font-family: 'Press Start 2P', monospace; background: #ffcc00; color: #4a0252; padding: 5px 12px; border: 2px solid #7b058c; text-decoration: none; font-size: 0.5em; transition: all 0.05s linear; box-shadow: 2px 2px 0 #7b058c;">
-                📝 ОТЗЫВ
-            </a>
-            <div class="support-text" style="margin: 0; padding: 0; border: none; color: #ffffff; font-size: 0.5em;">
-                📧 support.mozgoshtorm@ro.ru
-            </div>
+        <div class="footer-bar">
+            <a href="/feedback.html" class="feedback-link">📝 ОТЗЫВ</a>
+            <div class="email-text">📧 support.mozgoshtorm@ro.ru</div>
         </div>
+    </div>
 </body>
 </html>

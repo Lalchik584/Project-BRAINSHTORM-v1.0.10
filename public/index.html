@@ -121,29 +121,45 @@
 
         .subject-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
             margin: 40px 0;
             padding: 20px;
             background: #0a001a;
             border: 2px solid #d70bf2;
         }
 
-        .subject-item {
+        .subject-card {
             background: #1a0033;
             border: 2px solid #ffcc00;
-            padding: 8px;
+            padding: 15px 8px;
             text-align: center;
-            color: #ffffff;
-            font-size: 0.45em;
             transition: all 0.05s linear;
+            cursor: pointer;
         }
 
-        .subject-item:hover {
+        .subject-card:hover {
             background: #d70bf2;
-            color: #000;
             transform: translate(-2px, -2px);
             box-shadow: 4px 4px 0 #ffcc00;
+        }
+
+        .subject-avatar {
+            font-size: 2.5em;
+            display: block;
+            margin-bottom: 8px;
+            image-rendering: pixelated;
+        }
+
+        .subject-name {
+            color: #ffffff;
+            font-size: 0.35em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .subject-card:hover .subject-name {
+            color: #000;
         }
 
         .buttons {
@@ -189,12 +205,95 @@
             box-shadow: 2px 2px 0 #ffcc00;
         }
 
+        /* Блок DevLog в стиле командной строки */
+        .devlog-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            margin: 40px 0 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .devlog-info {
+            flex: 2;
+            background: #0a0a0a;
+            border: 2px solid #00ff00;
+            box-shadow: 4px 4px 0 #00aa00;
+            position: relative;
+            padding: 20px;
+        }
+
+        .devlog-info::before {
+            content: "devlog.exe";
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: #0a0a0a;
+            padding: 0 10px;
+            font-family: monospace;
+            font-size: 0.5em;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+
+        .devlog-info p {
+            font-family: monospace;
+            color: #00ff00;
+            font-size: 0.45em;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        .devlog-info .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 12px;
+            background-color: #00ff00;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .devlog-btn-container {
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-devlog {
+            font-family: 'Press Start 2P', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 0.55em;
+            border: 2px solid #00ff00;
+            box-shadow: 4px 4px 0 #00aa00;
+            transition: all 0.05s linear;
+            display: inline-block;
+        }
+
+        .btn-devlog:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #00aa00;
+            background: #1a1a1a;
+        }
+
+        .btn-devlog:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #00aa00;
+        }
+
         .footer-bar {
             display: flex;
             justify-content: flex-end;
             align-items: center;
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 20px;
             padding-top: 20px;
             border-top: 2px solid #d70bf2;
         }
@@ -225,8 +324,11 @@
         @media (max-width: 768px) {
             .hero { padding: 20px; }
             h1 { font-size: 1.5em; }
-            .subject-item { font-size: 0.35em; }
+            .subject-avatar { font-size: 1.8em; }
+            .subject-name { font-size: 0.3em; }
             .btn { padding: 10px 15px; font-size: 0.45em; }
+            .devlog-section { flex-direction: column; text-align: center; }
+            .devlog-info { width: 100%; }
             .feedback-link { font-size: 0.35em; padding: 4px 8px; }
             .email-text { font-size: 0.35em; }
         }
@@ -293,6 +395,20 @@
         <div class="buttons">
             <a href="/teacher.html" class="btn teacher">👨‍🏫 ВОЙТИ КАК УЧИТЕЛЬ</a>
             <a href="/student.html" class="btn student">👨‍🎓 ВОЙТИ КАК УЧЕНИК</a>
+        </div>
+
+        <!-- Блок DevLog -->
+        <div class="devlog-section">
+            <div class="devlog-info">
+                <p>C:\&gt; devlog.exe --info</p>
+                <p>&gt; Версия: 1.2.0</p>
+                <p>&gt; Последнее обновление: 20.04.2026</p>
+                <p>&gt; Добавлен DevLog, страница отзывов, пиксельный дизайн</p>
+                <p>&gt; Статус: <span style="color: #00ff00;">Активен</span> <span class="cursor"></span></p>
+            </div>
+            <div class="devlog-btn-container">
+                <a href="/devlog.html" class="btn-devlog">📜 ЧИТАТЬ DEVLOG</a>
+            </div>
         </div>
 
         <div class="footer-bar">

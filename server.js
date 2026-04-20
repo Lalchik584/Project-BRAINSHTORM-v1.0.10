@@ -710,6 +710,26 @@ app.delete('/api/devlog/:id', (req, res) => {
     res.json({ success: true });
 });
 
+// Удаление отзыва (только для админа)
+app.delete('/api/feedback/:id', (req, res) => {
+    const { id } = req.params;
+    const { adminPassword } = req.body;
+    
+    if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
+    }
+    
+    let feedbacks = loadFeedbacks();
+    const newFeedbacks = feedbacks.filter(f => f.id !== id);
+    
+    if (feedbacks.length === newFeedbacks.length) {
+        return res.status(404).json({ success: false, error: 'Отзыв не найден' });
+    }
+    
+    saveFeedbacks(newFeedbacks);
+    res.json({ success: true });
+});
+
 server.listen(PORT, HOST, () => {
     console.log('🎯 ================================');
     console.log('🎯 BRAINSHTORM SERVER STARTED');

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevLog - МОЗГОШТОРМ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: #1a0033;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    #2a0050 0px,
+                    #2a0050 2px,
+                    #1a0033 2px,
+                    #1a0033 4px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #0a001a;
+            border: 4px solid #ffcc00;
+            padding: 30px;
+            box-shadow: 8px 8px 0 #ffcc00;
+            position: relative;
+            z-index: 1;
+            animation: pixelFadeIn 0.3s steps(5);
+        }
+
+        @keyframes pixelFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 1.8em;
+            text-align: center;
+            color: #ffcc00;
+            text-shadow: 3px 3px 0 #7b058c;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.5em;
+            margin-bottom: 30px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #d70bf2;
+            font-size: 0.5em;
+            text-decoration: none;
+            border-bottom: 2px solid #d70bf2;
+            padding-bottom: 5px;
+        }
+
+        .back-link:hover {
+            color: #ffcc00;
+            border-bottom-color: #ffcc00;
+        }
+
+        .admin-panel {
+            background: #1a0033;
+            border: 2px solid #d70bf2;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .admin-panel h3 {
+            color: #ffcc00;
+            font-size: 0.7em;
+            margin-bottom: 15px;
+        }
+
+        .admin-panel input, .admin-panel textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0a001a;
+            border: 2px solid #d70bf2;
+            color: #ffffff;
+            font-family: monospace;
+            font-size: 0.6em;
+            margin-bottom: 10px;
+        }
+
+        .admin-panel textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            font-family: 'Press Start 2P', monospace;
+            background: #7b058c;
+            color: #ffcc00;
+            padding: 10px 20px;
+            border: 2px solid #ffcc00;
+            cursor: pointer;
+            font-size: 0.6em;
+            transition: all 0.05s linear;
+            box-shadow: 3px 3px 0 #4a0252;
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #4a0252;
+            background: #9b0cac;
+        }
+
+        .entry {
+            background: #1a0033;
+            border: 2px solid #d70bf2;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #d70bf2;
+        }
+
+        .entry-date {
+            color: #ffcc00;
+            font-size: 0.5em;
+        }
+
+        .entry-title {
+            color: #ffffff;
+            font-size: 0.7em;
+            margin-bottom: 15px;
+        }
+
+        .entry-content {
+            color: #ffffff;
+            font-size: 0.5em;
+            line-height: 1.6;
+        }
+
+        .entry-version {
+            display: inline-block;
+            background: #d70bf2;
+            color: #ffcc00;
+            padding: 3px 8px;
+            font-size: 0.4em;
+            margin-top: 15px;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-family: monospace;
+            font-size: 0.4em;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #a71d2a;
+        }
+
+        .no-entries {
+            color: #ffffff;
+            font-size: 0.5em;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .login-form {
+            background: #1a0033;
+            border: 2px solid #ffcc00;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            background: #0a001a;
+            border: 2px solid #d70bf2;
+            color: #ffffff;
+            font-family: monospace;
+            font-size: 0.6em;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 1.2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← НА ГЛАВНУЮ</a>
+        <h1>📝 DEVLOG</h1>
+        <div class="subtitle">ИСТОРИЯ РАЗРАБОТКИ ПРОЕКТА</div>
+
+        <!-- Панель администратора (скрыта до входа) -->
+        <div id="admin-panel" class="admin-panel" style="display: none;">
+            <h3>➕ ДОБАВИТЬ ЗАПИСЬ</h3>
+            <input type="text" id="entry-title" placeholder="ЗАГОЛОВОК (например: v1.0.0 - Первый релиз)">
+            <textarea id="entry-content" placeholder="ОПИСАНИЕ ИЗМЕНЕНИЙ..."></textarea>
+            <button class="btn" onclick="addEntry()">📨 ОПУБЛИКОВАТЬ</button>
+        </div>
+
+        <!-- Форма входа (показывается, если не авторизован) -->
+        <div id="login-form" class="login-form">
+            <h3>🔐 ВХОД ДЛЯ АДМИНИСТРАТОРА</h3>
+            <input type="password" id="admin-password" placeholder="ВВЕДИТЕ ПАРОЛЬ">
+            <button class="btn" onclick="login()">🚪 ВОЙТИ</button>
+        </div>
+
+        <!-- Список записей -->
+        <div id="entries-list"></div>
+    </div>
+
+    <script>
+        let isAdmin = false;
+        let adminPassword = '';
+
+        // Вход в админку
+        async function login() {
+            const password = document.getElementById('admin-password').value;
+            if (!password) {
+                alert('ВВЕДИТЕ ПАРОЛЬ!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    isAdmin = true;
+                    adminPassword = password;
+                    document.getElementById('login-form').style.display = 'none';
+                    document.getElementById('admin-panel').style.display = 'block';
+                    loadEntries();
+                } else {
+                    alert('НЕВЕРНЫЙ ПАРОЛЬ!');
+                }
+            } catch (e) {
+                alert('ОШИБКА ПРОВЕРКИ ПАРОЛЯ!');
+            }
+        }
+
+        // Загрузка записей
+        async function loadEntries() {
+            try {
+                const response = await fetch('/api/devlog');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayEntries(data.entries);
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки:', e);
+            }
+        }
+
+        // Отображение записей
+        function displayEntries(entries) {
+            const container = document.getElementById('entries-list');
+            
+            if (!entries || entries.length === 0) {
+                container.innerHTML = '<div class="no-entries">📭 ПОКА НЕТ ЗАПИСЕЙ</div>';
+                return;
+            }
+
+            entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            container.innerHTML = '';
+            entries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'entry';
+                entryDiv.innerHTML = `
+                    <div class="entry-header">
+                        <span class="entry-date">📅 ${new Date(entry.date).toLocaleDateString('ru-RU')}</span>
+                        ${isAdmin ? `<button class="delete-btn" onclick="deleteEntry('${entry.id}')">🗑 УДАЛИТЬ</button>` : ''}
+                    </div>
+                    <div class="entry-title">📌 ${escapeHtml(entry.title)}</div>
+                    <div class="entry-content">${escapeHtml(entry.content).replace(/\n/g, '<br>')}</div>
+                    ${entry.version ? `<div class="entry-version">🔧 ВЕРСИЯ: ${escapeHtml(entry.version)}</div>` : ''}
+                `;
+                container.appendChild(entryDiv);
+            });
+        }
+
+        // Добавление записи
+        async function addEntry() {
+            const title = document.getElementById('entry-title').value.trim();
+            const content = document.getElementById('entry-content').value.trim();
+            
+            if (!title || !content) {
+                alert('ЗАПОЛНИТЕ ЗАГОЛОВОК И ТЕКСТ!');
+                return;
+            }
+
+            const entry = {
+                id: Date.now().toString(),
+                title: title,
+                content: content,
+                date: new Date().toISOString(),
+                version: extractVersion(title),
+                adminPassword: adminPassword
+            };
+
+            try {
+                const response = await fetch('/api/devlog', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(entry)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('entry-title').value = '';
+                    document.getElementById('entry-content').value = '';
+                    loadEntries();
+                } else {
+                    alert('ОШИБКА ПРИ ДОБАВЛЕНИИ!');
+                }
+            } catch (e) {
+                alert('ОШИБКА СВЯЗИ!');
+            }
+        }
+
+        // Удаление записи
+        async function deleteEntry(id) {
+            if (!confirm('УДАЛИТЬ ЭТУ ЗАПИСЬ?')) return;
+            
+            try {
+                const response = await fetch(`/api/devlog/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminPassword: adminPassword })
+                });
+                
+                if (response.ok) {
+                    loadEntries();
+                } else {
+                    alert('ОШИБКА ПРИ УДАЛЕНИИ!');
+                }
+            } catch (e) {
+                alert('ОШИБКА СВЯЗИ!');
+            }
+        }
+
+        function extractVersion(title) {
+            const match = title.match(/v[\d\.]+/i);
+            return match ? match[0] : null;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Загружаем записи при старте
+        loadEntries();
+    </script>
+</body>
+</html>

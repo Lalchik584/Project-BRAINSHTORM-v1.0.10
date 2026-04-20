@@ -205,7 +205,7 @@
             box-shadow: 2px 2px 0 #ffcc00;
         }
 
-        /* Блок DevLog в стиле командной строки */
+        /* Блок DevLog в стиле командной строки — УВЕЛИЧЕННЫЙ ШРИФТ */
         .devlog-section {
             display: flex;
             align-items: center;
@@ -221,7 +221,7 @@
             border: 2px solid #00ff00;
             box-shadow: 4px 4px 0 #00aa00;
             position: relative;
-            padding: 20px;
+            padding: 25px;
         }
 
         .devlog-info::before {
@@ -231,24 +231,24 @@
             left: 15px;
             background: #0a0a0a;
             padding: 0 10px;
-            font-family: monospace;
-            font-size: 0.5em;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55em;
             color: #00ff00;
             border: 1px solid #00ff00;
         }
 
         .devlog-info p {
-            font-family: monospace;
+            font-family: 'Press Start 2P', monospace;
             color: #00ff00;
-            font-size: 0.45em;
-            line-height: 1.6;
-            margin: 5px 0;
+            font-size: 0.6em;
+            line-height: 1.8;
+            margin: 8px 0;
         }
 
         .devlog-info .cursor {
             display: inline-block;
-            width: 8px;
-            height: 12px;
+            width: 10px;
+            height: 14px;
             background-color: #00ff00;
             vertical-align: middle;
             animation: blink 1s step-end infinite;
@@ -270,7 +270,7 @@
             color: #00ff00;
             padding: 15px 25px;
             text-decoration: none;
-            font-size: 0.55em;
+            font-size: 0.65em;
             border: 2px solid #00ff00;
             box-shadow: 4px 4px 0 #00aa00;
             transition: all 0.05s linear;
@@ -329,6 +329,8 @@
             .btn { padding: 10px 15px; font-size: 0.45em; }
             .devlog-section { flex-direction: column; text-align: center; }
             .devlog-info { width: 100%; }
+            .devlog-info p { font-size: 0.5em; }
+            .btn-devlog { font-size: 0.5em; padding: 12px 20px; }
             .feedback-link { font-size: 0.35em; padding: 4px 8px; }
             .email-text { font-size: 0.35em; }
         }
@@ -358,134 +360,38 @@
 
         <h3>📚 ВЫБЕРИ ПРЕДМЕТ</h3>
         <div class="subject-grid">
-            <div class="subject-card">
-                <div class="subject-avatar">📐</div>
-                <div class="subject-name">МАТЕМАТИКА</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🔢</div>
-                <div class="subject-name">АЛГЕБРА</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">📏</div>
-                <div class="subject-name">ГЕОМЕТРИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🖥️</div>
-                <div class="subject-name">ИНФОРМАТИКА</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">📖</div>
-                <div class="subject-name">РУССКИЙ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">📚</div>
-                <div class="subject-name">ЛИТЕРАТУРА</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🇬🇧</div>
-                <div class="subject-name">АНГЛИЙСКИЙ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🇫🇷</div>
-                <div class="subject-name">ФРАНЦУЗСКИЙ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🇩🇪</div>
-                <div class="subject-name">НЕМЕЦКИЙ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">📜</div>
-                <div class="subject-name">ИСТОРИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🏛️</div>
-                <div class="subject-name">ИСТОРИЯ РФ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">👥</div>
-                <div class="subject-name">ОБЩЕСТВОЗНАНИЕ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🌏</div>
-                <div class="subject-name">ГЕОГРАФИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🧬</div>
-                <div class="subject-name">БИОЛОГИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🧪</div>
-                <div class="subject-name">ХИМИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">⚡</div>
-                <div class="subject-name">ФИЗИКА</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🌿</div>
-                <div class="subject-name">ЭКОЛОГИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🌍</div>
-                <div class="subject-name">ОКР. МИР</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">⚽</div>
-                <div class="subject-name">ФИЗКУЛЬТУРА</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🛡️</div>
-                <div class="subject-name">ОБЗР</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🎖️</div>
-                <div class="subject-name">НВП</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🔧</div>
-                <div class="subject-name">ТЕХНОЛОГИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">✏️</div>
-                <div class="subject-name">ЧЕРЧЕНИЕ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🎨</div>
-                <div class="subject-name">ИЗО</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🎵</div>
-                <div class="subject-name">МУЗЫКА</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🏛️</div>
-                <div class="subject-name">МХК</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🤔</div>
-                <div class="subject-name">ФИЛОСОФИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🧠</div>
-                <div class="subject-name">ПСИХОЛОГИЯ</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">⚖️</div>
-                <div class="subject-name">ПРАВО</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">📈</div>
-                <div class="subject-name">ЭКОНОМИКА</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">📊</div>
-                <div class="subject-name">ТЕОРВЕР</div>
-            </div>
-            <div class="subject-card">
-                <div class="subject-avatar">🤝</div>
-                <div class="subject-name">ОРКСЭ</div>
-            </div>
+            <div class="subject-card"><div class="subject-avatar">📐</div><div class="subject-name">МАТЕМАТИКА</div></div>
+            <div class="subject-card"><div class="subject-avatar">🔢</div><div class="subject-name">АЛГЕБРА</div></div>
+            <div class="subject-card"><div class="subject-avatar">📏</div><div class="subject-name">ГЕОМЕТРИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🖥️</div><div class="subject-name">ИНФОРМАТИКА</div></div>
+            <div class="subject-card"><div class="subject-avatar">📖</div><div class="subject-name">РУССКИЙ</div></div>
+            <div class="subject-card"><div class="subject-avatar">📚</div><div class="subject-name">ЛИТЕРАТУРА</div></div>
+            <div class="subject-card"><div class="subject-avatar">🇬🇧</div><div class="subject-name">АНГЛИЙСКИЙ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🇫🇷</div><div class="subject-name">ФРАНЦУЗСКИЙ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🇩🇪</div><div class="subject-name">НЕМЕЦКИЙ</div></div>
+            <div class="subject-card"><div class="subject-avatar">📜</div><div class="subject-name">ИСТОРИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🏛️</div><div class="subject-name">ИСТОРИЯ РФ</div></div>
+            <div class="subject-card"><div class="subject-avatar">👥</div><div class="subject-name">ОБЩЕСТВОЗНАНИЕ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🌏</div><div class="subject-name">ГЕОГРАФИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🧬</div><div class="subject-name">БИОЛОГИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🧪</div><div class="subject-name">ХИМИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">⚡</div><div class="subject-name">ФИЗИКА</div></div>
+            <div class="subject-card"><div class="subject-avatar">🌿</div><div class="subject-name">ЭКОЛОГИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🌍</div><div class="subject-name">ОКР. МИР</div></div>
+            <div class="subject-card"><div class="subject-avatar">⚽</div><div class="subject-name">ФИЗКУЛЬТУРА</div></div>
+            <div class="subject-card"><div class="subject-avatar">🛡️</div><div class="subject-name">ОБЗР</div></div>
+            <div class="subject-card"><div class="subject-avatar">🎖️</div><div class="subject-name">НВП</div></div>
+            <div class="subject-card"><div class="subject-avatar">🔧</div><div class="subject-name">ТЕХНОЛОГИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">✏️</div><div class="subject-name">ЧЕРЧЕНИЕ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🎨</div><div class="subject-name">ИЗО</div></div>
+            <div class="subject-card"><div class="subject-avatar">🎵</div><div class="subject-name">МУЗЫКА</div></div>
+            <div class="subject-card"><div class="subject-avatar">🏛️</div><div class="subject-name">МХК</div></div>
+            <div class="subject-card"><div class="subject-avatar">🤔</div><div class="subject-name">ФИЛОСОФИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">🧠</div><div class="subject-name">ПСИХОЛОГИЯ</div></div>
+            <div class="subject-card"><div class="subject-avatar">⚖️</div><div class="subject-name">ПРАВО</div></div>
+            <div class="subject-card"><div class="subject-avatar">📈</div><div class="subject-name">ЭКОНОМИКА</div></div>
+            <div class="subject-card"><div class="subject-avatar">📊</div><div class="subject-name">ТЕОРВЕР</div></div>
+            <div class="subject-card"><div class="subject-avatar">🤝</div><div class="subject-name">ОРКСЭ</div></div>
         </div>
 
         <div class="buttons">
@@ -493,7 +399,7 @@
             <a href="/student.html" class="btn student">👨‍🎓 ВОЙТИ КАК УЧЕНИК</a>
         </div>
 
-        <!-- Блок DevLog -->
+        <!-- Блок DevLog с увеличенным шрифтом -->
         <div class="devlog-section">
             <div class="devlog-info">
                 <p>C:\&gt; devlog.exe --info</p>

@@ -632,6 +632,84 @@ function sendDetailedStats(session) {
     io.to(session.teacher).emit('detailed-stats', stats);
 }
 
+// ========== DEVLOG С БЕЗОПАСНОЙ АВТОРИЗАЦИЕЙ ==========
+const DEVLOG_FILE = path.join(__dirname, 'devlog.json');
+const ADMIN_PASSWORD = "Форест_Блекуэл";  // Хранится ТОЛЬКО на сервере!
+
+function loadDevlog() {
+    try {
+        if (fs.existsSync(DEVLOG_FILE)) {
+            const data = fs.readFileSync(DEVLOG_FILE, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки DevLog:', error);
+    }
+    return [];
+}
+
+function saveDevlog(entries) {
+    try {
+        fs.writeFileSync(DEVLOG_FILE, JSON.stringify(entries, null, 2));
+        console.log(`✅ Сохранено ${entries.length} записей в DevLog`);
+    } catch (error) {
+        console.error('Ошибка сохранения DevLog:', error);
+    }
+}
+
+// Проверка пароля админа (безопасно!)
+app.post('/api/admin/check', (req, res) => {
+    const { password } = req.body;
+    
+    if (password === ADMIN_PASSWORD) {
+        res.json({ success: true });
+    } else {
+        res.json({ success: false });
+    }
+});
+
+// Получить все записи (доступно всем)
+app.get('/api/devlog', (req, res) => {
+    const entries = loadDevlog();
+    res.json({ success: true, entries });
+});
+
+// Добавить запись (только с правильным паролем)
+app.post('/api/devlog', (req, res) => {
+    const { id, title, content, date, version, adminPassword } = req.body;
+    
+    // Проверка пароля
+    if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
+    }
+    
+    if (!title || !content) {
+        return res.status(400).json({ success: false, error: 'Некорректные данные' });
+    }
+    
+    const entries = loadDevlog();
+    entries.push({ id, title, content, date, version });
+    saveDevlog(entries);
+    
+    console.log(`📝 Добавлена запись в DevLog: ${title}`);
+    res.json({ success: true });
+});
+
+// Удалить запись (только с правильным паролем)
+app.delete('/api/devlog/:id', (req, res) => {
+    const { id } = req.params;
+    const { adminPassword } = req.body;
+    
+    if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
+    }
+    
+    let entries = loadDevlog();
+    entries = entries.filter(e => e.id !== id);
+    saveDevlog(entries);
+    res.json({ success: true });
+});
+
 server.listen(PORT, HOST, () => {
     console.log('🎯 ================================');
     console.log('🎯 BRAINSHTORM SERVER STARTED');

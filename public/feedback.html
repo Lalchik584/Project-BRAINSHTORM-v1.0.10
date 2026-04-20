@@ -165,13 +165,134 @@
             border-bottom-color: #ffcc00;
         }
 
-        @media (max-width: 600px) {
-            .container { padding: 20px; }
-            h1 { font-size: 1em; }
+        /* Скрытая область для входа в админку (левый нижний угол) */
+        .hidden-admin-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 150px;
+            height: 50px;
+            background: transparent;
+            cursor: pointer;
+            z-index: 999;
+        }
+
+        .login-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #0a001a;
+            border: 4px solid #ffcc00;
+            padding: 30px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 8px 8px 0 #ffcc00;
+        }
+
+        .login-modal input {
+            width: 100%;
+            padding: 12px;
+            background: #1a0033;
+            border: 2px solid #d70bf2;
+            color: #ffffff;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6em;
+            margin-bottom: 15px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        /* Стили для списка отзывов в админке */
+        .admin-feedbacks {
+            margin-top: 30px;
+            border-top: 2px solid #ffcc00;
+            padding-top: 20px;
+        }
+
+        .admin-feedbacks h3 {
+            color: #ffcc00;
+            font-size: 0.7em;
+            margin-bottom: 15px;
+        }
+
+        .feedback-item {
+            background: #1a0033;
+            border: 2px solid #d70bf2;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #d70bf2;
+        }
+
+        .feedback-name {
+            color: #ffcc00;
+            font-size: 0.6em;
+        }
+
+        .feedback-date {
+            color: #aaa;
+            font-size: 0.4em;
+        }
+
+        .feedback-text {
+            color: #ffffff;
+            font-size: 0.55em;
+            line-height: 1.5;
+        }
+
+        .delete-feedback-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.4em;
+            cursor: pointer;
+        }
+
+        .delete-feedback-btn:hover {
+            background: #a71d2a;
+        }
+
+        .no-feedbacks {
+            color: #ffffff;
+            font-size: 0.5em;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
+    <!-- Скрытая область для входа в админку (левый нижний угол) -->
+    <div class="hidden-admin-area" id="hiddenAdminArea"></div>
+
+    <!-- Оверлей -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Модальное окно входа -->
+    <div class="login-modal" id="loginModal">
+        <h3 style="color: #ffcc00; margin-bottom: 15px;">🔐 ВХОД АДМИНИСТРАТОРА</h3>
+        <input type="password" id="admin-password" placeholder="ВВЕДИТЕ ПАРОЛЬ">
+        <button class="btn" onclick="login()" style="width: 100%;">🚪 ВОЙТИ</button>
+    </div>
+
     <div class="container">
         <h1>📝 ОСТАВИТЬ ОТЗЫВ</h1>
         <div class="subtitle">ВАШЕ МНЕНИЕ ВАЖНО ДЛЯ НАС</div>
@@ -190,12 +311,57 @@
 
         <div id="result-message" class="message"></div>
 
+        <!-- Скрытая панель админа с отзывами -->
+        <div id="admin-feedbacks" class="admin-feedbacks" style="display: none;"></div>
+
         <div style="text-align: center; margin-top: 20px;">
             <a href="/" class="back-link">← НА ГЛАВНУЮ</a>
         </div>
     </div>
 
     <script>
+        let isAdmin = false;
+        let adminPassword = '';
+
+        // Скрытая область для входа
+        document.getElementById('hiddenAdminArea').addEventListener('click', () => {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('loginModal').style.display = 'block';
+        });
+
+        function closeModal() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        async function login() {
+            const password = document.getElementById('admin-password').value;
+            if (!password) {
+                alert('ВВЕДИТЕ ПАРОЛЬ!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    isAdmin = true;
+                    adminPassword = password;
+                    closeModal();
+                    loadFeedbacks();
+                } else {
+                    alert('НЕВЕРНЫЙ ПАРОЛЬ!');
+                }
+            } catch (e) {
+                alert('ОШИБКА ПРОВЕРКИ ПАРОЛЯ!');
+            }
+        }
+
         async function sendFeedback() {
             const name = document.getElementById('feedback-name').value.trim();
             const text = document.getElementById('feedback-text').value.trim();
@@ -233,6 +399,7 @@
                     resultDiv.textContent = '✅ СПАСИБО ЗА ОТЗЫВ!';
                     document.getElementById('feedback-name').value = '';
                     document.getElementById('feedback-text').value = '';
+                    if (isAdmin) loadFeedbacks();
                 } else {
                     resultDiv.className = 'message error';
                     resultDiv.textContent = '❌ ОШИБКА: ' + (result.error || 'ПОПРОБУЙТЕ ПОЗЖЕ');
@@ -241,6 +408,75 @@
                 resultDiv.className = 'message error';
                 resultDiv.textContent = '❌ ОШИБКА СВЯЗИ. ПОПРОБУЙТЕ ПОЗЖЕ.';
             }
+        }
+
+        async function loadFeedbacks() {
+            if (!isAdmin) return;
+            
+            try {
+                const response = await fetch('/api/feedbacks');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayFeedbacks(data.feedbacks);
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки отзывов:', e);
+            }
+        }
+
+        function displayFeedbacks(feedbacks) {
+            const container = document.getElementById('admin-feedbacks');
+            container.style.display = 'block';
+            
+            if (!feedbacks || feedbacks.length === 0) {
+                container.innerHTML = '<h3>📋 ВСЕ ОТЗЫВЫ</h3><div class="no-feedbacks">📭 ПОКА НЕТ ОТЗЫВОВ</div>';
+                return;
+            }
+
+            let html = '<h3>📋 ВСЕ ОТЗЫВЫ</h3>';
+            feedbacks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            feedbacks.forEach(fb => {
+                html += `
+                    <div class="feedback-item" id="fb-${fb.id}">
+                        <div class="feedback-header">
+                            <span class="feedback-name">👤 ${escapeHtml(fb.name)}</span>
+                            <span class="feedback-date">📅 ${new Date(fb.createdAt).toLocaleString('ru-RU')}</span>
+                            <button class="delete-feedback-btn" onclick="deleteFeedback('${fb.id}')">🗑 УДАЛИТЬ</button>
+                        </div>
+                        <div class="feedback-text">${escapeHtml(fb.text)}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        async function deleteFeedback(id) {
+            if (!confirm('УДАЛИТЬ ЭТОТ ОТЗЫВ?')) return;
+            
+            try {
+                const response = await fetch(`/api/feedback/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminPassword: adminPassword })
+                });
+                
+                if (response.ok) {
+                    loadFeedbacks();
+                } else {
+                    alert('ОШИБКА ПРИ УДАЛЕНИИ!');
+                }
+            } catch (e) {
+                alert('ОШИБКА СВЯЗИ!');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>

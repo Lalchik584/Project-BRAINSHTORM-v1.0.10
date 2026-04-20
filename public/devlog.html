@@ -77,7 +77,7 @@
             display: inline-block;
             margin-bottom: 20px;
             color: #d70bf2;
-            font-size: 0.5em;
+            font-size: 0.6em;
             text-decoration: none;
             border-bottom: 2px solid #d70bf2;
             padding-bottom: 5px;
@@ -86,6 +86,18 @@
         .back-link:hover {
             color: #ffcc00;
             border-bottom-color: #ffcc00;
+        }
+
+        /* Скрытая область для входа в админку (левый нижний угол) */
+        .hidden-admin-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 150px;
+            height: 50px;
+            background: transparent;
+            cursor: pointer;
+            z-index: 999;
         }
 
         .admin-panel {
@@ -107,7 +119,7 @@
             background: #0a001a;
             border: 2px solid #d70bf2;
             color: #ffffff;
-            font-family: monospace;
+            font-family: 'Press Start 2P', monospace;
             font-size: 0.6em;
             margin-bottom: 10px;
         }
@@ -154,18 +166,18 @@
 
         .entry-date {
             color: #ffcc00;
-            font-size: 0.5em;
+            font-size: 0.6em;
         }
 
         .entry-title {
             color: #ffffff;
-            font-size: 0.7em;
+            font-size: 0.9em;
             margin-bottom: 15px;
         }
 
         .entry-content {
             color: #ffffff;
-            font-size: 0.5em;
+            font-size: 0.7em;
             line-height: 1.6;
         }
 
@@ -173,8 +185,8 @@
             display: inline-block;
             background: #d70bf2;
             color: #ffcc00;
-            padding: 3px 8px;
-            font-size: 0.4em;
+            padding: 5px 10px;
+            font-size: 0.5em;
             margin-top: 15px;
         }
 
@@ -183,8 +195,8 @@
             color: white;
             border: none;
             padding: 5px 10px;
-            font-family: monospace;
-            font-size: 0.4em;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.5em;
             cursor: pointer;
         }
 
@@ -194,42 +206,74 @@
 
         .no-entries {
             color: #ffffff;
-            font-size: 0.5em;
+            font-size: 0.6em;
             text-align: center;
             padding: 40px;
         }
 
-        .login-form {
-            background: #1a0033;
-            border: 2px solid #ffcc00;
+        /* Форма входа (скрыта, вызывается через скрытую область) */
+        .login-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #0a001a;
+            border: 4px solid #ffcc00;
             padding: 30px;
-            text-align: center;
+            z-index: 1000;
+            display: none;
+            box-shadow: 8px 8px 0 #ffcc00;
         }
 
-        .login-form input {
+        .login-modal input {
             width: 100%;
             padding: 12px;
-            background: #0a001a;
+            background: #1a0033;
             border: 2px solid #d70bf2;
             color: #ffffff;
-            font-family: monospace;
+            font-family: 'Press Start 2P', monospace;
             font-size: 0.6em;
             margin-bottom: 15px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
         }
 
         @media (max-width: 600px) {
             .container { padding: 20px; }
             h1 { font-size: 1.2em; }
+            .entry-title { font-size: 0.7em; }
+            .entry-content { font-size: 0.55em; }
         }
     </style>
 </head>
 <body>
+    <!-- Скрытая область для входа в админку (левый нижний угол) -->
+    <div class="hidden-admin-area" id="hiddenAdminArea"></div>
+
+    <!-- Оверлей -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Модальное окно входа -->
+    <div class="login-modal" id="loginModal">
+        <h3 style="color: #ffcc00; margin-bottom: 15px;">🔐 ВХОД АДМИНИСТРАТОРА</h3>
+        <input type="password" id="admin-password" placeholder="ВВЕДИТЕ ПАРОЛЬ">
+        <button class="btn" onclick="login()" style="width: 100%;">🚪 ВОЙТИ</button>
+    </div>
+
     <div class="container">
         <a href="/" class="back-link">← НА ГЛАВНУЮ</a>
         <h1>📝 DEVLOG</h1>
         <div class="subtitle">ИСТОРИЯ РАЗРАБОТКИ ПРОЕКТА</div>
 
-        <!-- Панель администратора (скрыта до входа) -->
         <div id="admin-panel" class="admin-panel" style="display: none;">
             <h3>➕ ДОБАВИТЬ ЗАПИСЬ</h3>
             <input type="text" id="entry-title" placeholder="ЗАГОЛОВОК (например: v1.0.0 - Первый релиз)">
@@ -237,14 +281,6 @@
             <button class="btn" onclick="addEntry()">📨 ОПУБЛИКОВАТЬ</button>
         </div>
 
-        <!-- Форма входа (показывается, если не авторизован) -->
-        <div id="login-form" class="login-form">
-            <h3>🔐 ВХОД ДЛЯ АДМИНИСТРАТОРА</h3>
-            <input type="password" id="admin-password" placeholder="ВВЕДИТЕ ПАРОЛЬ">
-            <button class="btn" onclick="login()">🚪 ВОЙТИ</button>
-        </div>
-
-        <!-- Список записей -->
         <div id="entries-list"></div>
     </div>
 
@@ -252,7 +288,17 @@
         let isAdmin = false;
         let adminPassword = '';
 
-        // Вход в админку
+        // Скрытая область для входа
+        document.getElementById('hiddenAdminArea').addEventListener('click', () => {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('loginModal').style.display = 'block';
+        });
+
+        function closeModal() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
         async function login() {
             const password = document.getElementById('admin-password').value;
             if (!password) {
@@ -271,7 +317,7 @@
                 if (result.success) {
                     isAdmin = true;
                     adminPassword = password;
-                    document.getElementById('login-form').style.display = 'none';
+                    closeModal();
                     document.getElementById('admin-panel').style.display = 'block';
                     loadEntries();
                 } else {
@@ -282,32 +328,26 @@
             }
         }
 
-        // Загрузка записей
         async function loadEntries() {
             try {
                 const response = await fetch('/api/devlog');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displayEntries(data.entries);
-                }
+                if (data.success) displayEntries(data.entries);
             } catch (e) {
                 console.error('Ошибка загрузки:', e);
             }
         }
 
-        // Отображение записей
         function displayEntries(entries) {
             const container = document.getElementById('entries-list');
-            
             if (!entries || entries.length === 0) {
                 container.innerHTML = '<div class="no-entries">📭 ПОКА НЕТ ЗАПИСЕЙ</div>';
                 return;
             }
 
             entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-
             container.innerHTML = '';
+
             entries.forEach(entry => {
                 const entryDiv = document.createElement('div');
                 entryDiv.className = 'entry';
@@ -324,7 +364,6 @@
             });
         }
 
-        // Добавление записи
         async function addEntry() {
             const title = document.getElementById('entry-title').value.trim();
             const content = document.getElementById('entry-content').value.trim();
@@ -349,7 +388,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(entry)
                 });
-                
                 if (response.ok) {
                     document.getElementById('entry-title').value = '';
                     document.getElementById('entry-content').value = '';
@@ -362,22 +400,16 @@
             }
         }
 
-        // Удаление записи
         async function deleteEntry(id) {
             if (!confirm('УДАЛИТЬ ЭТУ ЗАПИСЬ?')) return;
-            
             try {
                 const response = await fetch(`/api/devlog/${id}`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ adminPassword: adminPassword })
                 });
-                
-                if (response.ok) {
-                    loadEntries();
-                } else {
-                    alert('ОШИБКА ПРИ УДАЛЕНИИ!');
-                }
+                if (response.ok) loadEntries();
+                else alert('ОШИБКА ПРИ УДАЛЕНИИ!');
             } catch (e) {
                 alert('ОШИБКА СВЯЗИ!');
             }
@@ -394,7 +426,6 @@
             return div.innerHTML;
         }
 
-        // Загружаем записи при старте
         loadEntries();
     </script>
 </body>

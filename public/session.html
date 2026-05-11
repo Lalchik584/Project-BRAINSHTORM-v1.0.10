@@ -4,9 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление сессией - МОЗГОШТОРМ</title>
-    
-    <!-- Библиотека для экспорта в Excel -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <!-- Yandex.Metrika -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109132213', 'ym');
+
+        ym(109132213, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/109132213" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -142,6 +155,31 @@
             margin: 20px auto;
         }
 
+        .btn-start {
+            font-family: 'Press Start 2P', monospace;
+            padding: 15px 35px;
+            border: 3px solid #ffcc00;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin: 10px;
+            transition: all 0.05s linear;
+            background: #7b058c;
+            color: #ffcc00;
+            text-shadow: 2px 2px 0 #1a0033;
+            box-shadow: 6px 6px 0 #4a0252;
+        }
+
+        .btn-start:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0 #4a0252;
+            background: #9b0cac;
+        }
+
+        .btn-start:active {
+            transform: translate(3px, 3px);
+            box-shadow: 3px 3px 0 #4a0252;
+        }
+
         .btn {
             font-family: 'Press Start 2P', monospace;
             padding: 12px 25px;
@@ -149,18 +187,7 @@
             cursor: pointer;
             font-size: 0.7em;
             margin: 10px;
-            transition: all 0.08s linear;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 4px 4px 0 #4a0252;
-        }
-
-        .btn-primary:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 #4a0252;
+            transition: all 0.05s linear;
         }
 
         .btn-warning {
@@ -169,20 +196,21 @@
             box-shadow: 4px 4px 0 #b8860b;
         }
 
-        .btn-warning:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 #b8860b;
-        }
-
         .btn-danger {
             background: #dc3545;
             color: white;
             box-shadow: 4px 4px 0 #8b1a1a;
         }
 
-        .btn-danger:hover {
+        .btn-primary {
+            background: #28a745;
+            color: white;
+            box-shadow: 4px 4px 0 #1a5a2a;
+        }
+
+        .btn:hover {
             transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 #8b1a1a;
+            box-shadow: 6px 6px 0 #ffcc00;
         }
 
         .students-list, .leaderboard {
@@ -332,6 +360,12 @@
             color: #333;
         }
 
+        .qr-section p {
+            color: #ffffff;
+            font-size: 0.6em;
+            margin-top: 10px;
+        }
+
         code {
             background: #1a0033;
             color: #ffffff;
@@ -348,6 +382,8 @@
             th, td { font-size: 0.5em; padding: 5px; }
         }
     </style>
+    <!-- Библиотека для экспорта в Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -380,10 +416,10 @@
         </div>
 
         <div style="text-align: center; margin: 20px 0;">
-            <button class="btn btn-primary" id="start-quiz-btn">🚀 НАЧАТЬ КВИЗ</button>
+            <button class="btn-start" id="start-quiz-btn">🚀 НАЧАТЬ КВИЗ</button>
             <button class="btn btn-warning" id="next-question-btn" style="display: none;">⏭️ СЛЕДУЮЩИЙ ВОПРОС</button>
             <button class="btn btn-danger" id="end-quiz-btn" style="display: none;">🏁 ЗАВЕРШИТЬ</button>
-            <button class="btn btn-primary" id="export-xlsx-btn" style="background: #28a745; display: none;">📊 Скачать Excel</button>
+            <button class="btn btn-primary" id="export-excel-btn" style="background: #28a745; display: none;">📊 Скачать Excel</button>
         </div>
 
         <div id="current-question-display" class="question-block" style="display: none;">
@@ -520,7 +556,7 @@
             document.getElementById('end-quiz-btn').style.display = 'none';
             document.getElementById('current-question-display').style.display = 'none';
             document.getElementById('detailed-results').style.display = 'block';
-            document.getElementById('export-xlsx-btn').style.display = 'inline-block';
+            document.getElementById('export-excel-btn').style.display = 'inline-block';
             
             if (data.finalResults) {
                 updateFinalResults(data.finalResults);
@@ -623,7 +659,7 @@
             for (let i = 0; i < data.questions.length; i++) {
                 tableHtml += `<th>ВОПРОС ${i+1}</th>`;
             }
-            tableHtml += `</tr></thead><tbody>`;
+            tableHtml += `<tr></thead><tbody>`;
             
             data.studentDetails.forEach(student => {
                 const studentName = student.name || `УЧЕНИК ${student.studentId?.slice(0, 6) || '?'}`;
@@ -670,7 +706,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${student.name}</strong></td>
-                    <td>${student.score}<td>
+                    <td>${student.score}</td>
                     <td>${percentage}%</td>
                     <td><span class="grade-badge ${grade.class}">${grade.text}</span></td>
                 `;
@@ -716,7 +752,7 @@
             XLSX.writeFile(workbook, `quiz_results_${quizTitle.replace(/[^a-zа-яё0-9]/gi, '_')}_${new Date().toISOString().slice(0,19)}.xlsx`);
         }
 
-        document.getElementById('export-xlsx-btn')?.addEventListener('click', exportToXLSX);
+        document.getElementById('export-excel-btn')?.addEventListener('click', exportToXLSX);
     </script>
 </body>
 </html>

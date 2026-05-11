@@ -4,23 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление сессией - МОЗГОШТОРМ</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
-    <link rel="shortcut icon" href="/favicon.png">
-
-    <!-- Yandex.Metrika counter -->
-    <script type="text/javascript">
-        (function(m,e,t,r,i,k,a){
-            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();
-            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109132213', 'ym');
-
-        ym(109132213, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
-    </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/109132213" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<!-- /Yandex.Metrika counter -->
+    
+    <!-- Библиотека для экспорта в Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -68,12 +54,12 @@
             box-shadow: 8px 8px 0 #ffcc00;
             position: relative;
             z-index: 1;
-            animation: pixelFadeIn 0.3s steps(5);
+            animation: fadeIn 0.4s ease-out;
         }
 
-        @keyframes pixelFadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         h1 {
@@ -156,33 +142,6 @@
             margin: 20px auto;
         }
 
-        /* Кнопка СТАРТ — ФИОЛЕТОВАЯ */
-        .btn-start {
-            font-family: 'Press Start 2P', monospace;
-            padding: 15px 35px;
-            border: 3px solid #ffcc00;
-            cursor: pointer;
-            font-size: 0.8em;
-            margin: 10px;
-            transition: all 0.05s linear;
-            background: #7b058c;
-            color: #ffcc00;
-            text-shadow: 2px 2px 0 #1a0033;
-            box-shadow: 6px 6px 0 #4a0252;
-        }
-
-        .btn-start:hover {
-            transform: translate(-3px, -3px);
-            box-shadow: 9px 9px 0 #4a0252;
-            background: #9b0cac;
-        }
-
-        .btn-start:active {
-            transform: translate(3px, 3px);
-            box-shadow: 3px 3px 0 #4a0252;
-        }
-
-        /* Остальные кнопки */
         .btn {
             font-family: 'Press Start 2P', monospace;
             padding: 12px 25px;
@@ -190,7 +149,18 @@
             cursor: pointer;
             font-size: 0.7em;
             margin: 10px;
-            transition: all 0.05s linear;
+            transition: all 0.08s linear;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 4px 4px 0 #4a0252;
+        }
+
+        .btn-primary:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #4a0252;
         }
 
         .btn-warning {
@@ -199,20 +169,20 @@
             box-shadow: 4px 4px 0 #b8860b;
         }
 
+        .btn-warning:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #b8860b;
+        }
+
         .btn-danger {
             background: #dc3545;
             color: white;
             box-shadow: 4px 4px 0 #8b1a1a;
         }
 
-        .btn:hover {
+        .btn-danger:hover {
             transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 #ffcc00;
-        }
-
-        .btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0 #ffcc00;
+            box-shadow: 6px 6px 0 #8b1a1a;
         }
 
         .students-list, .leaderboard {
@@ -362,12 +332,6 @@
             color: #333;
         }
 
-        .qr-section p {
-            color: #ffffff;
-            font-size: 0.6em;
-            margin-top: 10px;
-        }
-
         code {
             background: #1a0033;
             color: #ffffff;
@@ -383,45 +347,7 @@
             .session-code { font-size: 1.2em; letter-spacing: 2px; }
             th, td { font-size: 0.5em; padding: 5px; }
         }
-
-        .btn-primary {
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        color: white;
-        border: 2px solid #ffcc00;
-    }
-
-    .btn-primary:hover {
-        transform: translate(-2px, -2px);
-        box-shadow: 4px 4px 0 #ffcc00;
-    }
-        
-    /* ===== АНИМАЦИИ ПЕРЕХОДОВ ===== */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .container, .hero { animation: fadeIn 0.4s ease-out; }
-    
-    @keyframes cardFadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-    
-    .subject-card, .quiz-card, .stat, .entry { animation: cardFadeIn 0.3s ease-out; animation-fill-mode: backwards; }
-    
-    .tab, .btn, .btn-devlog, .feedback-link { transition: all 0.08s linear; }
-    
-    .tab-content { animation: fadeIn 0.3s ease-out; }
-    
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .answer-feedback { animation: slideIn 0.3s ease-out; }
     </style>
-
 </head>
 <body>
     <div class="container">
@@ -454,14 +380,10 @@
         </div>
 
         <div style="text-align: center; margin: 20px 0;">
-            <button class="btn-start" id="start-quiz-btn">🚀 НАЧАТЬ КВИЗ</button>
+            <button class="btn btn-primary" id="start-quiz-btn">🚀 НАЧАТЬ КВИЗ</button>
             <button class="btn btn-warning" id="next-question-btn" style="display: none;">⏭️ СЛЕДУЮЩИЙ ВОПРОС</button>
             <button class="btn btn-danger" id="end-quiz-btn" style="display: none;">🏁 ЗАВЕРШИТЬ</button>
-        </div>
-        
-        <div style="text-align: center; margin: 20px 0;">
-        <button class="btn btn-primary" id="export-pdf-btn" style="background: #dc3545; display: none;">📄 Скачать PDF</button>
-        <button class="btn btn-primary" id="export-excel-btn" style="background: #28a745; display: none;">📊 Скачать Excel</button>
+            <button class="btn btn-primary" id="export-xlsx-btn" style="background: #28a745; display: none;">📊 Скачать Excel</button>
         </div>
 
         <div id="current-question-display" class="question-block" style="display: none;">
@@ -598,6 +520,7 @@
             document.getElementById('end-quiz-btn').style.display = 'none';
             document.getElementById('current-question-display').style.display = 'none';
             document.getElementById('detailed-results').style.display = 'block';
+            document.getElementById('export-xlsx-btn').style.display = 'inline-block';
             
             if (data.finalResults) {
                 updateFinalResults(data.finalResults);
@@ -700,7 +623,7 @@
             for (let i = 0; i < data.questions.length; i++) {
                 tableHtml += `<th>ВОПРОС ${i+1}</th>`;
             }
-            tableHtml += `<tr></thead><tbody>`;
+            tableHtml += `</tr></thead><tbody>`;
             
             data.studentDetails.forEach(student => {
                 const studentName = student.name || `УЧЕНИК ${student.studentId?.slice(0, 6) || '?'}`;
@@ -747,7 +670,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${student.name}</strong></td>
-                    <td>${student.score}</td>
+                    <td>${student.score}<td>
                     <td>${percentage}%</td>
                     <td><span class="grade-badge ${grade.class}">${grade.text}</span></td>
                 `;
@@ -755,159 +678,45 @@
             });
         }
 
-// === ЭКСПОРТ РЕЗУЛЬТАТОВ ===
-function exportToExcel() {
-    const table = document.getElementById('results-table');
-    if (!table) return;
-    
-    let csv = [];
-    // Заголовки
-    let headers = [];
-    document.querySelectorAll('#results-table th').forEach(th => {
-        headers.push(th.innerText);
-    });
-    csv.push(headers.join(','));
-    
-    // Данные
-    document.querySelectorAll('#results-body tr').forEach(row => {
-        let rowData = [];
-        row.querySelectorAll('td').forEach(cell => {
-            rowData.push('"' + cell.innerText.replace(/"/g, '""') + '"');
-        });
-        csv.push(rowData.join(','));
-    });
-    
-    // Детали по вопросам
-    csv.push([]);
-    csv.push(['"Детали по вопросам"']);
-    csv.push([]);
-    
-    // Заголовки вопросов
-    let questionHeaders = ['Ученик'];
-    const questionDetails = document.querySelectorAll('#question-details-container .details-table th');
-    for (let i = 1; i < questionDetails.length; i++) {
-        questionHeaders.push(questionDetails[i].innerText);
-    }
-    csv.push(questionHeaders.join(','));
-    
-    // Данные по вопросам
-    document.querySelectorAll('#question-details-container .details-table tbody tr').forEach(row => {
-        let rowData = [];
-        row.querySelectorAll('td').forEach(cell => {
-            let text = cell.innerText.trim();
-            if (text === '✅') text = 'Правильно';
-            if (text === '❌') text = 'Неправильно';
-            if (text === '⏳') text = 'Пропущен';
-            rowData.push('"' + text + '"');
-        });
-        csv.push(rowData.join(','));
-    });
-    
-    // Скачивание
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.setAttribute('download', `quiz_results_${new Date().toISOString().slice(0,19)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
+        // === ЭКСПОРТ В EXCEL (XLSX) ===
+        function exportToXLSX() {
+            const workbook = XLSX.utils.book_new();
+            
+            const resultsTable = document.getElementById('results-table');
+            if (resultsTable) {
+                const resultsSheet = XLSX.utils.table_to_sheet(resultsTable, { raw: true });
+                XLSX.utils.book_append_sheet(workbook, resultsSheet, 'Результаты');
+            }
+            
+            const detailsTable = document.querySelector('#question-details-container .details-table');
+            if (detailsTable) {
+                const detailsSheet = XLSX.utils.table_to_sheet(detailsTable, { raw: true });
+                for (let R in detailsSheet) {
+                    if (typeof detailsSheet[R] === 'object' && detailsSheet[R].v) {
+                        let cellValue = detailsSheet[R].v;
+                        if (cellValue === '✅') detailsSheet[R].v = 'Правильно';
+                        else if (cellValue === '❌') detailsSheet[R].v = 'Неправильно';
+                        else if (cellValue === '⏳') detailsSheet[R].v = 'Пропущен';
+                    }
+                }
+                XLSX.utils.book_append_sheet(workbook, detailsSheet, 'Детали по вопросам');
+            }
+            
+            const quizTitle = document.getElementById('quiz-title').innerText;
+            const dateStr = new Date().toLocaleString();
+            const infoSheet = XLSX.utils.aoa_to_sheet([
+                ['Информация о квизе'],
+                ['Название:', quizTitle],
+                ['Дата:', dateStr],
+                ['Создано в:', 'МОЗГОШТОРМ'],
+                ['Ссылка:', window.location.href]
+            ]);
+            XLSX.utils.book_append_sheet(workbook, infoSheet, 'Информация');
+            
+            XLSX.writeFile(workbook, `quiz_results_${quizTitle.replace(/[^a-zа-яё0-9]/gi, '_')}_${new Date().toISOString().slice(0,19)}.xlsx`);
+        }
 
-function exportToPDF() {
-    const printContents = document.getElementById('detailed-results').innerHTML;
-    const originalTitle = document.title;
-    const quizName = document.getElementById('quiz-title').innerText;
-    
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Результаты квиза - ${quizName}</title>
-            <style>
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    padding: 20px;
-                    margin: 0;
-                }
-                h1 {
-                    color: #333;
-                    border-bottom: 2px solid #667eea;
-                    padding-bottom: 10px;
-                }
-                h2 {
-                    color: #555;
-                    margin-top: 30px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin: 20px 0;
-                }
-                th, td {
-                    border: 1px solid #ddd;
-                    padding: 8px;
-                    text-align: left;
-                }
-                th {
-                    background: #667eea;
-                    color: white;
-                }
-                .correct { background: #d4edda; color: #155724; }
-                .wrong { background: #f8d7da; color: #721c24; }
-                .missed { background: #fff3cd; color: #856404; }
-                .footer {
-                    margin-top: 30px;
-                    text-align: center;
-                    font-size: 12px;
-                    color: #999;
-                    border-top: 1px solid #ddd;
-                    padding-top: 20px;
-                }
-                @media print {
-                    .no-print { display: none; }
-                }
-            </style>
-        </head>
-        <body>
-            <h1>Результаты квиза: ${quizName}</h1>
-            <p>Дата: ${new Date().toLocaleString()}</p>
-            ${printContents}
-            <div class="footer">
-                МОЗГОШТОРМ — интерактивная платформа для образовательных квизов<br>
-                https://мозгошторм.рф
-            </div>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-}
-
-// Показываем кнопки экспорта после завершения квиза
-socket.on('quiz-ended', (data) => {
-    document.getElementById('next-question-btn').style.display = 'none';
-    document.getElementById('end-quiz-btn').style.display = 'none';
-    document.getElementById('current-question-display').style.display = 'none';
-    document.getElementById('detailed-results').style.display = 'block';
-    
-    // Показываем кнопки экспорта
-    document.getElementById('export-pdf-btn').style.display = 'inline-block';
-    document.getElementById('export-excel-btn').style.display = 'inline-block';
-    
-    if (data.finalResults) {
-        updateFinalResults(data.finalResults);
-    }
-});
-
-// Добавляем обработчики кнопок
-document.getElementById('export-excel-btn')?.addEventListener('click', exportToExcel);
-document.getElementById('export-pdf-btn')?.addEventListener('click', exportToPDF);
-
-        
+        document.getElementById('export-xlsx-btn')?.addEventListener('click', exportToXLSX);
     </script>
 </body>
 </html>

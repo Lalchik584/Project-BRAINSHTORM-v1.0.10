@@ -66,6 +66,7 @@
             position: relative;
         }
 
+        /* Пиксельная сетка поверх всего */
         body::before {
             content: "";
             position: fixed;
@@ -75,13 +76,54 @@
             bottom: 0;
             background-image: 
                 repeating-linear-gradient(
-                    #2a0050 0px,
-                    #2a0050 2px,
-                    #1a0033 2px,
-                    #1a0033 4px
+                    rgba(215, 11, 242, 0.08) 0px,
+                    rgba(215, 11, 242, 0.08) 2px,
+                    transparent 2px,
+                    transparent 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(215, 11, 242, 0.08) 0px,
+                    rgba(215, 11, 242, 0.08) 2px,
+                    transparent 2px,
+                    transparent 4px
                 );
             pointer-events: none;
-            z-index: 0;
+            z-index: 2;
+        }
+
+        /* Цветной пиксельный дождь */
+        .pixel-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .pixel {
+            position: absolute;
+            background-color: #ffcc00;
+            opacity: 0.25;
+            width: 4px;
+            height: 4px;
+            animation: fall linear infinite;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 0.25;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         .hero {
@@ -92,7 +134,7 @@
             padding: 40px;
             box-shadow: 8px 8px 0 #ffcc00;
             position: relative;
-            z-index: 1;
+            z-index: 3;
             animation: pixelFadeIn 0.3s steps(5);
         }
 
@@ -376,176 +418,146 @@
             .feedback-link { font-size: 0.35em; padding: 4px 8px; }
             .email-text { font-size: 0.35em; }
         }
-    /* ===== АНИМАЦИИ ПЕРЕХОДОВ ===== */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .container, .hero { animation: fadeIn 0.4s ease-out; }
-    
-    @keyframes cardFadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-    
-    .subject-card, .quiz-card, .stat, .entry { animation: cardFadeIn 0.3s ease-out; animation-fill-mode: backwards; }
-    
-    .tab, .btn, .btn-devlog, .feedback-link { transition: all 0.08s linear; }
-    
-    .tab-content { animation: fadeIn 0.3s ease-out; }
-    
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .answer-feedback { animation: slideIn 0.3s ease-out; }
 
-    /* ===== ПАДАЮЩИЕ ПИКСЕЛИ ===== */
-    .pixel-rain {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 0;
-        overflow: hidden;
-    }
-
-    .pixel {
-        position: absolute;
-        background-color: #ffcc00;
-        opacity: 0.3;
-        width: 4px;
-        height: 4px;
-        animation: fall linear infinite;
-        image-rendering: crisp-edges;
-        image-rendering: pixelated;
-    }
-
-    @keyframes fall {
-        0% {
-            transform: translateY(-10vh) rotate(0deg);
-            opacity: 0.3;
+        /* ===== АНИМАЦИИ ПЕРЕХОДОВ ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        100% {
-            transform: translateY(100vh) rotate(360deg);
-            opacity: 0;
-        }
-    }
         
+        .hero { animation: fadeIn 0.4s ease-out; }
+        
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .subject-card, .stat { animation: cardFadeIn 0.3s ease-out; animation-fill-mode: backwards; }
+        
+        .btn, .btn-devlog, .feedback-link { transition: all 0.08s linear; }
     </style>
 </head>
 <body>
-    <div class="hero">
-        <h1>🧠 МОЗГОШТОРМ</h1>
-        <div style="text-align: center;">
-            <div class="subtitle">ИНТЕРАКТИВНАЯ ПЛАТФОРМА ДЛЯ ОБРАЗОВАТЕЛЬНЫХ ОРГАНИЗАЦИЙ</div>
+
+<!-- Пиксельный дождь -->
+<div class="pixel-rain" id="pixelRain"></div>
+
+<div class="hero">
+    <h1>🧠 МОЗГОШТОРМ</h1>
+    <div style="text-align: center;">
+        <div class="subtitle">ИНТЕРАКТИВНАЯ ПЛАТФОРМА ДЛЯ ОБРАЗОВАТЕЛЬНЫХ ОРГАНИЗАЦИЙ</div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <span>30+</span>
+            <div>ШКОЛЬНЫХ ПРЕДМЕТОВ</div>
         </div>
-
-        <div class="stats">
-            <div class="stat">
-                <span>30+</span>
-                <div>ШКОЛЬНЫХ ПРЕДМЕТОВ</div>
-            </div>
-            <div class="stat">
-                <span>⚡</span>
-                <div>МГНОВЕННАЯ ПРОВЕРКА</div>
-            </div>
-            <div class="stat">
-                <span>📊</span>
-                <div>ДЕТАЛЬНАЯ СТАТИСТИКА</div>
-            </div>
+        <div class="stat">
+            <span>⚡</span>
+            <div>МГНОВЕННАЯ ПРОВЕРКА</div>
         </div>
-
-        <h3>📚 ВЫБЕРИ ПРЕДМЕТ</h3>
-        <div class="subject-grid">
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/math.png" alt="Математика"><div class="subject-name">МАТЕМАТИКА</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/algebra.png" alt="Алгебра"><div class="subject-name">АЛГЕБРА</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/geometry.png" alt="Геометрия"><div class="subject-name">ГЕОМЕТРИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/informatics.png" alt="Информатика"><div class="subject-name">ИНФОРМАТИКА</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/russian.png" alt="Русский язык"><div class="subject-name">РУССКИЙ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/literature.png" alt="Литература"><div class="subject-name">ЛИТЕРАТУРА</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/english.png" alt="Английский"><div class="subject-name">АНГЛИЙСКИЙ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/french.png" alt="Французский"><div class="subject-name">ФРАНЦУЗСКИЙ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/german.png" alt="Немецкий"><div class="subject-name">НЕМЕЦКИЙ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/history.png" alt="История"><div class="subject-name">ИСТОРИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/history_russia.png" alt="История России"><div class="subject-name">ИСТОРИЯ РФ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/social.png" alt="Обществознание"><div class="subject-name">ОБЩЕСТВОЗНАНИЕ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/geography.png" alt="География"><div class="subject-name">ГЕОГРАФИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/biology.png" alt="Биология"><div class="subject-name">БИОЛОГИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/chemistry.png" alt="Химия"><div class="subject-name">ХИМИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/physics.png" alt="Физика"><div class="subject-name">ФИЗИКА</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/ecology.png" alt="Экология"><div class="subject-name">ЭКОЛОГИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/environment.png" alt="Окружающий мир"><div class="subject-name">ОКР. МИР</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/pe.png" alt="Физкультура"><div class="subject-name">ФИЗКУЛЬТУРА</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/obzh.png" alt="ОБЗР"><div class="subject-name">ОБЗР</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/military.png" alt="НВП"><div class="subject-name">НВП</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/tech.png" alt="Технология"><div class="subject-name">ТЕХНОЛОГИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/drafting.png" alt="Черчение"><div class="subject-name">ЧЕРЧЕНИЕ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/art.png" alt="ИЗО"><div class="subject-name">ИЗО</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/music.png" alt="Музыка"><div class="subject-name">МУЗЫКА</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/culture.png" alt="МХК"><div class="subject-name">МХК</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/philosophy.png" alt="Философия"><div class="subject-name">ФИЛОСОФИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/psychology.png" alt="Психология"><div class="subject-name">ПСИХОЛОГИЯ</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/law.png" alt="Право"><div class="subject-name">ПРАВО</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/economics.png" alt="Экономика"><div class="subject-name">ЭКОНОМИКА</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/statistics.png" alt="Теорвер"><div class="subject-name">ТЕОРВЕР</div></div>
-            <div class="subject-card"><img class="subject-icon" src="/images/subjects/ethics.png" alt="ОРКСЭ"><div class="subject-name">ОРКСЭ</div></div>
-        </div>
-
-        <div class="buttons">
-            <a href="/teacher.html" class="btn teacher">👨‍🏫 ВОЙТИ КАК УЧИТЕЛЬ</a>
-            <a href="/student.html" class="btn student">👨‍🎓 ВОЙТИ КАК УЧЕНИК</a>
-        </div>
-
-        <div class="devlog-section">
-            <div class="devlog-info">
-                <p>C:\&gt; devlog.exe --info</p>
-                <p>&gt; Версия: 1.4.0</p>
-                <p>&gt; Последнее обновление: 20.04.2026</p>
-                <p>&gt; Добавлены пиксельные иконки предметов, логотип</p>
-                <p>&gt; Статус: <span style="color: #00ff00;">Активен</span> <span class="cursor"></span></p>
-            </div>
-            <div class="devlog-btn-container">
-                <a href="/devlog.html" class="btn-devlog">📜 ЧИТАТЬ DEVLOG</a>
-            </div>
-        </div>
-
-
-        
-        <div class="footer-bar">
-            <a href="/feedback.html" class="feedback-link">📝 ОТЗЫВ</a>
-            <div class="email-text">📧 support.mozgoshtorm@ro.ru</div>
+        <div class="stat">
+            <span>📊</span>
+            <div>ДЕТАЛЬНАЯ СТАТИСТИКА</div>
         </div>
     </div>
 
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-        repeating-linear-gradient(
-            rgba(215, 11, 242, 0.05) 0px,
-            rgba(215, 11, 242, 0.05) 2px,
-            transparent 2px,
-            transparent 4px
-        ),
-        repeating-linear-gradient(
-            90deg,
-            rgba(215, 11, 242, 0.05) 0px,
-            rgba(215, 11, 242, 0.05) 2px,
-            transparent 2px,
-            transparent 4px
-        );
-    pointer-events: none;
-    z-index: 0;
-}
+    <h3>📚 ВЫБЕРИ ПРЕДМЕТ</h3>
+    <div class="subject-grid">
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/math.png" alt="Математика"><div class="subject-name">МАТЕМАТИКА</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/algebra.png" alt="Алгебра"><div class="subject-name">АЛГЕБРА</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/geometry.png" alt="Геометрия"><div class="subject-name">ГЕОМЕТРИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/informatics.png" alt="Информатика"><div class="subject-name">ИНФОРМАТИКА</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/russian.png" alt="Русский язык"><div class="subject-name">РУССКИЙ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/literature.png" alt="Литература"><div class="subject-name">ЛИТЕРАТУРА</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/english.png" alt="Английский"><div class="subject-name">АНГЛИЙСКИЙ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/french.png" alt="Французский"><div class="subject-name">ФРАНЦУЗСКИЙ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/german.png" alt="Немецкий"><div class="subject-name">НЕМЕЦКИЙ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/history.png" alt="История"><div class="subject-name">ИСТОРИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/history_russia.png" alt="История России"><div class="subject-name">ИСТОРИЯ РФ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/social.png" alt="Обществознание"><div class="subject-name">ОБЩЕСТВОЗНАНИЕ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/geography.png" alt="География"><div class="subject-name">ГЕОГРАФИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/biology.png" alt="Биология"><div class="subject-name">БИОЛОГИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/chemistry.png" alt="Химия"><div class="subject-name">ХИМИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/physics.png" alt="Физика"><div class="subject-name">ФИЗИКА</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/ecology.png" alt="Экология"><div class="subject-name">ЭКОЛОГИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/environment.png" alt="Окружающий мир"><div class="subject-name">ОКР. МИР</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/pe.png" alt="Физкультура"><div class="subject-name">ФИЗКУЛЬТУРА</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/obzh.png" alt="ОБЗР"><div class="subject-name">ОБЗР</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/military.png" alt="НВП"><div class="subject-name">НВП</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/tech.png" alt="Технология"><div class="subject-name">ТЕХНОЛОГИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/drafting.png" alt="Черчение"><div class="subject-name">ЧЕРЧЕНИЕ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/art.png" alt="ИЗО"><div class="subject-name">ИЗО</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/music.png" alt="Музыка"><div class="subject-name">МУЗЫКА</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/culture.png" alt="МХК"><div class="subject-name">МХК</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/philosophy.png" alt="Философия"><div class="subject-name">ФИЛОСОФИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/psychology.png" alt="Психология"><div class="subject-name">ПСИХОЛОГИЯ</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/law.png" alt="Право"><div class="subject-name">ПРАВО</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/economics.png" alt="Экономика"><div class="subject-name">ЭКОНОМИКА</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/statistics.png" alt="Теорвер"><div class="subject-name">ТЕОРВЕР</div></div>
+        <div class="subject-card"><img class="subject-icon" src="/images/subjects/ethics.png" alt="ОРКСЭ"><div class="subject-name">ОРКСЭ</div></div>
+    </div>
+
+    <div class="buttons">
+        <a href="/teacher.html" class="btn teacher">👨‍🏫 ВОЙТИ КАК УЧИТЕЛЬ</a>
+        <a href="/student.html" class="btn student">👨‍🎓 ВОЙТИ КАК УЧЕНИК</a>
+    </div>
+
+    <div class="devlog-section">
+        <div class="devlog-info">
+            <p>C:\&gt; devlog.exe --info</p>
+            <p>&gt; Версия: 0.21.2</p>
+            <p>&gt; Последнее обновление: 11.05.2026</p>
+            <p>&gt; Обновлены анимации, добавлен экспорт в Excel</p>
+            <p>&gt; Статус: <span style="color: #00ff00;">Активен</span> <span class="cursor"></span></p>
+        </div>
+        <div class="devlog-btn-container">
+            <a href="/devlog.html" class="btn-devlog">📜 ЧИТАТЬ DEVLOG</a>
+        </div>
+    </div>
+
+    <div class="footer-bar">
+        <a href="/feedback.html" class="feedback-link">📝 ОТЗЫВ</a>
+        <div class="email-text">📧 support.mozgoshtorm@ro.ru</div>
+    </div>
+</div>
+
+<script>
+    // === ПАДАЮЩИЕ ПИКСЕЛИ ===
+    function createPixelRain() {
+        const container = document.getElementById('pixelRain');
+        if (!container) return;
+        
+        const pixelCount = 80;
+        
+        for (let i = 0; i < pixelCount; i++) {
+            const pixel = document.createElement('div');
+            pixel.className = 'pixel';
+            
+            const size = Math.floor(Math.random() * 6) + 2;
+            pixel.style.width = size + 'px';
+            pixel.style.height = size + 'px';
+            
+            pixel.style.left = Math.random() * 100 + '%';
+            
+            const duration = Math.random() * 7 + 3;
+            pixel.style.animationDuration = duration + 's';
+            
+            pixel.style.animationDelay = Math.random() * 5 + 's';
+            
+            if (Math.random() > 0.7) {
+                pixel.style.backgroundColor = '#d70bf2';
+            } else {
+                pixel.style.backgroundColor = '#ffcc00';
+            }
+            
+            container.appendChild(pixel);
+        }
+    }
     
+    document.addEventListener('DOMContentLoaded', createPixelRain);
+</script>
+
 </body>
 </html>

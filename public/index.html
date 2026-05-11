@@ -376,6 +376,31 @@
             .feedback-link { font-size: 0.35em; padding: 4px 8px; }
             .email-text { font-size: 0.35em; }
         }
+    /* ===== АНИМАЦИИ ПЕРЕХОДОВ ===== */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .container, .hero { animation: fadeIn 0.4s ease-out; }
+    
+    @keyframes cardFadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    
+    .subject-card, .quiz-card, .stat, .entry { animation: cardFadeIn 0.3s ease-out; animation-fill-mode: backwards; }
+    
+    .tab, .btn, .btn-devlog, .feedback-link { transition: all 0.08s linear; }
+    
+    .tab-content { animation: fadeIn 0.3s ease-out; }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .answer-feedback { animation: slideIn 0.3s ease-out; }
     </style>
 </head>
 <body>

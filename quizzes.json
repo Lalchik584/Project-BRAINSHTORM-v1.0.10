@@ -1,255 +1,2461 @@
 [
   {
-    "id": "7dcf7085-55ef-48b9-a490-eda006c57631",
-    "article": "3209769",
-    "title": "TEST_QUIZ_3_DATA_BAZE_(QUIZES)",
+    "id": "math-5grade-01",
+    "article": "5012025",
+    "title": "Математика 5 класс. Дроби",
+    "category": "math",
     "questions": [
       {
-        "question": "100=?",
-        "correctAnswer": "64+36",
+        "question": "Сколько будет 1/2 + 1/4?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "3/4",
         "wrongAnswers": [
-          "93+7,1",
-          "42+47",
-          "89+12"
+          "2/6",
+          "1/6",
+          "2/4"
+        ]
+      },
+      {
+        "question": "Переведите 3/5 в десятичную дробь",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "0.6",
+        "wrongAnswers": [
+          "0.3",
+          "0.5",
+          "0.35"
+        ]
+      },
+      {
+        "question": "Сколько будет 2/3 * 3/4?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "1/2",
+        "wrongAnswers": [
+          "6/12",
+          "2/4",
+          "3/6"
+        ]
+      },
+      {
+        "question": "Какая дробь больше: 7/8 или 3/4?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "7/8",
+        "wrongAnswers": [
+          "3/4",
+          "одинаковые",
+          "не сравнить"
+        ]
+      },
+      {
+        "question": "Сколько будет 5/6 - 1/3?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "1/2",
+        "wrongAnswers": [
+          "4/3",
+          "2/3",
+          "5/18"
         ]
       }
     ],
-    "createdAt": "2025-11-18T17:36:25.405Z",
+    "createdAt": "2025-04-12T00:00:00.000Z",
     "plays": 0
   },
   {
-    "id": "9e666dd4-2d0f-4060-8e35-46e1c5e96ecb",
-    "article": "8010290",
-    "title": "TESTING QUIZ 5 Questions",
+    "id": "math-6grade-01",
+    "article": "6012025",
+    "title": "Математика 6 класс. Проценты",
+    "category": "math",
     "questions": [
       {
-        "question": "1",
-        "correctAnswer": "1",
+        "question": "Сколько процентов составляет число 30 от 150?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "20",
         "wrongAnswers": [
-          "2",
+          "30",
+          "15",
+          "25"
+        ]
+      },
+      {
+        "question": "Найдите 25% от 200",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "50",
+        "wrongAnswers": [
+          "25",
+          "75",
+          "100"
+        ]
+      },
+      {
+        "question": "Цена товара 500 рублей. После скидки 10% он стал стоить",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "450",
+        "wrongAnswers": [
+          "490",
+          "400",
+          "550"
+        ]
+      },
+      {
+        "question": "Если число увеличили на 20% и получили 120, то исходное число",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "100",
+        "wrongAnswers": [
+          "96",
+          "110",
+          "90"
+        ]
+      },
+      {
+        "question": "Сколько процентов составляет 15 от 60?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "25",
+        "wrongAnswers": [
+          "15",
+          "30",
+          "20"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "russian-5grade-01",
+    "article": "5022025",
+    "title": "Русский язык 5 класс. Части речи",
+    "category": "russian",
+    "questions": [
+      {
+        "question": "Какая часть речи обозначает предмет?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "существительное",
+        "wrongAnswers": [
+          "прилагательное",
+          "глагол",
+          "наречие"
+        ]
+      },
+      {
+        "question": "Какая часть речи обозначает действие предмета?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "глагол",
+        "wrongAnswers": [
+          "существительное",
+          "прилагательное",
+          "местоимение"
+        ]
+      },
+      {
+        "question": "Какая часть речи обозначает признак предмета?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "прилагательное",
+        "wrongAnswers": [
+          "глагол",
+          "существительное",
+          "числительное"
+        ]
+      },
+      {
+        "question": "Сколько падежей в русском языке?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "6",
+        "wrongAnswers": [
+          "4",
+          "5",
+          "7"
+        ]
+      },
+      {
+        "question": "Какой падеж отвечает на вопрос КТО? ЧТО?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "именительный",
+        "wrongAnswers": [
+          "родительный",
+          "винительный",
+          "предложный"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "russian-7grade-01",
+    "article": "7022025",
+    "title": "Русский язык 7 класс. Причастия и деепричастия",
+    "category": "russian",
+    "questions": [
+      {
+        "question": "Причастие отвечает на вопрос",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "какой",
+        "wrongAnswers": [
+          "что делая",
+          "что сделать",
+          "кто"
+        ]
+      },
+      {
+        "question": "Деепричастие отвечает на вопрос",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "что делая",
+        "wrongAnswers": [
+          "какой",
+          "что сделать",
+          "кто"
+        ]
+      },
+      {
+        "question": "Суффикс -УЩ-/-ЮЩ- пишется в причастиях",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "1 спряжения",
+        "wrongAnswers": [
+          "2 спряжения",
+          "всегда",
+          "никогда"
+        ]
+      },
+      {
+        "question": "Как пишется НЕ с причастием без зависимых слов?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "слитно",
+        "wrongAnswers": [
+          "раздельно",
+          "через дефис",
+          "всегда раздельно"
+        ]
+      },
+      {
+        "question": "Выберите деепричастие",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "читая",
+        "wrongAnswers": [
+          "читающий",
+          "читаемый",
+          "прочитанный"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "english-5grade-01",
+    "article": "5032025",
+    "title": "Английский язык 5 класс. Глагол TO BE",
+    "category": "english",
+    "questions": [
+      {
+        "question": "Как переводится I am?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "я есть",
+        "wrongAnswers": [
+          "ты есть",
+          "он есть",
+          "мы есть"
+        ]
+      },
+      {
+        "question": "Выберите правильную форму для HE",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "is",
+        "wrongAnswers": [
+          "am",
+          "are",
+          "be"
+        ]
+      },
+      {
+        "question": "Выберите правильную форму для WE",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "are",
+        "wrongAnswers": [
+          "am",
+          "is",
+          "be"
+        ]
+      },
+      {
+        "question": "Как сказать по-английски ОНИ УЧЕНИКИ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "They are pupils",
+        "wrongAnswers": [
+          "We are pupils",
+          "He is pupil",
+          "I am pupil"
+        ]
+      },
+      {
+        "question": "Отрицательная форма IS NOT сокращённо",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "isn't",
+        "wrongAnswers": [
+          "aren't",
+          "am not",
+          "not is"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "english-7grade-01",
+    "article": "7032025",
+    "title": "Английский язык 7 класс. Present Perfect",
+    "category": "english",
+    "questions": [
+      {
+        "question": "Как образуется Present Perfect?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "have/has + V3",
+        "wrongAnswers": [
+          "am/is/are + Ving",
+          "do/does + V",
+          "will + V"
+        ]
+      },
+      {
+        "question": "Какой вспомогательный глагол для HE?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "has",
+        "wrongAnswers": [
+          "have",
+          "is",
+          "does"
+        ]
+      },
+      {
+        "question": "Как переводится I have already done?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "я уже сделал",
+        "wrongAnswers": [
+          "я делаю",
+          "я сделаю",
+          "я буду делать"
+        ]
+      },
+      {
+        "question": "Какое слово является маркером Present Perfect?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "just",
+        "wrongAnswers": [
+          "yesterday",
+          "last week",
+          "tomorrow"
+        ]
+      },
+      {
+        "question": "Выберите правильную форму глагола: She ... to London",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "has gone",
+        "wrongAnswers": [
+          "have gone",
+          "went",
+          "goes"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "history-6grade-01",
+    "article": "6042025",
+    "title": "История 6 класс. Древняя Русь",
+    "category": "history",
+    "questions": [
+      {
+        "question": "Кто был основателем древнерусского государства?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Рюрик",
+        "wrongAnswers": [
+          "Олег",
+          "Игорь",
+          "Владимир"
+        ]
+      },
+      {
+        "question": "В каком году произошло крещение Руси?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "988",
+        "wrongAnswers": [
+          "862",
+          "945",
+          "1015"
+        ]
+      },
+      {
+        "question": "Кто крестил Русь?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Владимир",
+        "wrongAnswers": [
+          "Олег",
+          "Ярослав",
+          "Святослав"
+        ]
+      },
+      {
+        "question": "Какое прозвище получил князь Ярослав?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Мудрый",
+        "wrongAnswers": [
+          "Великий",
+          "Красное Солнышко",
+          "Грозный"
+        ]
+      },
+      {
+        "question": "Кто написал Повесть временных лет?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Нестор",
+        "wrongAnswers": [
+          "Летописец",
+          "Кирилл",
+          "Мефодий"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "history-8grade-01",
+    "article": "8042025",
+    "title": "История 8 класс. Эпоха Петра I",
+    "category": "history_russia",
+    "questions": [
+      {
+        "question": "В каком году началось правление Петра I?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "1682",
+        "wrongAnswers": [
+          "1672",
+          "1698",
+          "1721"
+        ]
+      },
+      {
+        "question": "Как называлась война России со Швецией?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Северная",
+        "wrongAnswers": [
+          "Семилетняя",
+          "Тридцатилетняя",
+          "Крымская"
+        ]
+      },
+      {
+        "question": "Какое сражение стало решающим в Северной войне?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Полтавская",
+        "wrongAnswers": [
+          "Нарвская",
+          "Гангутская",
+          "Лефортовская"
+        ]
+      },
+      {
+        "question": "В каком году была основана Санкт-Петербург?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "1703",
+        "wrongAnswers": [
+          "1700",
+          "1712",
+          "1721"
+        ]
+      },
+      {
+        "question": "Как назывался первый российский флот?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Азовский",
+        "wrongAnswers": [
+          "Балтийский",
+          "Черноморский",
+          "Тихоокеанский"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "geography-6grade-01",
+    "article": "6052025",
+    "title": "География 6 класс. Литосфера",
+    "category": "geography",
+    "questions": [
+      {
+        "question": "Что такое литосфера?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "твердая оболочка Земли",
+        "wrongAnswers": [
+          "воздушная оболочка",
+          "водная оболочка",
+          "живая оболочка"
+        ]
+      },
+      {
+        "question": "Самая высокая гора в мире",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Эверест",
+        "wrongAnswers": [
+          "Эльбрус",
+          "Килиманджаро",
+          "Мак-Кинли"
+        ]
+      },
+      {
+        "question": "Самая глубокая впадина в океане",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Марианская",
+        "wrongAnswers": [
+          "Филиппинская",
+          "Тонга",
+          "Кермадек"
+        ]
+      },
+      {
+        "question": "Какая порода является магматической?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "гранит",
+        "wrongAnswers": [
+          "известняк",
+          "песчаник",
+          "мрамор"
+        ]
+      },
+      {
+        "question": "Какая порода является осадочной?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "песчаник",
+        "wrongAnswers": [
+          "базальт",
+          "гранит",
+          "гнейс"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "geography-9grade-01",
+    "article": "9052025",
+    "title": "География 9 класс. Население России",
+    "category": "geography",
+    "questions": [
+      {
+        "question": "Сколько примерно народов проживает в России?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "190",
+        "wrongAnswers": [
+          "100",
+          "150",
+          "250"
+        ]
+      },
+      {
+        "question": "Самый многочисленный народ России",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "русские",
+        "wrongAnswers": [
+          "татары",
+          "украинцы",
+          "башкиры"
+        ]
+      },
+      {
+        "question": "Самый большой город России по площади",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Москва",
+        "wrongAnswers": [
+          "Санкт-Петербург",
+          "Новосибирск",
+          "Екатеринбург"
+        ]
+      },
+      {
+        "question": "Сколько субъектов в Российской Федерации?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "85",
+        "wrongAnswers": [
+          "83",
+          "89",
+          "90"
+        ]
+      },
+      {
+        "question": "Какая религия является традиционной для большинства россиян?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "православие",
+        "wrongAnswers": [
+          "ислам",
+          "буддизм",
+          "иудаизм"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "biology-7grade-01",
+    "article": "6072025",
+    "title": "Биология 7 класс. Зоология",
+    "category": "biology",
+    "questions": [
+      {
+        "question": "К какому типу относятся насекомые?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "членистоногие",
+        "wrongAnswers": [
+          "хордовые",
+          "моллюски",
+          "кольчатые черви"
+        ]
+      },
+      {
+        "question": "Сколько ног у насекомых?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "6",
+        "wrongAnswers": [
+          "4",
+          "8",
+          "10"
+        ]
+      },
+      {
+        "question": "Какое животное относится к пресмыкающимся?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "крокодил",
+        "wrongAnswers": [
+          "лягушка",
+          "тритон",
+          "жаба"
+        ]
+      },
+      {
+        "question": "Какое животное относится к млекопитающим?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "дельфин",
+        "wrongAnswers": [
+          "акула",
+          "осьминог",
+          "пингвин"
+        ]
+      },
+      {
+        "question": "Какую птицу называют санитаром леса?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "дятел",
+        "wrongAnswers": [
+          "ворона",
+          "сорока",
+          "синица"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "chemistry-8grade-01",
+    "article": "6082025",
+    "title": "Химия 8 класс. Атомы и молекулы",
+    "category": "chemistry",
+    "questions": [
+      {
+        "question": "Самая маленькая частица вещества",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "атом",
+        "wrongAnswers": [
+          "молекула",
+          "электрон",
+          "протон"
+        ]
+      },
+      {
+        "question": "Кислород это",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "газ",
+        "wrongAnswers": [
+          "жидкость",
+          "твердое вещество",
+          "плазма"
+        ]
+      },
+      {
+        "question": "Химическая формула воды",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "H2O",
+        "wrongAnswers": [
+          "CO2",
+          "O2",
+          "H2"
+        ]
+      },
+      {
+        "question": "Какой газ выделяется при горении?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "углекислый",
+        "wrongAnswers": [
+          "кислород",
+          "азот",
+          "водород"
+        ]
+      },
+      {
+        "question": "Кислоты в водном растворе имеют вкус",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "кислый",
+        "wrongAnswers": [
+          "горький",
+          "соленый",
+          "сладкий"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "physics-7grade-01",
+    "article": "6092025",
+    "title": "Физика 7 класс. Механическое движение",
+    "category": "physics",
+    "questions": [
+      {
+        "question": "Единица измерения скорости",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "м/с",
+        "wrongAnswers": [
+          "км/ч",
+          "м/с2",
+          "Н"
+        ]
+      },
+      {
+        "question": "Формула скорости",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "v = S/t",
+        "wrongAnswers": [
+          "S = v*t",
+          "t = S/v",
+          "a = v/t"
+        ]
+      },
+      {
+        "question": "Какое движение называется равномерным?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "с постоянной скоростью",
+        "wrongAnswers": [
+          "с ускорением",
+          "по окружности",
+          "колебательное"
+        ]
+      },
+      {
+        "question": "Что измеряется в метрах?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "расстояние",
+        "wrongAnswers": [
+          "скорость",
+          "время",
+          "масса"
+        ]
+      },
+      {
+        "question": "Что является единицей времени в системе СИ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "секунда",
+        "wrongAnswers": [
+          "минута",
+          "час",
+          "сутки"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "informatics-8grade-01",
+    "article": "6102025",
+    "title": "Информатика 8 класс. Алгоритмы",
+    "category": "informatic",
+    "questions": [
+      {
+        "question": "Что такое алгоритм?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "последовательность действий",
+        "wrongAnswers": [
+          "команда",
+          "программа",
+          "язык"
+        ]
+      },
+      {
+        "question": "Как называется алгоритм, в котором действия повторяются?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "циклический",
+        "wrongAnswers": [
+          "линейный",
+          "разветвляющийся",
+          "вспомогательный"
+        ]
+      },
+      {
+        "question": "Свойство алгоритма, означающее конечность",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "результативность",
+        "wrongAnswers": [
+          "дискретность",
+          "массовость",
+          "понятность"
+        ]
+      },
+      {
+        "question": "Какая структура алгоритма используется при выборе?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "ветвление",
+        "wrongAnswers": [
+          "цикл",
+          "следование",
+          "подпрограмма"
+        ]
+      },
+      {
+        "question": "Какой алгоритм называется линейным?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "команды идут подряд",
+        "wrongAnswers": [
+          "с повторением",
+          "с выбором",
+          "с условием"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "informatics-9grade-01",
+    "article": "9102025",
+    "title": "Информатика 9 класс. Программирование",
+    "category": "informatic",
+    "questions": [
+      {
+        "question": "Какая команда выводит текст на экран в Python?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "print",
+        "wrongAnswers": [
+          "input",
+          "int",
+          "str"
+        ]
+      },
+      {
+        "question": "Какая команда считывает данные с клавиатуры в Python?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "input",
+        "wrongAnswers": [
+          "print",
+          "read",
+          "scan"
+        ]
+      },
+      {
+        "question": "Какой тип данных используется для целых чисел?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "int",
+        "wrongAnswers": [
+          "float",
+          "str",
+          "bool"
+        ]
+      },
+      {
+        "question": "Какой тип данных используется для дробных чисел?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "float",
+        "wrongAnswers": [
+          "int",
+          "str",
+          "bool"
+        ]
+      },
+      {
+        "question": "Что означает оператор if?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "если",
+        "wrongAnswers": [
+          "иначе",
+          "пока",
+          "для"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "social-9grade-01",
+    "article": "6112025",
+    "title": "Обществознание 9 класс. Конституция РФ",
+    "category": "social",
+    "questions": [
+      {
+        "question": "Когда была принята Конституция РФ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "1993",
+        "wrongAnswers": [
+          "1991",
+          "1995",
+          "2000"
+        ]
+      },
+      {
+        "question": "Кто является главой государства в России?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "президент",
+        "wrongAnswers": [
+          "премьер-министр",
+          "председатель",
+          "министр"
+        ]
+      },
+      {
+        "question": "Как называется парламент России?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Федеральное Собрание",
+        "wrongAnswers": [
+          "Государственная Дума",
+          "Совет Федерации",
+          "Правительство"
+        ]
+      },
+      {
+        "question": "Из скольких палат состоит парламент РФ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "2",
+        "wrongAnswers": [
+          "1",
           "3",
           "4"
         ]
       },
       {
-        "question": "2",
-        "correctAnswer": "2",
+        "question": "Сколько лет длится срок полномочий президента?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "6",
         "wrongAnswers": [
-          "3",
           "4",
-          "5"
+          "5",
+          "7"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "literature-9grade-01",
+    "article": "6122025",
+    "title": "Литература 9 класс. Евгений Онегин",
+    "category": "literature",
+    "questions": [
+      {
+        "question": "Кто написал Евгения Онегина?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Пушкин",
+        "wrongAnswers": [
+          "Лермонтов",
+          "Гоголь",
+          "Толстой"
         ]
       },
       {
-        "question": "3",
-        "correctAnswer": "3",
+        "question": "Кого убил Онегин на дуэли?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Ленского",
         "wrongAnswers": [
-          "4",
+          "Зарецкого",
+          "Ларина",
+          "Гремина"
+        ]
+      },
+      {
+        "question": "Как звали сестру Татьяны Лариной?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Ольга",
+        "wrongAnswers": [
+          "Анна",
+          "Мария",
+          "Екатерина"
+        ]
+      },
+      {
+        "question": "Как назывался роман в стихах?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Евгений Онегин",
+        "wrongAnswers": [
+          "Мертвые души",
+          "Горе от ума",
+          "Герой нашего времени"
+        ]
+      },
+      {
+        "question": "Где родился Онегин?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Петербург",
+        "wrongAnswers": [
+          "Москва",
+          "Киев",
+          "Париж"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "obzh-8grade-01",
+    "article": "6132025",
+    "title": "ОБЗР 8 класс. Первая помощь",
+    "category": "obzh",
+    "questions": [
+      {
+        "question": "Что нужно сделать при ожоге первой степени?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "охладить водой",
+        "wrongAnswers": [
+          "смазать маслом",
+          "проколоть пузырь",
+          "наложить жгут"
+        ]
+      },
+      {
+        "question": "Какой номер вызова скорой помощи в России?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "103",
+        "wrongAnswers": [
+          "101",
+          "102",
+          "104"
+        ]
+      },
+      {
+        "question": "Что нужно сделать при носовом кровотечении?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "наклонить голову вперед",
+        "wrongAnswers": [
+          "запрокинуть голову",
+          "лечь на спину",
+          "помассировать шею"
+        ]
+      },
+      {
+        "question": "Сколько надавливаний при непрямом массаже сердца?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "30",
+        "wrongAnswers": [
+          "15",
+          "20",
+          "25"
+        ]
+      },
+      {
+        "question": "Что нужно сделать при обмороке?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "поднять ноги",
+        "wrongAnswers": [
+          "опустить голову",
+          "уложить на бок",
+          "дать воду"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "economics-11grade-01",
+    "article": "6142025",
+    "title": "Экономика 11 класс. Спрос и предложение",
+    "category": "economics",
+    "questions": [
+      {
+        "question": "Закон спроса: чем выше цена, тем...",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "меньше спрос",
+        "wrongAnswers": [
+          "больше спрос",
+          "спрос не меняется",
+          "предложение растет"
+        ]
+      },
+      {
+        "question": "Что происходит с предложением при росте цены?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "растет",
+        "wrongAnswers": [
+          "падает",
+          "не меняется",
+          "становится эластичным"
+        ]
+      },
+      {
+        "question": "Что такое инфляция?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "рост цен",
+        "wrongAnswers": [
+          "падение цен",
+          "безработица",
+          "кризис"
+        ]
+      },
+      {
+        "question": "Что является деньгами?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "всеобщий эквивалент",
+        "wrongAnswers": [
+          "бумага",
+          "металл",
+          "вексель"
+        ]
+      },
+      {
+        "question": "Какая система характеризуется господством государственной собственности?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "командная",
+        "wrongAnswers": [
+          "рыночная",
+          "смешанная",
+          "традиционная"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "psychology-1course-01",
+    "article": "6152025",
+    "title": "Психология 1 курс. Познавательные процессы",
+    "category": "psychology",
+    "questions": [
+      {
+        "question": "Что является формой ощущения?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "зрение",
+        "wrongAnswers": [
+          "мышление",
+          "воображение",
+          "память"
+        ]
+      },
+      {
+        "question": "Какой процесс отвечает за запоминание?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "память",
+        "wrongAnswers": [
+          "внимание",
+          "восприятие",
+          "мышление"
+        ]
+      },
+      {
+        "question": "Как называется непроизвольное сосредоточение?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "непроизвольное внимание",
+        "wrongAnswers": [
+          "произвольное внимание",
+          "послепроизвольное",
+          "распределение"
+        ]
+      },
+      {
+        "question": "Сколько типов темперамента выделил Гиппократ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "4",
+        "wrongAnswers": [
+          "3",
           "5",
           "6"
         ]
       },
       {
-        "question": "4",
-        "correctAnswer": "4",
+        "question": "Какой тип темперамента характеризуется медлительностью?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "флегматик",
         "wrongAnswers": [
-          "5",
-          "6",
-          "7"
+          "холерик",
+          "сангвиник",
+          "меланхолик"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "philosophy-2course-01",
+    "article": "6162025",
+    "title": "Философия 2 курс. Античная философия",
+    "category": "philosophy",
+    "questions": [
+      {
+        "question": "Кто считается основателем античной философии?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Фалес",
+        "wrongAnswers": [
+          "Платон",
+          "Аристотель",
+          "Сократ"
         ]
       },
       {
-        "question": "5",
-        "correctAnswer": "5",
+        "question": "Кто был учителем Платона?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Сократ",
         "wrongAnswers": [
-          "6",
+          "Аристотель",
+          "Демокрит",
+          "Эпикур"
+        ]
+      },
+      {
+        "question": "Кто был учеником Платона?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Аристотель",
+        "wrongAnswers": [
+          "Сократ",
+          "Зенон",
+          "Пифагор"
+        ]
+      },
+      {
+        "question": "Что является первоосновой у Фалеса?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "вода",
+        "wrongAnswers": [
+          "огонь",
+          "воздух",
+          "земля"
+        ]
+      },
+      {
+        "question": "Как называется учение об идеях Платона?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "теория идей",
+        "wrongAnswers": [
+          "теория познания",
+          "теория бытия",
+          "теория души"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "law-2course-01",
+    "article": "6172025",
+    "title": "Право 2 курс. Основы права",
+    "category": "law",
+    "questions": [
+      {
+        "question": "Что является высшей юридической силой в РФ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Конституция",
+        "wrongAnswers": [
+          "УК РФ",
+          "ГК РФ",
+          "ТК РФ"
+        ]
+      },
+      {
+        "question": "Какая отрасль права регулирует имущественные отношения?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "гражданское",
+        "wrongAnswers": [
+          "уголовное",
+          "административное",
+          "трудовое"
+        ]
+      },
+      {
+        "question": "С какого возраста наступает административная ответственность?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "16",
+        "wrongAnswers": [
+          "14",
+          "18",
+          "21"
+        ]
+      },
+      {
+        "question": "Что является формой правления в РФ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "республика",
+        "wrongAnswers": [
+          "монархия",
+          "федерация",
+          "унитарное"
+        ]
+      },
+      {
+        "question": "Кто является гарантом Конституции РФ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "президент",
+        "wrongAnswers": [
+          "правительство",
+          "парламент",
+          "суд"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "ecology-10grade-01",
+    "article": "6182025",
+    "title": "Экология 10 класс. Охрана природы",
+    "category": "ecology",
+    "questions": [
+      {
+        "question": "Что такое заповедник?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "территория без хоздеятельности",
+        "wrongAnswers": [
+          "территория с ограничениями",
+          "национальный парк",
+          "заказник"
+        ]
+      },
+      {
+        "question": "Какой газ вызывает парниковый эффект?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "CO2",
+        "wrongAnswers": [
+          "O2",
+          "N2",
+          "H2"
+        ]
+      },
+      {
+        "question": "Что такое смог?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "загрязнение воздуха",
+        "wrongAnswers": [
+          "загрязнение воды",
+          "загрязнение почвы",
+          "шумовое загрязнение"
+        ]
+      },
+      {
+        "question": "Какая книга содержит список редких видов?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Красная книга",
+        "wrongAnswers": [
+          "Зеленая книга",
+          "Синяя книга",
+          "Черная книга"
+        ]
+      },
+      {
+        "question": "Что такое озоновые дыры?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "уменьшение озонового слоя",
+        "wrongAnswers": [
+          "отверстия в небе",
+          "извержение вулкана",
+          "кислотные дожди"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "astronomy-11grade-01",
+    "article": "6192025",
+    "title": "Астрономия 11 класс. Солнечная система",
+    "category": "astronomy",
+    "questions": [
+      {
+        "question": "Сколько планет в Солнечной системе?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "8",
+        "wrongAnswers": [
           "7",
+          "9",
+          "10"
+        ]
+      },
+      {
+        "question": "Самая большая планета Солнечной системы",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Юпитер",
+        "wrongAnswers": [
+          "Сатурн",
+          "Нептун",
+          "Уран"
+        ]
+      },
+      {
+        "question": "Самая близкая к Солнцу планета",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Меркурий",
+        "wrongAnswers": [
+          "Венера",
+          "Земля",
+          "Марс"
+        ]
+      },
+      {
+        "question": "Какая планета известна своими кольцами?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Сатурн",
+        "wrongAnswers": [
+          "Юпитер",
+          "Уран",
+          "Нептун"
+        ]
+      },
+      {
+        "question": "Что такое Галактика?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "звездная система",
+        "wrongAnswers": [
+          "скопление планет",
+          "туманность",
+          "черная дыра"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "art-8grade-01",
+    "article": "6202025",
+    "title": "ИЗО 8 класс. Жанры живописи",
+    "category": "art",
+    "questions": [
+      {
+        "question": "Что такое портрет?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "изображение человека",
+        "wrongAnswers": [
+          "изображение природы",
+          "изображение предметов",
+          "историческое событие"
+        ]
+      },
+      {
+        "question": "Что такое пейзаж?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "изображение природы",
+        "wrongAnswers": [
+          "изображение человека",
+          "изображение предметов",
+          "изображение животных"
+        ]
+      },
+      {
+        "question": "Что такое натюрморт?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "изображение неживых предметов",
+        "wrongAnswers": [
+          "изображение человека",
+          "изображение природы",
+          "изображение животных"
+        ]
+      },
+      {
+        "question": "Какой жанр посвящен историческим событиям?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "исторический",
+        "wrongAnswers": [
+          "батальный",
+          "бытовой",
+          "мифологический"
+        ]
+      },
+      {
+        "question": "Какой цвет получается при смешении красного и синего?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "фиолетовый",
+        "wrongAnswers": [
+          "зеленый",
+          "оранжевый",
+          "коричневый"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "music-7grade-01",
+    "article": "6212025",
+    "title": "Музыка 7 класс. Музыкальные инструменты",
+    "category": "music",
+    "questions": [
+      {
+        "question": "Какой инструмент относится к струнным?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "скрипка",
+        "wrongAnswers": [
+          "флейта",
+          "труба",
+          "барабан"
+        ]
+      },
+      {
+        "question": "Какой инструмент относится к духовым?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "флейта",
+        "wrongAnswers": [
+          "скрипка",
+          "пианино",
+          "гитара"
+        ]
+      },
+      {
+        "question": "Какой инструмент относится к ударным?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "барабан",
+        "wrongAnswers": [
+          "флейта",
+          "труба",
+          "скрипка"
+        ]
+      },
+      {
+        "question": "Кто написал Лунную сонату?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Бетховен",
+        "wrongAnswers": [
+          "Моцарт",
+          "Бах",
+          "Шопен"
+        ]
+      },
+      {
+        "question": "Сколько нот в музыкальной гамме?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "7",
+        "wrongAnswers": [
+          "5",
+          "6",
           "8"
         ]
       }
     ],
-    "createdAt": "2025-11-18T18:06:51.972Z",
+    "createdAt": "2025-04-12T00:00:00.000Z",
     "plays": 0
   },
   {
-    "id": "9b629117-8906-41e4-9444-df01a186a147",
-    "article": "1503330",
-    "title": "TESTING QUIZ_publish",
+    "id": "culture-10grade-01",
+    "article": "6222025",
+    "title": "МХК 10 класс. Архитектура",
+    "category": "culture",
     "questions": [
       {
-        "question": "1",
-        "correctAnswer": "1",
+        "question": "Что такое архитектура?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "искусство строить",
         "wrongAnswers": [
-          "2",
+          "искусство рисовать",
+          "искусство лепить",
+          "искусство вышивать"
+        ]
+      },
+      {
+        "question": "Как называется стиль с остроконечными башнями?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "готика",
+        "wrongAnswers": [
+          "романский",
+          "барокко",
+          "классицизм"
+        ]
+      },
+      {
+        "question": "Как называются египетские гробницы?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "пирамиды",
+        "wrongAnswers": [
+          "храмы",
+          "дворцы",
+          "склепы"
+        ]
+      },
+      {
+        "question": "Какой ордер использовали древние греки?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "дорический",
+        "wrongAnswers": [
+          "готический",
+          "барочный",
+          "классический"
+        ]
+      },
+      {
+        "question": "Что такое собор?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "главный храм",
+        "wrongAnswers": [
+          "дворец",
+          "крепость",
+          "монастырь"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "technology-7grade-01",
+    "article": "6232025",
+    "title": "Технология 7 класс. Материалы",
+    "category": "tech",
+    "questions": [
+      {
+        "question": "Какой материал получают из древесины?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "фанера",
+        "wrongAnswers": [
+          "пластик",
+          "стекло",
+          "металл"
+        ]
+      },
+      {
+        "question": "Какой металл является самым распространенным?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "железо",
+        "wrongAnswers": [
+          "алюминий",
+          "медь",
+          "свинец"
+        ]
+      },
+      {
+        "question": "Что получают из глины?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "кирпич",
+        "wrongAnswers": [
+          "стекло",
+          "бетон",
+          "асфальт"
+        ]
+      },
+      {
+        "question": "Какой материал используется для пайки?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "припой",
+        "wrongAnswers": [
+          "клей",
+          "сварка",
+          "болты"
+        ]
+      },
+      {
+        "question": "Что такое древесина?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "материал из дерева",
+        "wrongAnswers": [
+          "искусственный материал",
+          "пластмасса",
+          "композит"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "drafting-9grade-01",
+    "article": "6242025",
+    "title": "Черчение 9 класс. Линии чертежа",
+    "category": "drafting",
+    "questions": [
+      {
+        "question": "Какой линией изображается контур детали?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "сплошной толстой",
+        "wrongAnswers": [
+          "штриховой",
+          "штрихпунктирной",
+          "волнистой"
+        ]
+      },
+      {
+        "question": "Какой линией изображается ось симметрии?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "штрихпунктирной",
+        "wrongAnswers": [
+          "сплошной",
+          "штриховой",
+          "волнистой"
+        ]
+      },
+      {
+        "question": "Какой линией изображается невидимый контур?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "штриховой",
+        "wrongAnswers": [
+          "сплошной",
+          "штрихпунктирной",
+          "волнистой"
+        ]
+      },
+      {
+        "question": "Что такое масштаб?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "отношение размеров",
+        "wrongAnswers": [
+          "размер детали",
+          "линия чертежа",
+          "вид спереди"
+        ]
+      },
+      {
+        "question": "Сколько основных видов на чертеже?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "6",
+        "wrongAnswers": [
+          "3",
+          "4",
+          "5"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "pe-7grade-01",
+    "article": "6252025",
+    "title": "Физкультура 7 класс. Виды спорта",
+    "category": "pe",
+    "questions": [
+      {
+        "question": "Сколько игроков в футбольной команде на поле?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "11",
+        "wrongAnswers": [
+          "10",
+          "12",
+          "15"
+        ]
+      },
+      {
+        "question": "Какой вид спорта называется королевой спорта?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "легкая атлетика",
+        "wrongAnswers": [
+          "гимнастика",
+          "футбол",
+          "баскетбол"
+        ]
+      },
+      {
+        "question": "Сколько очков дается за баскетбольный мяч?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "2",
+        "wrongAnswers": [
+          "1",
           "3",
           "4"
         ]
-      }
-    ],
-    "createdAt": "2025-11-19T06:17:06.348Z",
-    "plays": 0
-  },
-  {
-    "id": "df84c078-f3b3-49d2-a372-20258e97c154",
-    "article": "3123322",
-    "title": "Test Quiz 1763567271063",
-    "questions": [
+      },
       {
-        "question": "Test question?",
-        "correctAnswer": "Correct",
+        "question": "Как называется игра с ракеткой и воланом?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "бадминтон",
         "wrongAnswers": [
-          "Wrong 1",
-          "Wrong 2",
-          "Wrong 3"
-        ]
-      }
-    ],
-    "createdAt": "2025-11-19T15:47:51.094Z",
-    "plays": 0
-  },
-  {
-    "id": "6289fb01-8017-46fe-9bfc-8440b749c415",
-    "article": "8540729",
-    "title": "TESTING_QUIZ_NEW_DIALOG",
-    "questions": [
-      {
-        "question": "1",
-        "correctAnswer": "1",
-        "wrongAnswers": [
-          "авдивжд",
-          "дущ",
-          "39489",
-          "345"
+          "теннис",
+          "сквош",
+          "настольный теннис"
         ]
       },
       {
-        "question": "134",
-        "correctAnswer": "134",
+        "question": "Сколько колец в олимпийской символике?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "5",
         "wrongAnswers": [
-          "257457",
-          "ерлтошзк",
-          "0000000"
-        ]
-      },
-      {
-        "question": "53н2",
-        "correctAnswer": "235",
-        "wrongAnswers": [
-          "33453435",
-          "345345345345345",
-          "3453й45ц22"
+          "3",
+          "4",
+          "6"
         ]
       }
     ],
-    "createdAt": "2025-11-19T18:32:50.129Z",
+    "createdAt": "2025-04-12T00:00:00.000Z",
     "plays": 0
   },
   {
-    "id": "297b50b7-86f1-4310-ace7-7040eab46a0b",
-    "article": "1371099",
+    "id": "military-10grade-01",
+    "article": "6262025",
+    "title": "НВП 10 класс. Воинские звания",
+    "category": "military",
+    "questions": [
+      {
+        "question": "Какое воинское звание ниже ефрейтора?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "рядовой",
+        "wrongAnswers": [
+          "сержант",
+          "старшина",
+          "прапорщик"
+        ]
+      },
+      {
+        "question": "Сколько звезд у лейтенанта?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "2",
+        "wrongAnswers": [
+          "1",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "question": "Какое звание идет после капитана?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "майор",
+        "wrongAnswers": [
+          "полковник",
+          "подполковник",
+          "генерал"
+        ]
+      },
+      {
+        "question": "Как называется армия в России?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "ВС РФ",
+        "wrongAnswers": [
+          "РА",
+          "РККА",
+          "СА"
+        ]
+      },
+      {
+        "question": "Какое высшее звание в армии РФ?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Маршал РФ",
+        "wrongAnswers": [
+          "Генералиссимус",
+          "Генерал армии",
+          "Верховный главнокомандующий"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "ethics-4grade-01",
+    "article": "6272025",
+    "title": "ОРКСЭ 4 класс. Добро и зло",
+    "category": "ethics",
+    "questions": [
+      {
+        "question": "Что такое добро?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "хорошие поступки",
+        "wrongAnswers": [
+          "плохие поступки",
+          "нейтральные",
+          "безразличные"
+        ]
+      },
+      {
+        "question": "Что такое зло?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "плохие поступки",
+        "wrongAnswers": [
+          "хорошие поступки",
+          "нейтральные",
+          "безразличные"
+        ]
+      },
+      {
+        "question": "Что такое совесть?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "внутренний голос",
+        "wrongAnswers": [
+          "закон",
+          "правила",
+          "традиции"
+        ]
+      },
+      {
+        "question": "Что такое милосердие?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "сострадание",
+        "wrongAnswers": [
+          "равнодушие",
+          "жестокость",
+          "зависть"
+        ]
+      },
+      {
+        "question": "Что такое дружба?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "взаимопомощь",
+        "wrongAnswers": [
+          "соревнование",
+          "борьба",
+          "соперничество"
+        ]
+      }
+    ],
+    "createdAt": "2025-04-12T00:00:00.000Z",
+    "plays": 0
+  },
+  {
+    "id": "06f5650f-9a04-4c24-bfbd-2f53a401f56d",
+    "article": "1017325",
+    "title": "Итоговая по математике. 1 класс",
+    "category": "math",
+    "questions": [
+      {
+        "question": "Сколько будет 32+87,5",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "119,5",
+        "wrongAnswers": [
+          "117,5",
+          "118,5",
+          "120,5"
+        ]
+      }
+    ],
+    "createdAt": "2026-04-20T04:29:13.982Z",
+    "plays": 0
+  },
+  {
+    "id": "256b2cfe-c7a0-4f77-89a6-2a60f5ddab4e",
+    "article": "3167634",
     "title": "TESTING QUIZ",
+    "category": "other",
     "questions": [
       {
         "question": "1",
+        "type": "single",
+        "timeLimit": 30,
         "correctAnswer": "1",
         "wrongAnswers": [
           "2",
-          "3",
-          "4"
-        ]
-      }
-    ],
-    "createdAt": "2025-11-21T05:27:52.884Z",
-    "plays": 0
-  },
-  {
-    "id": "b2c52769-279b-4fd8-b0c1-77d70aaa6405",
-    "article": "7324874",
-    "title": "Test Quiz 1763703295850",
-    "questions": [
-      {
-        "question": "Test question?",
-        "correctAnswer": "Correct",
-        "wrongAnswers": [
-          "Wrong 1",
-          "Wrong 2",
-          "Wrong 3"
-        ]
-      }
-    ],
-    "createdAt": "2025-11-21T05:34:55.876Z",
-    "plays": 0
-  },
-  {
-    "id": "942d0082-a482-455c-be6e-e080860b6f2d",
-    "article": "3351794",
-    "title": "123_test",
-    "questions": [
-      {
-        "question": "test",
-        "correctAnswer": "test",
-        "wrongAnswers": [
-          "1",
           "2",
+          "2"
+        ]
+      },
+      {
+        "question": "2",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "2",
+        "wrongAnswers": [
+          "3",
+          "3",
           "3"
         ]
       },
       {
-        "question": "test",
-        "correctAnswer": "test",
+        "question": "3",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "3",
         "wrongAnswers": [
-          "1",
-          "2",
-          "3"
+          "4",
+          "4",
+          "4"
         ]
       },
       {
-        "question": "test",
-        "correctAnswer": "test",
+        "question": "4",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "4",
+        "wrongAnswers": [
+          "5",
+          "5",
+          "5"
+        ]
+      },
+      {
+        "question": "5",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "5",
+        "wrongAnswers": [
+          "null",
+          "null",
+          "null"
+        ]
+      },
+      {
+        "question": "6",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "6",
+        "wrongAnswers": [
+          "null",
+          "null",
+          "null"
+        ]
+      },
+      {
+        "question": "7",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "7",
+        "wrongAnswers": [
+          "null",
+          "null",
+          "null"
+        ]
+      },
+      {
+        "question": "8",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "8",
+        "wrongAnswers": [
+          "null",
+          "null",
+          "null"
+        ]
+      },
+      {
+        "question": "9",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "9",
+        "wrongAnswers": [
+          "null",
+          "null",
+          "null"
+        ]
+      },
+      {
+        "question": "10",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "10",
+        "wrongAnswers": [
+          "null",
+          "null",
+          "null"
+        ]
+      }
+    ],
+    "createdAt": "2026-04-20T04:39:53.507Z",
+    "plays": 0
+  },
+  {
+    "id": "29263ec2-eb6c-40fa-9f5a-87d419184b2e",
+    "article": "8946355",
+    "title": "Самостоятельная по биологии",
+    "category": "math",
+    "questions": [
+      {
+        "question": "1",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "11",
         "wrongAnswers": [
           "1",
-          "2",
-          "3"
+          "1",
+          "1"
         ]
       }
     ],
-    "createdAt": "2025-12-27T18:43:49.978Z",
+    "createdAt": "2026-04-21T10:37:58.699Z",
     "plays": 0
   },
   {
-    "id": "abdeb7af-ee49-4b36-aef3-74a27ad2c68f",
-    "article": "8357950",
-    "title": "data base test v10.0",
+    "id": "math-polyhedra-2025",
+    "article": "15052025",
+    "title": "Многогранники и призмы. 1 курс колледжа",
+    "category": "math",
     "questions": [
       {
-        "question": "1",
-        "correctAnswer": "1",
+        "question": "Что такое многогранник?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Тело, ограниченное плоскими многоугольниками",
         "wrongAnswers": [
-          "2",
-          "3",
-          "4"
+          "Фигура, ограниченная кривыми линиями",
+          "Объёмная фигура без граней",
+          "Многоугольник на плоскости"
+        ]
+      },
+      {
+        "question": "Какие элементы есть у многогранника?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Грани, рёбра, вершины",
+        "wrongAnswers": [
+          "Стороны, углы, диагонали",
+          "Основания, боковые грани, высота",
+          "Радиус, диаметр, центр"
+        ]
+      },
+      {
+        "question": "Что называется гранью многогранника?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Многоугольник, ограничивающий многогранник",
+        "wrongAnswers": [
+          "Линия пересечения двух граней",
+          "Точка пересечения рёбер",
+          "Отрезок, соединяющий вершины"
+        ]
+      },
+      {
+        "question": "Что такое ребро многогранника?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Отрезок, по которому пересекаются две грани",
+        "wrongAnswers": [
+          "Точка, где сходятся рёбра",
+          "Плоская поверхность многогранника",
+          "Диагональ многогранника"
+        ]
+      },
+      {
+        "question": "Что такое вершина многогранника?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Точка, в которой сходятся рёбра",
+        "wrongAnswers": [
+          "Отрезок между гранями",
+          "Плоская грань",
+          "Линия пересечения"
+        ]
+      },
+      {
+        "question": "Какая формула связывает число вершин (В), рёбер (Р) и граней (Г) выпуклого многогранника?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "В + Г = Р + 2",
+        "wrongAnswers": [
+          "В + Р = Г + 2",
+          "В - Г = Р - 2",
+          "В + Г + Р = 2"
+        ]
+      },
+      {
+        "question": "Как называется теорема Эйлера для многогранников?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "В + Г = Р + 2",
+        "wrongAnswers": [
+          "В - Р + Г = 2",
+          "В + Р = Г + 2",
+          "В = Р - Г + 2"
+        ]
+      },
+      {
+        "question": "Что называется призмой?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Многогранник, у которого две грани — равные многоугольники, а остальные — параллелограммы",
+        "wrongAnswers": [
+          "Многогранник с одним основанием",
+          "Пирамида с многоугольным основанием",
+          "Тело вращения"
+        ]
+      },
+      {
+        "question": "Как называются грани призмы, которые лежат в параллельных плоскостях?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Основания",
+        "wrongAnswers": [
+          "Боковые грани",
+          "Рёбра основания",
+          "Диагональные сечения"
+        ]
+      },
+      {
+        "question": "Что такое высота призмы?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Перпендикуляр, опущенный из любой точки одного основания на плоскость другого основания",
+        "wrongAnswers": [
+          "Длина бокового ребра",
+          "Расстояние между вершинами",
+          "Диагональ призмы"
+        ]
+      },
+      {
+        "question": "Какая призма называется прямой?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "У которой боковые рёбра перпендикулярны основаниям",
+        "wrongAnswers": [
+          "У которой основания — правильные многоугольники",
+          "У которой все грани — квадраты",
+          "У которой боковые рёбра наклонены"
+        ]
+      },
+      {
+        "question": "Какая призма называется правильной?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Прямая призма, в основании которой лежит правильный многоугольник",
+        "wrongAnswers": [
+          "Любая прямая призма",
+          "Призма, у которой все грани равны",
+          "Призма с квадратным основанием"
+        ]
+      },
+      {
+        "question": "Как найти площадь боковой поверхности прямой призмы?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "P * h, где P — периметр основания, h — высота",
+        "wrongAnswers": [
+          "Sосн * h",
+          "2 * Sосн + P * h",
+          "a * b * c"
+        ]
+      },
+      {
+        "question": "Как найти объём прямой призмы?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Sосн * h",
+        "wrongAnswers": [
+          "P * h",
+          "2 * Sосн * h",
+          "a * b"
+        ]
+      },
+      {
+        "question": "Сколько граней у треугольной призмы?",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "5",
+        "wrongAnswers": [
+          "4",
+          "6",
+          "8"
         ]
       }
     ],
-    "createdAt": "2026-01-01T08:32:08.770Z",
+    "createdAt": "2025-04-21T00:00:00.000Z",
     "plays": 0
   },
   {
-    "id": "a3d99ddd-b11e-483e-9fb2-e7b132080603",
-    "article": "8144395",
-    "title": "TESTING QUIZ123123",
+    "id": "785a0647-6b9a-4e84-91b5-04e607998138",
+    "article": "8372890",
+    "title": "о98нр97нр",
+    "category": "math",
     "questions": [
       {
-        "question": "1",
-        "correctAnswer": "1",
+        "question": "ог",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "н7он",
         "wrongAnswers": [
-          "2",
-          "3",
-          "4"
+          "ьогь",
+          "онре",
+          "гонррн"
         ]
       }
     ],
-    "createdAt": "2026-01-01T13:54:45.895Z",
+    "createdAt": "2026-04-22T11:55:46.340Z",
+    "plays": 0
+  },
+  {
+    "id": "875780eb-b1d2-423e-a454-c8f0970b2918",
+    "article": "6385671",
+    "title": "Итог",
+    "category": "drafting",
+    "questions": [
+      {
+        "question": "Что такое помидор",
+        "type": "single",
+        "timeLimit": 30,
+        "correctAnswer": "Помидор",
+        "wrongAnswers": [
+          "Огурец",
+          "Витамин",
+          "Что"
+        ]
+      }
+    ],
+    "createdAt": "2026-04-22T17:25:27.548Z",
     "plays": 0
   }
 ]

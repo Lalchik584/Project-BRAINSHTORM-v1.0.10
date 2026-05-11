@@ -383,6 +383,18 @@
             .session-code { font-size: 1.2em; letter-spacing: 2px; }
             th, td { font-size: 0.5em; padding: 5px; }
         }
+
+        .btn-primary {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: 2px solid #ffcc00;
+    }
+
+    .btn-primary:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 4px 4px 0 #ffcc00;
+    }
+        
     /* ===== АНИМАЦИИ ПЕРЕХОДОВ ===== */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
@@ -742,6 +754,160 @@
                 tbody.appendChild(row);
             });
         }
+
+// === ЭКСПОРТ РЕЗУЛЬТАТОВ ===
+function exportToExcel() {
+    const table = document.getElementById('results-table');
+    if (!table) return;
+    
+    let csv = [];
+    // Заголовки
+    let headers = [];
+    document.querySelectorAll('#results-table th').forEach(th => {
+        headers.push(th.innerText);
+    });
+    csv.push(headers.join(','));
+    
+    // Данные
+    document.querySelectorAll('#results-body tr').forEach(row => {
+        let rowData = [];
+        row.querySelectorAll('td').forEach(cell => {
+            rowData.push('"' + cell.innerText.replace(/"/g, '""') + '"');
+        });
+        csv.push(rowData.join(','));
+    });
+    
+    // Детали по вопросам
+    csv.push([]);
+    csv.push(['"Детали по вопросам"']);
+    csv.push([]);
+    
+    // Заголовки вопросов
+    let questionHeaders = ['Ученик'];
+    const questionDetails = document.querySelectorAll('#question-details-container .details-table th');
+    for (let i = 1; i < questionDetails.length; i++) {
+        questionHeaders.push(questionDetails[i].innerText);
+    }
+    csv.push(questionHeaders.join(','));
+    
+    // Данные по вопросам
+    document.querySelectorAll('#question-details-container .details-table tbody tr').forEach(row => {
+        let rowData = [];
+        row.querySelectorAll('td').forEach(cell => {
+            let text = cell.innerText.trim();
+            if (text === '✅') text = 'Правильно';
+            if (text === '❌') text = 'Неправильно';
+            if (text === '⏳') text = 'Пропущен';
+            rowData.push('"' + text + '"');
+        });
+        csv.push(rowData.join(','));
+    });
+    
+    // Скачивание
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute('download', `quiz_results_${new Date().toISOString().slice(0,19)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+function exportToPDF() {
+    const printContents = document.getElementById('detailed-results').innerHTML;
+    const originalTitle = document.title;
+    const quizName = document.getElementById('quiz-title').innerText;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Результаты квиза - ${quizName}</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    padding: 20px;
+                    margin: 0;
+                }
+                h1 {
+                    color: #333;
+                    border-bottom: 2px solid #667eea;
+                    padding-bottom: 10px;
+                }
+                h2 {
+                    color: #555;
+                    margin-top: 30px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background: #667eea;
+                    color: white;
+                }
+                .correct { background: #d4edda; color: #155724; }
+                .wrong { background: #f8d7da; color: #721c24; }
+                .missed { background: #fff3cd; color: #856404; }
+                .footer {
+                    margin-top: 30px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #999;
+                    border-top: 1px solid #ddd;
+                    padding-top: 20px;
+                }
+                @media print {
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Результаты квиза: ${quizName}</h1>
+            <p>Дата: ${new Date().toLocaleString()}</p>
+            ${printContents}
+            <div class="footer">
+                МОЗГОШТОРМ — интерактивная платформа для образовательных квизов<br>
+                https://мозгошторм.рф
+            </div>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Показываем кнопки экспорта после завершения квиза
+socket.on('quiz-ended', (data) => {
+    document.getElementById('next-question-btn').style.display = 'none';
+    document.getElementById('end-quiz-btn').style.display = 'none';
+    document.getElementById('current-question-display').style.display = 'none';
+    document.getElementById('detailed-results').style.display = 'block';
+    
+    // Показываем кнопки экспорта
+    document.getElementById('export-pdf-btn').style.display = 'inline-block';
+    document.getElementById('export-excel-btn').style.display = 'inline-block';
+    
+    if (data.finalResults) {
+        updateFinalResults(data.finalResults);
+    }
+});
+
+// Добавляем обработчики кнопок
+document.getElementById('export-excel-btn')?.addEventListener('click', exportToExcel);
+document.getElementById('export-pdf-btn')?.addEventListener('click', exportToPDF);
+
+        
     </script>
 </body>
 </html>

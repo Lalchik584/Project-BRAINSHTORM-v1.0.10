@@ -20,84 +20,11 @@ const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 const DB_FILE = path.join(__dirname, 'quizzes.json');
 const FEEDBACK_FILE = path.join(__dirname, 'feedbacks.json');
-const DEVLOG_FILE = path.join(__dirname, 'devlog.json');
-const LOGS_DIR = path.join(__dirname, 'logs');
-
-// Создаём папку для логов, если её нет
-if (!fs.existsSync(LOGS_DIR)) {
-    fs.mkdirSync(LOGS_DIR, { recursive: true });
-}
 
 // ========== БАЗЫ ДАННЫХ ==========
 let quizzes = [];
 let usedCodes = new Set();
 let activeSessions = new Map();
-
-// ========== ФУНКЦИИ ЛОГИРОВАНИЯ ==========
-function formatDateForFilename(date) {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-}
-
-function createSessionLog(sessionCode, startTime) {
-    const timestamp = formatDateForFilename(startTime);
-    const logFileName = `session_${sessionCode}_${timestamp}.log`;
-    const logPath = path.join(LOGS_DIR, logFileName);
-    
-    // Создаём файл с заголовком
-    const header = `========================================\n`;
-    header += `SESSION LOG: ${sessionCode}\n`;
-    header += `START TIME: ${startTime.toISOString()}\n`;
-    header += `QUIZ: ${activeSessions.get(sessionCode)?.quiz.title || 'Unknown'}\n`;
-    header += `========================================\n\n`;
-    
-    fs.writeFileSync(logPath, header);
-    return logPath;
-}
-
-function writeToSessionLog(sessionCode, message, type = 'INFO') {
-    const session = activeSessions.get(sessionCode);
-    if (!session || !session.logPath) return;
-    
-    const timestamp = new Date().toISOString();
-    const logLine = `[${timestamp}] [${type}] ${message}\n`;
-    
-    try {
-        fs.appendFileSync(session.logPath, logLine);
-    } catch (err) {
-        console.error(`Ошибка записи в лог сессии ${sessionCode}:`, err);
-    }
-}
-
-// Очистка старых логов (старше 14 дней)
-function cleanOldLogs() {
-    const now = Date.now();
-    const maxAge = 14 * 24 * 60 * 60 * 1000; // 14 дней
-    
-    try {
-        const files = fs.readdirSync(LOGS_DIR);
-        for (const file of files) {
-            const filePath = path.join(LOGS_DIR, file);
-            const stats = fs.statSync(filePath);
-            if (now - stats.mtimeMs > maxAge) {
-                fs.unlinkSync(filePath);
-                console.log(`🗑️ Удалён старый лог: ${file}`);
-            }
-        }
-    } catch (err) {
-        console.error('Ошибка при очистке логов:', err);
-    }
-}
-
-// Запускаем очистку логов раз в сутки
-setInterval(cleanOldLogs, 24 * 60 * 60 * 1000);
-cleanOldLogs(); // Запускаем сразу
 
 // ========== ФУНКЦИИ РАБОТЫ С ФАЙЛОМ ==========
 function loadQuizzesFromFile() {
@@ -147,28 +74,6 @@ function saveFeedbacks(feedbacks) {
         console.log(`✅ Сохранено ${feedbacks.length} отзывов`);
     } catch (error) {
         console.error('❌ Ошибка сохранения отзывов:', error);
-    }
-}
-
-// ========== DEVLOG ==========
-function loadDevlog() {
-    try {
-        if (fs.existsSync(DEVLOG_FILE)) {
-            const data = fs.readFileSync(DEVLOG_FILE, 'utf8');
-            return JSON.parse(data);
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки DevLog:', error);
-    }
-    return [];
-}
-
-function saveDevlog(entries) {
-    try {
-        fs.writeFileSync(DEVLOG_FILE, JSON.stringify(entries, null, 2));
-        console.log(`✅ Сохранено ${entries.length} записей в DevLog`);
-    } catch (error) {
-        console.error('Ошибка сохранения DevLog:', error);
     }
 }
 
@@ -228,7 +133,6 @@ function generateSessionCode() {
 // ========== ФУНКЦИИ КВИЗА ==========
 function startQuestion(session, questionIndex) {
     console.log(`📝 Вопрос ${questionIndex + 1} в сессии ${session.code}`);
-    writeToSessionLog(session.code, `Начат вопрос ${questionIndex + 1}`, 'QUESTION');
     
     session.currentQuestion = questionIndex;
     const question = session.quiz.questions[questionIndex];
@@ -294,8 +198,6 @@ function endQuestion(session, questionIndex) {
     const answers = session.answers.get(questionIndex) || new Map();
     const totalCorrect = Array.from(answers.values()).filter(a => a.isCorrect).length;
     
-    writeToSessionLog(session.code, `Завершён вопрос ${questionIndex + 1}. Правильных ответов: ${totalCorrect}`, 'QUESTION');
-    
     io.to(session.code).emit('question-ended', {
         questionIndex,
         correctAnswer: question.correctAnswer,
@@ -315,16 +217,7 @@ function endQuestion(session, questionIndex) {
 function endQuiz(session) {
     session.status = 'completed';
     
-    const finalScores = new Map();
-    session.studentAnswers.forEach((answers, studentId) => {
-        let total = 0;
-        answers.forEach(answer => {
-            if (answer.isCorrect) total += 10;
-        });
-        finalScores.set(studentId, total);
-    });
-    
-    const finalResults = Array.from(finalScores.entries())
+    const finalResults = Array.from(session.scores.entries())
         .map(([studentId, score]) => ({
             studentId,
             score,
@@ -334,10 +227,6 @@ function endQuiz(session) {
         .sort((a, b) => b.score - a.score);
     
     io.to(session.code).emit('quiz-ended', { finalResults });
-    
-    writeToSessionLog(session.code, `КВИЗ ЗАВЕРШЁН. Участников: ${session.students.size}. Результаты: ${JSON.stringify(finalResults.map(r => ({name: r.name, score: r.score})))}`, 'END');
-    
-    console.log(`🏁 Квиз завершён в сессии: ${session.code}`);
 }
 
 // ========== EXPRESS ROUTES ==========
@@ -348,6 +237,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// API для создания квиза
 app.post('/api/quizzes', (req, res) => {
     try {
         const { title, questions, category } = req.body;
@@ -373,11 +263,11 @@ app.post('/api/quizzes', (req, res) => {
         res.json({ success: true, quiz: newQuiz });
         
     } catch (error) {
-        console.error('Ошибка создания квиза:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
+// API для получения всех квизов
 app.get('/api/quizzes/all', (req, res) => {
     try {
         const quizzesWithCategoryNames = quizzes.map(quiz => ({
@@ -390,6 +280,7 @@ app.get('/api/quizzes/all', (req, res) => {
     }
 });
 
+// API для поиска квизов
 app.get('/api/quizzes/search', (req, res) => {
     try {
         const { query, category } = req.query;
@@ -420,6 +311,7 @@ app.get('/api/quizzes/search', (req, res) => {
     }
 });
 
+// API для создания сессии
 app.post('/api/sessions', (req, res) => {
     try {
         const { quizArticle } = req.body;
@@ -431,10 +323,6 @@ app.post('/api/sessions', (req, res) => {
 
         const sessionCode = generateSessionCode();
         const sessionId = uuidv4();
-        const startTime = new Date();
-        
-        // Создаём лог-файл для сессии
-        const logPath = createSessionLog(sessionCode, startTime);
 
         const session = {
             id: sessionId,
@@ -448,15 +336,10 @@ app.post('/api/sessions', (req, res) => {
             studentAnswers: new Map(),
             answers: new Map(),
             currentTimer: null,
-            createdAt: startTime,
-            logPath: logPath
+            createdAt: new Date().toISOString()
         };
 
         activeSessions.set(sessionCode, session);
-        
-        writeToSessionLog(sessionCode, `СЕССИЯ СОЗДАНА. Квиз: "${quiz.title}", вопросов: ${quiz.questions.length}`, 'START');
-        
-        console.log(`🎮 Создана сессия: ${sessionCode} для квиза: ${quiz.title}`);
         
         res.json({ 
             success: true, 
@@ -468,11 +351,11 @@ app.post('/api/sessions', (req, res) => {
         });
         
     } catch (error) {
-        console.error('Ошибка создания сессии:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
+// API для получения информации о сессии
 app.get('/api/sessions/:code', (req, res) => {
     try {
         const { code } = req.params;
@@ -481,15 +364,6 @@ app.get('/api/sessions/:code', (req, res) => {
         if (!session) {
             return res.status(404).json({ success: false, error: 'Сессия не найдена' });
         }
-
-        const studentScores = new Map();
-        session.studentAnswers.forEach((answers, studentId) => {
-            let total = 0;
-            answers.forEach(answer => {
-                if (answer.isCorrect) total += 10;
-            });
-            studentScores.set(studentId, total);
-        });
 
         res.json({ 
             success: true, 
@@ -502,7 +376,7 @@ app.get('/api/sessions/:code', (req, res) => {
                 students: Array.from(session.students.values()),
                 status: session.status,
                 currentQuestion: session.currentQuestion,
-                scores: Array.from(studentScores.entries()).map(([studentId, score]) => ({
+                scores: Array.from(session.scores.entries()).map(([studentId, score]) => ({
                     studentId,
                     score,
                     name: session.students.get(studentId)?.name
@@ -516,6 +390,7 @@ app.get('/api/sessions/:code', (req, res) => {
     }
 });
 
+// Генерация QR-кода
 app.get('/qr/:sessionCode', (req, res) => {
     const sessionCode = req.params.sessionCode;
     const protocol = req.headers['x-forwarded-proto'] || 'http';
@@ -527,11 +402,14 @@ app.get('/qr/:sessionCode', (req, res) => {
     qr_svg.pipe(res);
 });
 
+// Страница управления сессией
 app.get('/session/:sessionCode', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'session.html'));
 });
 
-// ========== API ДЛЯ ОТЗЫВОВ И DEVLOG ==========
+// ========== API ДЛЯ ОТЗЫВОВ ==========
+
+// Сохранение отзыва
 app.post('/api/feedback', (req, res) => {
     try {
         const { name, text } = req.body;
@@ -558,85 +436,13 @@ app.post('/api/feedback', (req, res) => {
     }
 });
 
+// Получение всех отзывов (для админа)
 app.get('/api/feedbacks', (req, res) => {
     try {
         const feedbacks = loadFeedbacks();
         res.json({ success: true, feedbacks });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-app.delete('/api/feedback/:id', (req, res) => {
-    const { id } = req.params;
-    const { adminPassword } = req.body;
-    
-    const ADMIN_PASSWORD = "Форест_Блекуэл";
-    
-    if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
-    }
-    
-    let feedbacks = loadFeedbacks();
-    const newFeedbacks = feedbacks.filter(f => f.id !== id);
-    
-    if (feedbacks.length === newFeedbacks.length) {
-        return res.status(404).json({ success: false, error: 'Отзыв не найден' });
-    }
-    
-    saveFeedbacks(newFeedbacks);
-    res.json({ success: true });
-});
-
-// DevLog API
-app.get('/api/devlog', (req, res) => {
-    const entries = loadDevlog();
-    res.json({ success: true, entries });
-});
-
-app.post('/api/devlog', (req, res) => {
-    const { id, title, content, date, version, adminPassword } = req.body;
-    const ADMIN_PASSWORD = "Форест_Блекуэл";
-    
-    if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
-    }
-    
-    if (!title || !content) {
-        return res.status(400).json({ success: false, error: 'Некорректные данные' });
-    }
-    
-    const entries = loadDevlog();
-    entries.push({ id, title, content, date, version });
-    saveDevlog(entries);
-    
-    console.log(`📝 Добавлена запись в DevLog: ${title}`);
-    res.json({ success: true });
-});
-
-app.delete('/api/devlog/:id', (req, res) => {
-    const { id } = req.params;
-    const { adminPassword } = req.body;
-    const ADMIN_PASSWORD = "Форест_Блекуэл";
-    
-    if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(403).json({ success: false, error: 'Доступ запрещЕН' });
-    }
-    
-    let entries = loadDevlog();
-    entries = entries.filter(e => e.id !== id);
-    saveDevlog(entries);
-    res.json({ success: true });
-});
-
-app.post('/api/admin/check', (req, res) => {
-    const { password } = req.body;
-    const ADMIN_PASSWORD = "Форест_Блекуэл";
-    
-    if (password === ADMIN_PASSWORD) {
-        res.json({ success: true });
-    } else {
-        res.json({ success: false });
     }
 });
 
@@ -651,7 +457,6 @@ io.on('connection', (socket) => {
             socket.join(sessionCode);
             socket.sessionCode = sessionCode;
             console.log(`👨‍🏫 Учитель в сессии: ${sessionCode}`);
-            writeToSessionLog(sessionCode, `Учитель присоединился (socket: ${socket.id})`, 'TEACHER');
             
             const students = Array.from(session.students.values());
             students.forEach(student => {
@@ -688,102 +493,13 @@ io.on('connection', (socket) => {
                 totalStudents: session.students.size
             });
             
-            writeToSessionLog(sessionCode, `Студент присоединился: ${studentName} (ID: ${studentId})`, 'STUDENT');
             console.log(`👨‍🎓 ${studentName} присоединился к ${sessionCode}`);
-        }
-    });
-
-    socket.on('student-rejoin', (data) => {
-        const { sessionCode, studentId, studentName } = data;
-        const session = activeSessions.get(sessionCode);
-        
-        if (!session) {
-            socket.emit('error', { message: 'Сессия не найдена' });
-            return;
-        }
-        
-        let student = session.students.get(studentId);
-        if (!student) {
-            student = {
-                id: studentId,
-                name: studentName,
-                socketId: socket.id,
-                joinedAt: new Date().toISOString()
-            };
-            session.students.set(studentId, student);
-            if (!session.scores.has(studentId)) session.scores.set(studentId, 0);
-            if (!session.studentAnswers.has(studentId)) session.studentAnswers.set(studentId, []);
-            writeToSessionLog(sessionCode, `Студент восстановлен: ${studentName} (ID: ${studentId})`, 'STUDENT');
-        } else {
-            student.socketId = socket.id;
-            session.students.set(studentId, student);
-            writeToSessionLog(sessionCode, `Студент переподключился: ${studentName} (ID: ${studentId})`, 'STUDENT');
-        }
-        
-        socket.join(sessionCode);
-        socket.sessionCode = sessionCode;
-        socket.studentId = studentId;
-        socket.emit('score-update', { score: session.scores.get(studentId) || 0 });
-        
-        const existingAnswers = session.studentAnswers.get(studentId) || [];
-        if (existingAnswers.length > 0) {
-            socket.emit('restore-answers', { answers: existingAnswers });
-        }
-        
-        if (session.status === 'active') {
-            const question = session.quiz.questions[session.currentQuestion];
-            let wrongAnswers = [];
-            if (Array.isArray(question.wrongAnswers)) {
-                wrongAnswers = question.wrongAnswers;
-            } else if (typeof question.wrongAnswers === 'string') {
-                wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
-            }
-            if (wrongAnswers.length === 0) wrongAnswers = ['(нет вариантов)'];
-            
-            const options = [question.correctAnswer, ...wrongAnswers];
-            for (let i = options.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [options[i], options[j]] = [options[j], options[i]];
-            }
-            
-            socket.emit('question-started', {
-                questionIndex: session.currentQuestion,
-                question: {
-                    question: question.question,
-                    options: options,
-                    timeLimit: question.timeLimit || 30
-                },
-                timeLimit: question.timeLimit || 30
-            });
-            
-            const alreadyAnswered = existingAnswers.some(a => a.questionIndex === session.currentQuestion);
-            if (alreadyAnswered) {
-                socket.emit('answer-already-sent', {});
-            }
-        } else if (session.status === 'waiting') {
-            socket.emit('waiting-room', { quizTitle: session.quiz.title, studentsCount: session.students.size });
-            const students = Array.from(session.students.values());
-            students.forEach(s => {
-                socket.emit('student-joined', {
-                    student: s,
-                    totalStudents: session.students.size
-                });
-            });
-        } else if (session.status === 'completed') {
-            const finalResults = Array.from(session.scores.entries()).map(([id, s]) => ({
-                studentId: id,
-                name: session.students.get(id)?.name,
-                score: s
-            }));
-            socket.emit('quiz-ended', { finalResults });
         }
     });
 
     socket.on('start-quiz', (sessionCode) => {
         const session = activeSessions.get(sessionCode);
         if (session && session.teacher === socket.id) {
-            writeToSessionLog(sessionCode, `КВИЗ ЗАПУЩЕН учителем`, 'START');
-            
             session.status = 'active';
             session.currentQuestion = 0;
             
@@ -807,7 +523,6 @@ io.on('connection', (socket) => {
         
         if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
             const studentId = socket.studentId;
-            const student = session.students.get(studentId);
             const question = session.quiz.questions[questionIndex];
             
             if (!session.answers.has(questionIndex)) {
@@ -823,19 +538,17 @@ io.on('connection', (socket) => {
                 timeLeft 
             });
             
-            writeToSessionLog(sessionCode, `Студент ${student?.name} (${studentId}) ответил на вопрос ${questionIndex + 1}: ${isCorrect ? 'ПРАВИЛЬНО' : 'НЕПРАВИЛЬНО'} (ответ: ${answerText})`, 'ANSWER');
-            
             if (session.teacher) {
                 const answeredCount = session.answers.get(questionIndex).size;
                 const totalStudents = session.students.size;
                 
                 const answeredStudents = [];
                 session.answers.get(questionIndex).forEach((value, id) => {
-                    const stud = session.students.get(id);
-                    if (stud) {
+                    const student = session.students.get(id);
+                    if (student) {
                         answeredStudents.push({
-                            id: stud.id,
-                            name: stud.name,
+                            id: student.id,
+                            name: student.name,
                             isCorrect: value.isCorrect
                         });
                     }
@@ -873,9 +586,6 @@ io.on('connection', (socket) => {
         if (socket.sessionCode && socket.studentId) {
             const session = activeSessions.get(socket.sessionCode);
             if (session) {
-                const student = session.students.get(socket.studentId);
-                writeToSessionLog(socket.sessionCode, `Студент ${student?.name} (${socket.studentId}) отключился`, 'DISCONNECT');
-                
                 session.students.delete(socket.studentId);
                 io.to(socket.sessionCode).emit('student-left', {
                     studentId: socket.studentId,
@@ -922,22 +632,102 @@ function sendDetailedStats(session) {
     io.to(session.teacher).emit('detailed-stats', stats);
 }
 
-// Глобальный обработчик ошибок
-process.on('uncaughtException', (err) => {
-    console.error('❌ Непойманная ошибка:', err);
+// ========== DEVLOG С БЕЗОПАСНОЙ АВТОРИЗАЦИЕЙ ==========
+const DEVLOG_FILE = path.join(__dirname, 'devlog.json');
+const ADMIN_PASSWORD = "Форест_Блекуэл";  // Хранится ТОЛЬКО на сервере!
+
+function loadDevlog() {
+    try {
+        if (fs.existsSync(DEVLOG_FILE)) {
+            const data = fs.readFileSync(DEVLOG_FILE, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки DevLog:', error);
+    }
+    return [];
+}
+
+function saveDevlog(entries) {
+    try {
+        fs.writeFileSync(DEVLOG_FILE, JSON.stringify(entries, null, 2));
+        console.log(`✅ Сохранено ${entries.length} записей в DevLog`);
+    } catch (error) {
+        console.error('Ошибка сохранения DevLog:', error);
+    }
+}
+
+// Проверка пароля админа (безопасно!)
+app.post('/api/admin/check', (req, res) => {
+    const { password } = req.body;
     
-    // Записываем ошибку в логи всех активных сессий
-    activeSessions.forEach((session, code) => {
-        writeToSessionLog(code, `КРИТИЧЕСКАЯ ОШИБКА: ${err.message}\n${err.stack}`, 'ERROR');
-    });
+    if (password === ADMIN_PASSWORD) {
+        res.json({ success: true });
+    } else {
+        res.json({ success: false });
+    }
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Необработанное отклонение Promise:', reason);
+// Получить все записи (доступно всем)
+app.get('/api/devlog', (req, res) => {
+    const entries = loadDevlog();
+    res.json({ success: true, entries });
+});
+
+// Добавить запись (только с правильным паролем)
+app.post('/api/devlog', (req, res) => {
+    const { id, title, content, date, version, adminPassword } = req.body;
     
-    activeSessions.forEach((session, code) => {
-        writeToSessionLog(code, `НЕОБРАБОТАННОЕ ОТКЛОНЕНИЕ: ${reason}`, 'ERROR');
-    });
+    // Проверка пароля
+    if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
+    }
+    
+    if (!title || !content) {
+        return res.status(400).json({ success: false, error: 'Некорректные данные' });
+    }
+    
+    const entries = loadDevlog();
+    entries.push({ id, title, content, date, version });
+    saveDevlog(entries);
+    
+    console.log(`📝 Добавлена запись в DevLog: ${title}`);
+    res.json({ success: true });
+});
+
+// Удалить запись (только с правильным паролем)
+app.delete('/api/devlog/:id', (req, res) => {
+    const { id } = req.params;
+    const { adminPassword } = req.body;
+    
+    if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
+    }
+    
+    let entries = loadDevlog();
+    entries = entries.filter(e => e.id !== id);
+    saveDevlog(entries);
+    res.json({ success: true });
+});
+
+// Удаление отзыва (только для админа)
+app.delete('/api/feedback/:id', (req, res) => {
+    const { id } = req.params;
+    const { adminPassword } = req.body;
+    
+    if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
+    }
+    
+    let feedbacks = loadFeedbacks();
+    const newFeedbacks = feedbacks.filter(f => f.id !== id);
+    
+    if (feedbacks.length === newFeedbacks.length) {
+        return res.status(404).json({ success: false, error: 'Отзыв не найден' });
+    }
+    
+    saveFeedbacks(newFeedbacks);
+    res.json({ success: true });
 });
 
 server.listen(PORT, HOST, () => {
@@ -947,7 +737,6 @@ server.listen(PORT, HOST, () => {
     console.log(`🌍 Локальный доступ: http://localhost:${PORT}`);
     console.log(`📁 База данных: ${DB_FILE}`);
     console.log(`📁 Отзывы: ${FEEDBACK_FILE}`);
-    console.log(`📁 Логи сессий: ${LOGS_DIR}`);
     console.log(`📊 Загружено квизов: ${quizzes.length}`);
     console.log('🎯 ================================');
 });

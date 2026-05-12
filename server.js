@@ -20,6 +20,7 @@ const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 const DB_FILE = path.join(__dirname, 'quizzes.json');
 const FEEDBACK_FILE = path.join(__dirname, 'feedbacks.json');
+const SessionLogger = require('./session-logger');
 
 // ========== БАЗЫ ДАННЫХ ==========
 let quizzes = [];

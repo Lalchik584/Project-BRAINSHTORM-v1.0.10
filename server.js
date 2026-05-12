@@ -324,6 +324,8 @@ app.post('/api/sessions', (req, res) => {
 
         const sessionCode = generateSessionCode();
         const sessionId = uuidv4();
+        const logger = new SessionLogger(sessionCode, sessionId, quiz.title);
+
 
         const session = {
             id: sessionId,
@@ -337,7 +339,8 @@ app.post('/api/sessions', (req, res) => {
             studentAnswers: new Map(),
             answers: new Map(),
             currentTimer: null,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString()  
+            logger: logger 
         };
 
         activeSessions.set(sessionCode, session);

@@ -41,6 +41,15 @@ class SessionLogger {
         const shortId = sessionId.substring(0, 8);
         this.logFileName = `session_${sessionCode}_${shortId}_${dateStr}.json`;
         this.logFilePath = path.join(LOG_DIR, this.logFileName);
+        console.log(`📁 Создан логгер: ${this.logFileName}`);
+        console.log(`📁 Полный путь: ${this.logFilePath}`);
+        console.log(`📁 Папка существует: ${fs.existsSync(LOG_DIR)}`);
+
+        // Принудительно создаём папку, если её нет
+        if (!fs.existsSync(LOG_DIR)) {
+            fs.mkdirSync(LOG_DIR, { recursive: true });
+            console.log(`📁 Папка создана: ${LOG_DIR}`);
+        }
         
         this.logData = {
             sessionInfo: {

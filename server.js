@@ -20,6 +20,154 @@ const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 const DB_FILE = path.join(__dirname, 'quizzes.json');
 const FEEDBACK_FILE = path.join(__dirname, 'feedbacks.json');
+const LOG_DIR = path.join(__dirname, 'logs', 'sessions');
+
+if (!fs.existsSync(LOG_DIR)) {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+}
+
+class SessionLogger {
+    constructor(sessionCode, sessionId, quizTitle) {
+        this.sessionCode = sessionCode;
+        this.sessionId = sessionId;
+        this.quizTitle = quizTitle;
+        this.startTime = new Date();
+        
+        // Формируем имя файла: session_кодсессии_дата_время.json
+        const dateStr = this.startTime.toISOString()
+            .replace(/T/, '_')
+            .replace(/:/g, '-')
+            .replace(/\..+/, '');
+        const shortId = sessionId.substring(0, 8);
+        this.logFileName = `session_${sessionCode}_${shortId}_${dateStr}.json`;
+        this.logFilePath = path.join(LOG_DIR, this.logFileName);
+        
+        this.logData = {
+            sessionInfo: {
+                code: sessionCode,
+                id: sessionId,
+                quizTitle: quizTitle,
+                startedAt: this.startTime.toISOString(),
+                status: 'created'
+            },
+            timeline: [],
+            students: {},
+            questions: [],
+            errors: [],
+            finalResults: null,
+            endedAt: null
+        };
+        
+        this.save();
+    }
+    
+    addEvent(eventType, data) {
+        const event = {
+            timestamp: new Date().toISOString(),
+            type: eventType,
+            ...data
+        };
+        this.logData.timeline.push(event);
+        
+        // Обновляем специфичные разделы
+        switch(eventType) {
+            case 'student_joined':
+                if (!this.logData.students[data.studentId]) {
+                    this.logData.students[data.studentId] = {
+                        id: data.studentId,
+                        name: data.studentName,
+                        joinedAt: event.timestamp,
+                        disconnectedAt: null,
+                        answers: [],
+                        finalScore: 0
+                    };
+                }
+                break;
+            case 'student_disconnected':
+                if (this.logData.students[data.studentId]) {
+                    this.logData.students[data.studentId].disconnectedAt = event.timestamp;
+                }
+                break;
+            case 'quiz_started':
+                this.logData.sessionInfo.status = 'active';
+                break;
+            case 'question_started':
+                this.logData.questions.push({
+                    index: data.questionIndex,
+                    question: data.questionText,
+                    correctAnswer: data.correctAnswer,
+                    startedAt: event.timestamp,
+                    answers: []
+                });
+                break;
+            case 'question_ended':
+                if (this.logData.questions[data.questionIndex]) {
+                    this.logData.questions[data.questionIndex].endedAt = event.timestamp;
+                    this.logData.questions[data.questionIndex].totalAnswers = data.totalAnswers || 0;
+                    this.logData.questions[data.questionIndex].correctAnswers = data.correctCount || 0;
+                }
+                break;
+            case 'student_answer':
+                if (this.logData.students[data.studentId]) {
+                    const answerRecord = {
+                        questionIndex: data.questionIndex,
+                        answer: data.answerText,
+                        isCorrect: data.isCorrect,
+                        timeLeft: data.timeLeft,
+                        timestamp: event.timestamp
+                    };
+                    this.logData.students[data.studentId].answers.push(answerRecord);
+                    
+                    if (this.logData.questions[data.questionIndex]) {
+                        this.logData.questions[data.questionIndex].answers.push({
+                            studentId: data.studentId,
+                            studentName: data.studentName,
+                            answer: data.answerText,
+                            isCorrect: data.isCorrect,
+                            timeLeft: data.timeLeft
+                        });
+                    }
+                }
+                break;
+            case 'score_updated':
+                if (this.logData.students[data.studentId]) {
+                    this.logData.students[data.studentId].finalScore = data.score;
+                }
+                break;
+            case 'quiz_ended':
+                this.logData.sessionInfo.status = 'completed';
+                this.logData.endedAt = event.timestamp;
+                this.logData.finalResults = data.finalResults;
+                break;
+            case 'quiz_aborted':
+                this.logData.sessionInfo.status = 'aborted';
+                this.logData.endedAt = event.timestamp;
+                this.logData.abortReason = data.reason;
+                break;
+            case 'server_error':
+                this.logData.errors.push({
+                    timestamp: event.timestamp,
+                    message: data.message,
+                    stack: data.stack,
+                    context: data.context
+                });
+                break;
+        }
+        
+        // Асинхронно сохраняем лог
+        this.save();
+    }
+    
+    save() {
+        try {
+            // Асинхронная запись, не блокирует основной поток
+            fs.promises.writeFile(this.logFilePath, JSON.stringify(this.logData, null, 2))
+                .catch(err => console.error(`❌ Ошибка сохранения лога ${this.logFileName}:`, err));
+        } catch (error) {
+            console.error(`❌ Ошибка записи лога ${this.logFileName}:`, error);
+        }
+    }
+}
 
 // ========== БАЗЫ ДАННЫХ ==========
 let quizzes = [];
@@ -131,6 +279,7 @@ function generateSessionCode() {
 }
 
 // ========== ФУНКЦИИ КВИЗА ==========
+// ========== ФУНКЦИИ КВИЗА ==========
 function startQuestion(session, questionIndex) {
     console.log(`📝 Вопрос ${questionIndex + 1} в сессии ${session.code}`);
     
@@ -138,6 +287,17 @@ function startQuestion(session, questionIndex) {
     const question = session.quiz.questions[questionIndex];
     
     if (!question) return;
+    
+    // Логируем начало вопроса
+    if (session.logger) {
+        session.logger.addEvent('question_started', {
+            questionIndex: questionIndex,
+            questionText: question.question,
+            correctAnswer: question.correctAnswer,
+            timeLimit: question.timeLimit || 30,
+            totalStudents: session.students.size
+        });
+    }
     
     let wrongAnswers = [];
     if (Array.isArray(question.wrongAnswers)) {
@@ -196,7 +356,34 @@ function endQuestion(session, questionIndex) {
     
     const question = session.quiz.questions[questionIndex];
     const answers = session.answers.get(questionIndex) || new Map();
-    const totalCorrect = Array.from(answers.values()).filter(a => a.isCorrect).length;
+    
+    // Считаем статистику ответов
+    let correctCount = 0;
+    const answerDetails = [];
+    answers.forEach((value, studentId) => {
+        if (value.isCorrect) correctCount++;
+        const student = session.students.get(studentId);
+        answerDetails.push({
+            studentId,
+            studentName: student?.name || 'Unknown',
+            isCorrect: value.isCorrect,
+            timeLeft: value.timeLeft
+        });
+    });
+    
+    const totalCorrect = correctCount;
+    
+    // Логируем завершение вопроса
+    if (session.logger) {
+        session.logger.addEvent('question_ended', {
+            questionIndex: questionIndex,
+            totalAnswers: answers.size,
+            correctCount: correctCount,
+            incorrectCount: answers.size - correctCount,
+            notAnswered: session.students.size - answers.size,
+            answerDetails: answerDetails
+        });
+    }
     
     io.to(session.code).emit('question-ended', {
         questionIndex,
@@ -212,6 +399,42 @@ function endQuestion(session, questionIndex) {
             endQuiz(session);
         }
     }, 3000);
+}
+
+function endQuiz(session) {
+    session.status = 'completed';
+    
+    const finalResults = Array.from(session.scores.entries())
+        .map(([studentId, score]) => ({
+            studentId,
+            score,
+            name: session.students.get(studentId)?.name,
+            answers: session.studentAnswers?.get(studentId) || []
+        }))
+        .sort((a, b) => b.score - a.score);
+    
+    // Логируем завершение квиза
+    if (session.logger) {
+        session.logger.addEvent('quiz_ended', {
+            finalResults: finalResults,
+            totalQuestions: session.quiz.questions.length,
+            averageScore: finalResults.length > 0 
+                ? (finalResults.reduce((sum, r) => sum + r.score, 0) / finalResults.length).toFixed(1)
+                : 0,
+            maxScore: finalResults.length > 0 ? finalResults[0].score : 0,
+            minScore: finalResults.length > 0 ? finalResults[finalResults.length - 1].score : 0
+        });
+        
+        console.log(`📋 Лог сессии ${session.code} сохранён: ${session.logger.logFileName}`);
+    }
+    
+    io.to(session.code).emit('quiz-ended', { finalResults });
+    
+    // Отложенная очистка сессии (даём время на сохранение лога)
+    setTimeout(() => {
+        activeSessions.delete(session.code);
+        console.log(`🧹 Сессия ${session.code} удалена из памяти`);
+    }, 60000); // Удаляем через минуту после завершения
 }
 
 function endQuiz(session) {
@@ -324,6 +547,14 @@ app.post('/api/sessions', (req, res) => {
         const sessionCode = generateSessionCode();
         const sessionId = uuidv4();
 
+        // Создаём логгер для сессии
+        const logger = new SessionLogger(sessionCode, sessionId, quiz.title);
+        logger.addEvent('session_created', {
+            quizArticle: quiz.article,
+            questionsCount: quiz.questions.length,
+            category: quiz.category
+        });
+
         const session = {
             id: sessionId,
             code: sessionCode,
@@ -336,10 +567,13 @@ app.post('/api/sessions', (req, res) => {
             studentAnswers: new Map(),
             answers: new Map(),
             currentTimer: null,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            logger: logger  // Привязываем логгер к сессии
         };
 
         activeSessions.set(sessionCode, session);
+        
+        console.log(`📋 Сессия ${sessionCode} создана, лог: ${logger.logFileName}`);
         
         res.json({ 
             success: true, 
@@ -458,6 +692,12 @@ io.on('connection', (socket) => {
             socket.sessionCode = sessionCode;
             console.log(`👨‍🏫 Учитель в сессии: ${sessionCode}`);
             
+            if (session.logger) {
+                session.logger.addEvent('teacher_joined', {
+                    socketId: socket.id
+                });
+            }
+            
             const students = Array.from(session.students.values());
             students.forEach(student => {
                 socket.emit('student-joined', {
@@ -488,6 +728,14 @@ io.on('connection', (socket) => {
             socket.sessionCode = sessionCode;
             socket.studentId = studentId;
             
+            if (session.logger) {
+                session.logger.addEvent('student_joined', {
+                    studentId: studentId,
+                    studentName: studentName,
+                    totalStudents: session.students.size
+                });
+            }
+            
             io.to(sessionCode).emit('student-joined', {
                 student,
                 totalStudents: session.students.size
@@ -510,6 +758,13 @@ io.on('connection', (socket) => {
                 session.studentAnswers.set(studentId, []);
             });
             session.answers.clear();
+            
+            if (session.logger) {
+                session.logger.addEvent('quiz_started', {
+                    totalStudents: session.students.size,
+                    totalQuestions: session.quiz.questions.length
+                });
+            }
             
             io.to(sessionCode).emit('quiz-started');
             
@@ -537,6 +792,19 @@ io.on('connection', (socket) => {
                 isCorrect,
                 timeLeft 
             });
+            
+            // Логируем ответ ученика
+            if (session.logger) {
+                const student = session.students.get(studentId);
+                session.logger.addEvent('student_answer', {
+                    studentId: studentId,
+                    studentName: student?.name || 'Unknown',
+                    questionIndex: questionIndex,
+                    answerText: answerText,
+                    isCorrect: isCorrect,
+                    timeLeft: timeLeft
+                });
+            }
             
             if (session.teacher) {
                 const answeredCount = session.answers.get(questionIndex).size;
@@ -576,6 +844,15 @@ io.on('connection', (socket) => {
             if (isCorrect) {
                 const currentScore = session.scores.get(studentId) || 0;
                 session.scores.set(studentId, currentScore + 10);
+                
+                if (session.logger) {
+                    session.logger.addEvent('score_updated', {
+                        studentId: studentId,
+                        score: currentScore + 10,
+                        reason: 'correct_answer',
+                        questionIndex: questionIndex
+                    });
+                }
             }
             
             sendDetailedStats(session);
@@ -586,6 +863,16 @@ io.on('connection', (socket) => {
         if (socket.sessionCode && socket.studentId) {
             const session = activeSessions.get(socket.sessionCode);
             if (session) {
+                const student = session.students.get(socket.studentId);
+                
+                if (session.logger) {
+                    session.logger.addEvent('student_disconnected', {
+                        studentId: socket.studentId,
+                        studentName: student?.name || 'Unknown',
+                        sessionStatus: session.status
+                    });
+                }
+                
                 session.students.delete(socket.studentId);
                 io.to(socket.sessionCode).emit('student-left', {
                     studentId: socket.studentId,
@@ -597,6 +884,42 @@ io.on('connection', (socket) => {
     });
 });
 
+// ========== ГЛОБАЛЬНЫЙ ОБРАБОТЧИК ОШИБОК ==========
+process.on('uncaughtException', (error) => {
+    console.error('💥 НЕОБРАБОТАННАЯ ОШИБКА:', error);
+    
+    // Пытаемся записать ошибку во все активные сессии
+    activeSessions.forEach((session) => {
+        if (session.logger) {
+            session.logger.addEvent('server_error', {
+                message: error.message,
+                stack: error.stack,
+                context: 'uncaughtException',
+                sessionStatus: session.status
+            });
+        }
+    });
+    
+    // Не завершаем процесс сразу, даём время на сохранение логов
+    setTimeout(() => {
+        process.exit(1);
+    }, 2000);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 НЕОБРАБОТАННЫЙ ПРОМИС:', reason);
+    
+    activeSessions.forEach((session) => {
+        if (session.logger) {
+            session.logger.addEvent('server_error', {
+                message: reason?.message || String(reason),
+                stack: reason?.stack || 'No stack',
+                context: 'unhandledRejection',
+                sessionStatus: session.status
+            });
+        }
+    });
+});
 function sendDetailedStats(session) {
     if (!session.teacher) return;
     

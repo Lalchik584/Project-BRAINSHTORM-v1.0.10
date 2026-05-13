@@ -1,9 +1,9 @@
+cat > /home/admin_ilka/Project-BRAINSHTORM-v1.0.10/session-logger.js << 'EOF'
 const fs = require('fs');
 const path = require('path');
 
 const LOG_DIR = path.join(__dirname, 'logs', 'sessions');
 
-// Создаём папку для логов
 try {
     if (!fs.existsSync(LOG_DIR)) {
         fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -48,12 +48,103 @@ class SessionLogger {
     }
     
     addEvent(type, data) {
+        const timestamp = new Date().toISOString();
+        
+        // Добавляем в timeline
         this.logData.timeline.push({
-            timestamp: new Date().toISOString(),
+            timestamp: timestamp,
             type: type,
             ...data
         });
+        
+        // Заполняем структурированные разделы
+        this._updateSections(type, data, timestamp);
+        
+        // Сохраняем
         this.save();
+    }
+    
+    _updateSections(type, data, timestamp) {
+        switch(type) {
+            case 'student_joined':
+                this.logData.students[data.studentId] = {
+                    id: data.studentId,
+                    name: data.studentName,
+                    joinedAt: timestamp,
+                    disconnectedAt: null,
+                    answers: [],
+                    finalScore: 0
+                };
+                break;
+                
+            case 'student_disconnected':
+                if (this.logData.students[data.studentId]) {
+                    this.logData.students[data.studentId].disconnectedAt = timestamp;
+                }
+                break;
+                
+            case 'quiz_started':
+                this.logData.sessionInfo.status = 'active';
+                break;
+                
+            case 'question_started':
+                this.logData.questions.push({
+                    index: data.questionIndex,
+                    question: data.questionText,
+                    correctAnswer: data.correctAnswer || 'не указан',
+                    startedAt: timestamp,
+                    endedAt: null,
+                    answers: []
+                });
+                break;
+                
+            case 'student_answer':
+                if (this.logData.students[data.studentId]) {
+                    this.logData.students[data.studentId].answers.push({
+                        questionIndex: data.questionIndex,
+                        answer: data.answerText,
+                        isCorrect: data.isCorrect,
+                        timeLeft: data.timeLeft,
+                        timestamp: timestamp
+                    });
+                }
+                if (this.logData.questions[data.questionIndex]) {
+                    this.logData.questions[data.questionIndex].answers.push({
+                        studentId: data.studentId,
+                        studentName: data.studentName,
+                        answer: data.answerText,
+                        isCorrect: data.isCorrect,
+                        timeLeft: data.timeLeft
+                    });
+                }
+                break;
+                
+            case 'score_updated':
+                if (this.logData.students[data.studentId]) {
+                    this.logData.students[data.studentId].finalScore = data.score;
+                }
+                break;
+                
+            case 'quiz_ended':
+                this.logData.sessionInfo.status = 'completed';
+                this.logData.endedAt = timestamp;
+                this.logData.finalResults = data.finalResults;
+                break;
+                
+            case 'quiz_aborted':
+                this.logData.sessionInfo.status = 'aborted';
+                this.logData.endedAt = timestamp;
+                break;
+                
+            case 'server_error':
+                this.logData.errors.push({
+                    timestamp: timestamp,
+                    message: data.message || 'Неизвестная ошибка',
+                    stack: data.stack || '',
+                    context: data.context || ''
+                });
+                break;
+        }
     }
     
     save() {
@@ -66,3 +157,4 @@ class SessionLogger {
 }
 
 module.exports = SessionLogger;
+EOF

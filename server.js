@@ -524,17 +524,17 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('disconnect', () => {
-        if (socket.sessionCode && socket.studentId) {
-            const session = activeSessions.get(socket.sessionCode);
-            if (session) {
+socket.on('disconnect', () => {
+    if (socket.sessionCode && socket.studentId) {
+        const session = activeSessions.get(socket.sessionCode);
+        if (session) {
             // Логируем отключение
-                if (session.logger) {
-                    session.logger.addEvent('student_disconnected', {
-                        studentId: socket.studentId,
-                        studentName: session.students.get(socket.studentId)?.name || 'Неизвестный'
-                    });
-               }
+            if (session.logger) {
+                session.logger.addEvent('student_disconnected', {
+                    studentId: socket.studentId,
+                    studentName: session.students.get(socket.studentId)?.name || 'Неизвестный'
+                });
+            }
             // Удаляем студента
             session.students.delete(socket.studentId);
             io.to(socket.sessionCode).emit('student-left', {
@@ -545,19 +545,34 @@ io.on('connection', (socket) => {
     }
     console.log('🔌 Отключился:', socket.id);
 });
-            session.scores.clear();
-            session.studentAnswers.clear();
-            session.students.forEach((_, studentId) => {
-                session.scores.set(studentId, 0);
-                session.studentAnswers.set(studentId, []);
+
+socket.on('start-quiz', (sessionCode) => {
+    const session = activeSessions.get(sessionCode);
+    if (session && session.teacher === socket.id) {
+        // Логируем старт квиза
+        if (session.logger) {
+            session.logger.addEvent('quiz_started', {
+                totalStudents: session.students.size,
+                totalQuestions: session.quiz.questions.length
             });
-            session.answers.clear();
-            
-            io.to(sessionCode).emit('quiz-started');
-            
-            setTimeout(() => startQuestion(session, 0), 3000);
         }
-    });
+        
+        session.status = 'active';
+        session.currentQuestion = 0;
+        
+        session.scores.clear();
+        session.studentAnswers.clear();
+        session.students.forEach((_, studentId) => {
+            session.scores.set(studentId, 0);
+            session.studentAnswers.set(studentId, []);
+        });
+        session.answers.clear();
+        
+        io.to(sessionCode).emit('quiz-started');
+        
+        setTimeout(() => startQuestion(session, 0), 3000);
+    }
+});
 
     socket.on('student-answer', (data) => {
         const { sessionCode, questionIndex, answerIndex, answerText, timeLeft } = data;

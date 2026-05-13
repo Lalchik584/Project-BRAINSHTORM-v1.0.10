@@ -134,13 +134,7 @@ function generateSessionCode() {
 // ========== ФУНКЦИИ КВИЗА ==========
 function startQuestion(session, questionIndex) {
     console.log(`📝 Вопрос ${questionIndex + 1} в сессии ${session.code}`);
-      if (session.logger) {
-        session.logger.addEvent('question_started', {
-        questionIndex: questionIndex,
-            questionText: question.question
-        });
-    }
-  
+    
     session.currentQuestion = questionIndex;
     const question = session.quiz.questions[questionIndex];
     
@@ -223,18 +217,7 @@ function endQuestion(session, questionIndex) {
 
 function endQuiz(session) {
     session.status = 'completed';
-    if (session.logger) {
-        const results = Array.from(session.scores.entries()).map(([id, score]) => ({
-            studentId: id,
-            name: session.students.get(id)?.name || 'Неизвестный',
-            score: score
-        }));
-        session.logger.addEvent('quiz_ended', {
-            finalResults: results,
-            totalQuestions: session.quiz.questions.length
-        });
-    }
-  
+    
     const finalResults = Array.from(session.scores.entries())
         .map(([studentId, score]) => ({
             studentId,
@@ -515,64 +498,28 @@ io.on('connection', (socket) => {
             });
             
             console.log(`👨‍🎓 ${studentName} присоединился к ${sessionCode}`);
-              if (session.logger) {
-                session.logger.addEvent('student_joined', {
-                    studentId: studentId,
-                    studentName: studentName
-                });
-            }
         }
     });
 
-socket.on('disconnect', () => {
-    if (socket.sessionCode && socket.studentId) {
-        const session = activeSessions.get(socket.sessionCode);
-        if (session) {
-            // Логируем отключение
-            if (session.logger) {
-                session.logger.addEvent('student_disconnected', {
-                    studentId: socket.studentId,
-                    studentName: session.students.get(socket.studentId)?.name || 'Неизвестный'
-                });
-            }
-            // Удаляем студента
-            session.students.delete(socket.studentId);
-            io.to(socket.sessionCode).emit('student-left', {
-                studentId: socket.studentId,
-                totalStudents: session.students.size
+    socket.on('start-quiz', (sessionCode) => {
+        const session = activeSessions.get(sessionCode);
+        if (session && session.teacher === socket.id) {
+            session.status = 'active';
+            session.currentQuestion = 0;
+            
+            session.scores.clear();
+            session.studentAnswers.clear();
+            session.students.forEach((_, studentId) => {
+                session.scores.set(studentId, 0);
+                session.studentAnswers.set(studentId, []);
             });
+            session.answers.clear();
+            
+            io.to(sessionCode).emit('quiz-started');
+            
+            setTimeout(() => startQuestion(session, 0), 3000);
         }
-    }
-    console.log('🔌 Отключился:', socket.id);
-});
-
-socket.on('start-quiz', (sessionCode) => {
-    const session = activeSessions.get(sessionCode);
-    if (session && session.teacher === socket.id) {
-        // Логируем старт квиза
-        if (session.logger) {
-            session.logger.addEvent('quiz_started', {
-                totalStudents: session.students.size,
-                totalQuestions: session.quiz.questions.length
-            });
-        }
-        
-        session.status = 'active';
-        session.currentQuestion = 0;
-        
-        session.scores.clear();
-        session.studentAnswers.clear();
-        session.students.forEach((_, studentId) => {
-            session.scores.set(studentId, 0);
-            session.studentAnswers.set(studentId, []);
-        });
-        session.answers.clear();
-        
-        io.to(sessionCode).emit('quiz-started');
-        
-        setTimeout(() => startQuestion(session, 0), 3000);
-    }
-});
+    });
 
     socket.on('student-answer', (data) => {
         const { sessionCode, questionIndex, answerIndex, answerText, timeLeft } = data;
@@ -636,37 +583,22 @@ socket.on('start-quiz', (sessionCode) => {
             }
             
             sendDetailedStats(session);
-            if (session.logger) {
-                session.logger.addEvent('student_answer', {
-                    studentId: socket.studentId,
-                    studentName: session.students.get(socket.studentId)?.name || 'Неизвестный',
-                    questionIndex: questionIndex,
-                    answerText: answerText,
-                    isCorrect: isCorrect,
-                    timeLeft: timeLeft
-                });
-            }
         }
     });
 
-socket.on('disconnect', () => {
-    if (socket.sessionCode && socket.studentId) {
-        const session = activeSessions.get(socket.sessionCode);
-        if (session) {
-            if (session.logger) {
-                session.logger.addEvent('student_disconnected', {
+    socket.on('disconnect', () => {
+        if (socket.sessionCode && socket.studentId) {
+            const session = activeSessions.get(socket.sessionCode);
+            if (session) {
+                session.students.delete(socket.studentId);
+                io.to(socket.sessionCode).emit('student-left', {
                     studentId: socket.studentId,
-                    studentName: session.students.get(socket.studentId)?.name || 'Неизвестный'
+                    totalStudents: session.students.size
                 });
             }
-            session.students.delete(socket.studentId);
-            io.to(socket.sessionCode).emit('student-left', {
-                studentId: socket.studentId,
-                totalStudents: session.students.size
-            });
         }
-    }
-    console.log('🔌 Отключился:', socket.id);
+        console.log('🔌 Отключился:', socket.id);
+    });
 });
 
 function sendDetailedStats(session) {

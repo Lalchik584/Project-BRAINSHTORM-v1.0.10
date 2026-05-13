@@ -157,4 +157,3 @@ class SessionLogger {
 }
 
 module.exports = SessionLogger;
-EOF

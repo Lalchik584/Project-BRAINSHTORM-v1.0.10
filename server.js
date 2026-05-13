@@ -134,13 +134,23 @@ function generateSessionCode() {
 // ========== ФУНКЦИИ КВИЗА ==========
 function startQuestion(session, questionIndex) {
     console.log(`📝 Вопрос ${questionIndex + 1} в сессии ${session.code}`);
-    
+
     session.currentQuestion = questionIndex;
     const question = session.quiz.questions[questionIndex];
-    
+
     if (!question) return;
     
+    // Логируем начало вопроса (ПОСЛЕ объявления question!)
+    if (session.logger) {
+        session.logger.addEvent("question_started", {
+            questionIndex: questionIndex,
+            questionText: question.question,
+            timeLimit: question.timeLimit || 30
+        });
+    }
+    
     let wrongAnswers = [];
+
     if (Array.isArray(question.wrongAnswers)) {
         wrongAnswers = question.wrongAnswers;
     } else if (typeof question.wrongAnswers === 'string') {

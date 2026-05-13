@@ -134,7 +134,13 @@ function generateSessionCode() {
 // ========== ФУНКЦИИ КВИЗА ==========
 function startQuestion(session, questionIndex) {
     console.log(`📝 Вопрос ${questionIndex + 1} в сессии ${session.code}`);
-    
+      if (session.logger) {
+        session.logger.addEvent('question_started', {
+        questionIndex: questionIndex,
+            questionText: question.question
+        });
+    }
+  
     session.currentQuestion = questionIndex;
     const question = session.quiz.questions[questionIndex];
     
@@ -217,7 +223,18 @@ function endQuestion(session, questionIndex) {
 
 function endQuiz(session) {
     session.status = 'completed';
-    
+    if (session.logger) {
+        const results = Array.from(session.scores.entries()).map(([id, score]) => ({
+            studentId: id,
+            name: session.students.get(id)?.name || 'Неизвестный',
+            score: score
+        }));
+        session.logger.addEvent('quiz_ended', {
+            finalResults: results,
+            totalQuestions: session.quiz.questions.length
+        });
+    }
+  
     const finalResults = Array.from(session.scores.entries())
         .map(([studentId, score]) => ({
             studentId,
@@ -498,15 +515,36 @@ io.on('connection', (socket) => {
             });
             
             console.log(`👨‍🎓 ${studentName} присоединился к ${sessionCode}`);
+              if (session.logger) {
+                session.logger.addEvent('student_joined', {
+                    studentId: studentId,
+                    studentName: studentName
+                });
+            }
         }
     });
 
-    socket.on('start-quiz', (sessionCode) => {
-        const session = activeSessions.get(sessionCode);
-        if (session && session.teacher === socket.id) {
-            session.status = 'active';
-            session.currentQuestion = 0;
-            
+    socket.on('disconnect', () => {
+        if (socket.sessionCode && socket.studentId) {
+            const session = activeSessions.get(socket.sessionCode);
+            if (session) {
+            // Логируем отключение
+                if (session.logger) {
+                    session.logger.addEvent('student_disconnected', {
+                        studentId: socket.studentId,
+                        studentName: session.students.get(socket.studentId)?.name || 'Неизвестный'
+                    });
+               }
+            // Удаляем студента
+            session.students.delete(socket.studentId);
+            io.to(socket.sessionCode).emit('student-left', {
+                studentId: socket.studentId,
+                totalStudents: session.students.size
+            });
+        }
+    }
+    console.log('🔌 Отключился:', socket.id);
+});
             session.scores.clear();
             session.studentAnswers.clear();
             session.students.forEach((_, studentId) => {
@@ -583,22 +621,37 @@ io.on('connection', (socket) => {
             }
             
             sendDetailedStats(session);
-        }
-    });
-
-    socket.on('disconnect', () => {
-        if (socket.sessionCode && socket.studentId) {
-            const session = activeSessions.get(socket.sessionCode);
-            if (session) {
-                session.students.delete(socket.studentId);
-                io.to(socket.sessionCode).emit('student-left', {
+            if (session.logger) {
+                session.logger.addEvent('student_answer', {
                     studentId: socket.studentId,
-                    totalStudents: session.students.size
+                    studentName: session.students.get(socket.studentId)?.name || 'Неизвестный',
+                    questionIndex: questionIndex,
+                    answerText: answerText,
+                    isCorrect: isCorrect,
+                    timeLeft: timeLeft
                 });
             }
         }
-        console.log('🔌 Отключился:', socket.id);
     });
+
+socket.on('disconnect', () => {
+    if (socket.sessionCode && socket.studentId) {
+        const session = activeSessions.get(socket.sessionCode);
+        if (session) {
+            if (session.logger) {
+                session.logger.addEvent('student_disconnected', {
+                    studentId: socket.studentId,
+                    studentName: session.students.get(socket.studentId)?.name || 'Неизвестный'
+                });
+            }
+            session.students.delete(socket.studentId);
+            io.to(socket.sessionCode).emit('student-left', {
+                studentId: socket.studentId,
+                totalStudents: session.students.size
+            });
+        }
+    }
+    console.log('🔌 Отключился:', socket.id);
 });
 
 function sendDetailedStats(session) {

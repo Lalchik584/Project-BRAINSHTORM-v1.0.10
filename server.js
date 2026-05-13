@@ -340,7 +340,6 @@ app.post('/api/sessions', (req, res) => {
             answers: new Map(),
             currentTimer: null,
             createdAt: new Date().toISOString()  
-            logger:logger
         };
 
         activeSessions.set(sessionCode, session);

@@ -342,6 +342,7 @@ app.post('/api/sessions', (req, res) => {
             createdAt: new Date().toISOString()  
         };
 
+        session.logger = new SessionLogger(sessionCode, sessionId, quiz.title);
         activeSessions.set(sessionCode, session);
         
         res.json({ 

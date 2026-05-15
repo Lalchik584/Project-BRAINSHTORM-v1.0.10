@@ -809,5 +809,77 @@
             document.getElementById('studentName').focus();
         }
     </script>
+    <!-- ========== ЗВУКОВАЯ СИСТЕМА ========== -->
+<script>
+const SoundFX = {
+    sounds: {},
+    enabled: true,
+    
+    preload() {
+        const soundList = {
+            studentJoin: '/sounds/student_join.wav',
+            timerTick: '/sounds/timer_tick.wav',
+            answerCorrect: '/sounds/answer_correct.wav',
+            answerWrong: '/sounds/answer_wrong.wav',
+            timeout: '/sounds/timeout.wav',
+            quizEnd: '/sounds/quiz_end.wav'
+        };
+        
+        for (let [name, src] of Object.entries(soundList)) {
+            const audio = new Audio(src);
+            audio.preload = 'auto';
+            audio.volume = 0.3;
+            this.sounds[name] = audio;
+        }
+        
+        // Загружаем настройку из localStorage
+        if (localStorage.getItem('soundEnabled') === 'false') {
+            this.enabled = false;
+        }
+    },
+    
+    play(name) {
+        if (!this.enabled || !this.sounds[name]) return;
+        try {
+            const audio = this.sounds[name].cloneNode();
+            audio.volume = this.sounds[name].volume;
+            audio.play().catch(() => {});
+        } catch(e) {}
+    },
+    
+    toggle() {
+        this.enabled = !this.enabled;
+        localStorage.setItem('soundEnabled', this.enabled);
+        return this.enabled;
+    }
+};
+
+// Инициализация при загрузке
+SoundFX.preload();
+
+// Кнопка звука (появится в левом нижнем углу)
+const soundToggle = document.createElement('button');
+soundToggle.style.cssText = `
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    z-index: 999;
+    background: #0a001a;
+    border: 2px solid #ffcc00;
+    color: #ffcc00;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6em;
+    padding: 8px 12px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 #4a0252;
+`;
+soundToggle.textContent = SoundFX.enabled ? '🔊' : '🔇';
+soundToggle.title = 'Вкл/Выкл звук';
+soundToggle.onclick = function() {
+    const enabled = SoundFX.toggle();
+    this.textContent = enabled ? '🔊' : '🔇';
+};
+document.body.appendChild(soundToggle);
+</script>
 </body>
 </html>

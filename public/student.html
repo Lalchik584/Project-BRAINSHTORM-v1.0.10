@@ -563,6 +563,7 @@
         socket.on('quiz-started', () => {
             document.getElementById('waiting-room').style.display = 'none';
             document.getElementById('quiz-room').style.display = 'block';
+            SoundFX.play('studentJoin');
             document.getElementById('quiz-title-display').textContent = document.getElementById('quiz-title').textContent;
         });
 
@@ -612,6 +613,9 @@
         socket.on('timer-update', (data) => {
             serverTimeLeft = data.timeLeft;
             lastServerUpdate = Date.now();
+            if (data.timeLeft <= 5 && data.timeLeft > 0) {
+                SoundFX.play('timerTick');
+            }
         });
 
         socket.on('question-ended', (data) => {
@@ -636,18 +640,22 @@
                 document.getElementById('score-display').textContent = score;
                 answers[currentQuestionIndex] = true;
                 feedback.innerHTML = '<div class="answer-feedback answer-correct">✅ Правильно! +10 очков</div>';
+                    SoundFX.play('answerCorrect');
             } else if (selectedAnswer !== null) {
                 answers[currentQuestionIndex] = false;
                 feedback.innerHTML = `<div class="answer-feedback answer-wrong">❌ Неправильно! Правильный ответ: ${data.correctAnswer}</div>`;
+                    SoundFX.play('answerWrong');
             } else {
                 answers[currentQuestionIndex] = false;
                 feedback.innerHTML = `<div class="answer-feedback answer-wrong">⏰ Время вышло! Правильный ответ: ${data.correctAnswer}</div>`;
+                    SoundFX.play('timeout');
             }
         });
 
         socket.on('quiz-ended', (data) => {
             document.getElementById('quiz-room').style.display = 'none';
             document.getElementById('results-room').style.display = 'block';
+                SoundFX.play('quizEnd');
             
             const correctCount = answers.filter(a => a === true).length;
             const wrongCount = totalQuestions - correctCount;

@@ -471,6 +471,7 @@
         let score = 0;
         let answers = [];
         let timerInterval = null;
+        let tickPlayed = false;
         let serverTimeLeft = 0;
         let lastServerUpdate = Date.now();
         let timeLimit = 30;
@@ -571,6 +572,7 @@
             currentQuestionIndex = data.questionIndex;
             questionType = data.question.type || 'single';
             timeLimit = data.timeLimit;
+            tickPlayed = false;
             
             selectedAnswer = null;
             selectedAnswerText = '';
@@ -613,8 +615,9 @@
         socket.on('timer-update', (data) => {
             serverTimeLeft = data.timeLeft;
             lastServerUpdate = Date.now();
-            if (data.timeLeft <= 5 && data.timeLeft > 0) {
+            if (data.timeLeft <= 5 && data.timeLeft > 0 && !tickPlayed) {
                 SoundFX.play('timerTick');
+                tickPlayed = true;
             }
         });
 

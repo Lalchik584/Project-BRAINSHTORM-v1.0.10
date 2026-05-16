@@ -131,23 +131,85 @@ function generateSessionCode() {
     return code;
 }
 
+// Перемешивание массива (Фишер-Йетс)
+function shuffleArray(arr) {
+    const shuffled = [...arr];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // ========== ФУНКЦИИ КВИЗА ==========
 function startQuestion(session, questionIndex) {
     console.log(`📝 Вопрос ${questionIndex + 1} в сессии ${session.code}`);
 
     session.currentQuestion = questionIndex;
-    const question = session.quiz.questions[questionIndex];
+    
+    // Если перемешивание вопросов включено — используем оригинальный массив
+    let question;
+    if (session.shuffleQuestions && session.originalQuestions) {
+        question = session.originalQuestions[questionIndex];
+    } else {
+        question = session.quiz.questions[questionIndex];
+    }
 
     if (!question) return;
     
-    // Логируем начало вопроса (ПОСЛЕ объявления question!)
     if (session.logger) {
-        session.logger.addEvent("question_started", {
+        session.logger.addEvent('question_started', {
             questionIndex: questionIndex,
             questionText: question.question,
             timeLimit: question.timeLimit || 30
         });
     }
+
+    // Формируем варианты ответов
+    let wrongAnswers = [];
+    if (Array.isArray(question.wrongAnswers)) {
+        wrongAnswers = [...question.wrongAnswers];
+    } else if (typeof question.wrongAnswers === 'string') {
+        wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
+    }
+    
+    if (wrongAnswers.length === 0) {
+        wrongAnswers = ['(нет вариантов)'];
+    }
+
+    // Всегда перемешиваем варианты ответов
+    const allOptions = [question.correctAnswer, ...wrongAnswers];
+    const shuffledOptions = shuffleArray(allOptions);
+    
+    const timeLimit = question.timeLimit || 30;
+    
+    io.to(session.code).emit('question-started', {
+        questionIndex,
+        question: {
+            question: question.question,
+            options: shuffledOptions,
+            timeLimit
+        },
+        timeLimit
+    });
+    
+    let timeLeft = timeLimit;
+    const startTime = Date.now();
+    
+    const timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        timeLeft = Math.max(0, timeLimit - elapsed);
+        
+        io.to(session.code).emit('timer-update', { timeLeft });
+        
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            endQuestion(session, questionIndex);
+        }
+    }, 200);
+    
+    session.currentTimer = timerInterval;
+}
     
     let wrongAnswers = [];
 
@@ -497,6 +559,13 @@ io.on('connection', (socket) => {
             session.students.set(studentId, student);
             session.scores.set(studentId, 0);
             session.studentAnswers.set(studentId, []);
+              if (!session.studentQuestionOrder) {
+                  session.studentQuestionOrder = new Map();
+              }
+              if (session.shuffleQuestions) {
+                  const order = shuffleArray([...Array(session.quiz.questions.length).keys()]);
+                  session.studentQuestionOrder.set(studentId, order);
+              }
             socket.join(sessionCode);
             socket.sessionCode = sessionCode;
             socket.studentId = studentId;
@@ -510,25 +579,51 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('start-quiz', (sessionCode) => {
-        const session = activeSessions.get(sessionCode);
-        if (session && session.teacher === socket.id) {
-            session.status = 'active';
-            session.currentQuestion = 0;
-            
-            session.scores.clear();
-            session.studentAnswers.clear();
-            session.students.forEach((_, studentId) => {
-                session.scores.set(studentId, 0);
-                session.studentAnswers.set(studentId, []);
-            });
-            session.answers.clear();
-            
-            io.to(sessionCode).emit('quiz-started');
-            
-            setTimeout(() => startQuestion(session, 0), 3000);
-        }
-    });
+    socket.on('start-quiz', (data) => {
+      // Поддержка старого формата (просто код) и нового (объект с флагом)
+      const sessionCode = typeof data === 'string' ? data : data.sessionCode;
+      const shuffleQuestions = typeof data === 'object' ? data.shuffleQuestions : false;
+    
+      const session = activeSessions.get(sessionCode);
+      if (session && session.teacher === socket.id) {
+          if (session.logger) {
+              session.logger.addEvent('quiz_started', {
+                  totalStudents: session.students.size,
+                  totalQuestions: session.quiz.questions.length,
+                  shuffleQuestions: shuffleQuestions,
+                  shuffleOptions: true
+              });
+          }
+        
+          // Сохраняем оригинальный порядок вопросов
+          session.originalQuestions = [...session.quiz.questions];
+          session.shuffleQuestions = shuffleQuestions;
+        session.shuffleQuestions = shuffleQuestions;
+          if (session.shuffleQuestions) {
+              session.studentQuestionOrder = new Map();
+              session.students.forEach((_, studentId) => {
+                  const totalQuestions = session.originalQuestions.length;
+                  const order = shuffleArray([...Array(totalQuestions).keys()]);
+                  session.studentQuestionOrder.set(studentId, order);
+              });
+          }
+        
+          session.status = 'active';
+          session.currentQuestion = 0;
+        
+          session.scores.clear();
+          session.studentAnswers.clear();
+          session.students.forEach((_, studentId) => {
+              session.scores.set(studentId, 0);
+              session.studentAnswers.set(studentId, []);
+          });
+          session.answers.clear();
+        
+          io.to(sessionCode).emit('quiz-started');
+        
+          setTimeout(() => startQuestion(session, 0), 3000);
+      }
+  });
 
     socket.on('student-answer', (data) => {
         const { sessionCode, questionIndex, answerIndex, answerText, timeLeft } = data;

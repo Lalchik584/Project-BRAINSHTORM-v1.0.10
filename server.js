@@ -207,7 +207,6 @@ function startQuestion(session, questionIndex) {
     
     session.currentTimer = timerInterval;
 }
-
 function endQuestion(session, questionIndex) {
     if (session.currentTimer) {
         clearInterval(session.currentTimer);
@@ -506,13 +505,6 @@ io.on('connection', (socket) => {
             session.students.set(studentId, student);
             session.scores.set(studentId, 0);
             session.studentAnswers.set(studentId, []);
-              if (!session.studentQuestionOrder) {
-                  session.studentQuestionOrder = new Map();
-              }
-              if (session.shuffleQuestions) {
-                  const order = shuffleArray([...Array(session.quiz.questions.length).keys()]);
-                  session.studentQuestionOrder.set(studentId, order);
-              }
             socket.join(sessionCode);
             socket.sessionCode = sessionCode;
             socket.studentId = studentId;
@@ -526,7 +518,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('start-quiz', (data) => {
+  socket.on('start-quiz', (data) => {
       // Поддержка старого формата (просто код) и нового (объект с флагом)
       const sessionCode = typeof data === 'string' ? data : data.sessionCode;
       const shuffleQuestions = typeof data === 'object' ? data.shuffleQuestions : false;
@@ -542,30 +534,16 @@ io.on('connection', (socket) => {
               });
           }
         
-          // Сохраняем оригинальный порядок вопросов
+        // Сохраняем оригинальный порядок вопросов
           session.originalQuestions = [...session.quiz.questions];
           session.shuffleQuestions = shuffleQuestions;
-        session.shuffleQuestions = shuffleQuestions;
+        
+        // Перемешиваем вопросы один раз для всей сессии
           if (session.shuffleQuestions) {
-              session.studentQuestionOrder = new Map();
-              session.students.forEach((_, studentId) => {
-                  const totalQuestions = session.originalQuestions.length;
-                  const order = shuffleArray([...Array(totalQuestions).keys()]);
-                  session.studentQuestionOrder.set(studentId, order);
-              });
+              session.originalQuestions = shuffleArray(session.originalQuestions);
           }
         
           session.status = 'active';
-          session.originalQuestions = [...session.quiz.questions];
-          session.shuffleQuestions = shuffleQuestions;
-          if (session.shuffleQuestions) {
-              session.studentQuestionOrder = new Map();
-              session.students.forEach((_, studentId) => {
-                  const totalQuestions = session.originalQuestions.length;
-                  const order = shuffleArray([...Array(totalQuestions).keys()]);
-                  session.studentQuestionOrder.set(studentId, order);
-              });
-          }
           session.currentQuestion = 0;
         
           session.scores.clear();

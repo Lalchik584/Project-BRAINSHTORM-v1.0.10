@@ -609,6 +609,16 @@ io.on('connection', (socket) => {
           }
         
           session.status = 'active';
+          session.originalQuestions = [...session.quiz.questions];
+          session.shuffleQuestions = shuffleQuestions;
+          if (session.shuffleQuestions) {
+              session.studentQuestionOrder = new Map();
+              session.students.forEach((_, studentId) => {
+                  const totalQuestions = session.originalQuestions.length;
+                  const order = shuffleArray([...Array(totalQuestions).keys()]);
+                  session.studentQuestionOrder.set(studentId, order);
+              });
+          }
           session.currentQuestion = 0;
         
           session.scores.clear();

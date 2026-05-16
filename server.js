@@ -147,7 +147,6 @@ function startQuestion(session, questionIndex) {
 
     session.currentQuestion = questionIndex;
     
-    // Если перемешивание вопросов включено — используем оригинальный массив
     let question;
     if (session.shuffleQuestions && session.originalQuestions) {
         question = session.originalQuestions[questionIndex];
@@ -165,7 +164,6 @@ function startQuestion(session, questionIndex) {
         });
     }
 
-    // Формируем варианты ответов
     let wrongAnswers = [];
     if (Array.isArray(question.wrongAnswers)) {
         wrongAnswers = [...question.wrongAnswers];
@@ -177,7 +175,6 @@ function startQuestion(session, questionIndex) {
         wrongAnswers = ['(нет вариантов)'];
     }
 
-    // Всегда перемешиваем варианты ответов
     const allOptions = [question.correctAnswer, ...wrongAnswers];
     const shuffledOptions = shuffleArray(allOptions);
     
@@ -188,56 +185,6 @@ function startQuestion(session, questionIndex) {
         question: {
             question: question.question,
             options: shuffledOptions,
-            timeLimit
-        },
-        timeLimit
-    });
-    
-    let timeLeft = timeLimit;
-    const startTime = Date.now();
-    
-    const timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        timeLeft = Math.max(0, timeLimit - elapsed);
-        
-        io.to(session.code).emit('timer-update', { timeLeft });
-        
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            endQuestion(session, questionIndex);
-        }
-    }, 200);
-    
-    session.currentTimer = timerInterval;
-}
-    
-    let wrongAnswers = [];
-
-    if (Array.isArray(question.wrongAnswers)) {
-        wrongAnswers = question.wrongAnswers;
-    } else if (typeof question.wrongAnswers === 'string') {
-        wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
-    } else {
-        wrongAnswers = [];
-    }
-    
-    if (wrongAnswers.length === 0) {
-        wrongAnswers = ['(нет вариантов)'];
-    }
-    
-    const options = [question.correctAnswer, ...wrongAnswers];
-    for (let i = options.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [options[i], options[j]] = [options[j], options[i]];
-    }
-    
-    const timeLimit = question.timeLimit || 30;
-    
-    io.to(session.code).emit('question-started', {
-        questionIndex,
-        question: {
-            question: question.question,
-            options,
             timeLimit
         },
         timeLimit

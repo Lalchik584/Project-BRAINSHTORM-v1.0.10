@@ -414,7 +414,12 @@
             <img id="qr-image" class="qr-code" src="" alt="QR Code">
             <p>Ссылка для учеников: <code id="session-link"></code></p>
         </div>
-
+        <div style="text-align: center; margin: 15px 0;">
+            <label style="color: #ffffff; font-size: 0.6em; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="shuffle-questions" style="width: 20px; height: 20px; cursor: pointer;">
+                🔀 Перемешать вопросы для каждого ученика
+            </label>
+        </div>
         <div style="text-align: center; margin: 20px 0;">
             <button class="btn-start" id="start-quiz-btn">🚀 НАЧАТЬ КВИЗ</button>
             <button class="btn btn-warning" id="next-question-btn" style="display: none;">⏭️ СЛЕДУЮЩИЙ ВОПРОС</button>
@@ -491,7 +496,8 @@
             });
 
         document.getElementById('start-quiz-btn').addEventListener('click', () => {
-            socket.emit('start-quiz', sessionCode);
+            const shuffleQuestions = document.getElementById('shuffle-questions').checked;
+            socket.emit('start-quiz', { sessionCode, shuffleQuestions });
         });
 
         document.getElementById('next-question-btn').addEventListener('click', () => {

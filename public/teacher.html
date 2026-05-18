@@ -455,6 +455,12 @@
 
         <!-- Вкладка создания квиза -->
         <div id="create-tab" class="tab-content active">
+            <div id="draft-banner" style="display: none; background: #ffc107; color: #333; padding: 15px; margin-bottom: 20px; border: 2px solid #ffcc00; text-align: center;">
+                📝 У вас есть несохранённый черновик квиза!
+                <button class="btn" onclick="restoreDraft()" style="margin: 10px; font-size: 0.6em;">📥 Восстановить</button>
+                <button class="btn" onclick="clearDraft()" style="margin: 10px; font-size: 0.6em; background: #dc3545;">🗑 Удалить</button>
+            </div>
+        
             <div class="form-group">
                 <label>Название квиза:</label>
                 <input type="text" id="quizTitle" placeholder="Например: Итоговая контрольная по биологии">
@@ -943,6 +949,117 @@ async function createQuiz() {
         }
 
         generateQuestionFields();
+        
+                // ========== АВТОСОХРАНЕНИЕ ЧЕРНОВИКА ==========
+        const DRAFT_KEY = 'quiz_draft';
+
+        function saveDraft() {
+            const title = document.getElementById('quizTitle').value.trim();
+            const category = document.getElementById('quizCategory').value;
+            const questionCount = parseInt(document.getElementById('questionCount').value);
+
+            if (!title && questionCount <= 1) return; // Ничего не заполнено
+
+            const questions = [];
+            for (let i = 1; i <= questionCount; i++) {
+                const questionText = document.getElementById(`question-${i}`)?.value.trim();
+                const type = document.getElementById(`type-${i}`)?.value || 'single';
+                const timeLimit = parseInt(document.getElementById(`time-${i}`)?.value || '30');
+
+                const optionInputs = document.querySelectorAll(`#options-${i} .option-input`);
+                const allOptions = [];
+                optionInputs.forEach(inp => {
+                    if (inp.value.trim()) allOptions.push(inp.value.trim());
+                });
+
+                let correctAnswer = null;
+                if (type === 'single') {
+                    const selected = document.querySelector(`input[name="correct-${i}"]:checked`);
+                    if (selected) correctAnswer = allOptions[parseInt(selected.value)];
+                } else {
+                    const selected = Array.from(document.querySelectorAll(`input[name="correct-${i}"]:checked`));
+                    if (selected.length > 0) correctAnswer = selected.map(cb => allOptions[parseInt(cb.value)]);
+                }
+
+                questions.push({
+                    question: questionText,
+                    type,
+                    timeLimit,
+                    options: allOptions,
+                    correctAnswer
+                });
+            }
+
+            const draft = { title, category, questionCount, questions, savedAt: new Date().toISOString() };
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        }
+
+        function checkDraft() {
+            const draft = localStorage.getItem(DRAFT_KEY);
+            if (draft) {
+                document.getElementById('draft-banner').style.display = 'block';
+            }
+        }
+
+        function restoreDraft() {
+            const draft = JSON.parse(localStorage.getItem(DRAFT_KEY));
+            if (!draft) return;
+
+            document.getElementById('quizTitle').value = draft.title || '';
+            document.getElementById('quizCategory').value = draft.category || 'other';
+            document.getElementById('questionCount').value = draft.questionCount || 5;
+            generateQuestionFields();
+
+            setTimeout(() => {
+                draft.questions.forEach((q, idx) => {
+                    const i = idx + 1;
+                    const questionEl = document.getElementById(`question-${i}`);
+                    const typeEl = document.getElementById(`type-${i}`);
+                    const timeEl = document.getElementById(`time-${i}`);
+
+                    if (questionEl) questionEl.value = q.question || '';
+                    if (typeEl) typeEl.value = q.type || 'single';
+                    if (timeEl) timeEl.value = q.timeLimit || 30;
+
+                    // Восстанавливаем варианты
+                    const optionInputs = document.querySelectorAll(`#options-${i} .option-input`);
+                    const options = q.options || [];
+                    optionInputs.forEach((inp, j) => {
+                        if (options[j]) inp.value = options[j];
+                    });
+
+                    // Отмечаем правильный ответ
+                    updateCorrectSection(i);
+                    setTimeout(() => {
+                        if (q.type === 'single' && q.correctAnswer) {
+                            const radio = document.querySelector(`input[name="correct-${i}"][value="${options.indexOf(q.correctAnswer)}"]`);
+                            if (radio) radio.checked = true;
+                        }
+                    }, 100);
+                });
+            }, 200);
+
+            document.getElementById('draft-banner').style.display = 'none';
+        }
+
+        function clearDraft() {
+            localStorage.removeItem(DRAFT_KEY);
+            document.getElementById('draft-banner').style.display = 'none';
+        }
+
+        // Автосохранение каждые 10 секунд
+        setInterval(saveDraft, 10000);
+
+        // Проверка при загрузке
+        checkDraft();
+
+        // Удаляем черновик после успешного создания квиза
+        const originalCreateQuiz = createQuiz;
+        createQuiz = async function() {
+            const result = await originalCreateQuiz.apply(this, arguments);
+            if (result) clearDraft();
+            return result;
+        };
     </script>
 </body>
 </html>

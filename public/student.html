@@ -527,6 +527,13 @@
                         totalQuestions = data.session.quiz.questions.length;
                         
                         socket.emit('student-join', { sessionCode, studentName });
+                        // Сохраняем ID после получения от сервера
+                        setTimeout(() => {
+                            if (socket.studentId) {
+                                studentId = socket.studentId;
+                                saveSessionState();
+                            }
+                        }, 500);
                         
                         document.getElementById('join-section').style.display = 'none';
                         document.getElementById('waiting-room').style.display = 'block';
@@ -654,6 +661,7 @@
                 feedback.innerHTML = `<div class="answer-feedback answer-wrong">⏰ Время вышло! Правильный ответ: ${data.correctAnswer}</div>`;
                     SoundFX.play('timeout');
             }
+            saveSessionState();
         });
 
         socket.on('quiz-ended', (data) => {
@@ -759,6 +767,7 @@
                 answerText: selectedAnswerText,
                 timeLeft: serverTimeLeft
             });
+            saveSessionState();
         }
 
         function unlockAnswer() {
@@ -772,47 +781,80 @@
         // ========== ВОССТАНОВЛЕНИЕ ПРИ ЗАГРУЗКЕ ==========
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            
-            // Очистка по параметру ?clear=true
+
             if (urlParams.get('clear')) {
                 localStorage.clear();
                 console.log('🧹 LocalStorage очищен');
             }
-            
+
             const saved = loadSessionState();
-            if (saved && saved.sessionCode) {
-                // Проверяем, существует ли сессия на сервере
+            if (saved && saved.sessionCode && saved.studentId) {
+                // Проверяем, существует ли сессия
                 fetch('/api/sessions/' + saved.sessionCode)
                     .then(r => r.json())
                     .then(data => {
-                        if (data.success && data.session.status === 'active') {
-                            // Сессия активна — восстанавливаем
+                        if (data.success && data.session.status !== 'completed') {
+                            // Сессия жива — восстанавливаем
                             sessionCode = saved.sessionCode;
                             studentName = saved.studentName;
                             studentId = saved.studentId;
                             currentQuestionIndex = saved.currentQuestionIndex;
-                            
+
+                            // Прячем форму входа, показываем квиз
+                            document.getElementById('join-section').style.display = 'none';
+                            document.getElementById('waiting-room').style.display = 'none';
+                            document.getElementById('quiz-room').style.display = 'block';
+                            document.getElementById('quiz-title-display').textContent = 'Восстановление...';
+
+                            // Запрашиваем восстановление
                             socket.emit('student-rejoin', {
                                 sessionCode: sessionCode,
                                 studentId: studentId,
                                 studentName: studentName,
                                 currentQuestionIndex: currentQuestionIndex
                             });
-                            
-                            document.getElementById('join-section').style.display = 'none';
-                            document.getElementById('quiz-room').style.display = 'block';
-                            document.getElementById('quiz-title-display').textContent = 'Восстановление...';
                         } else {
-                            // Сессия не активна — очищаем сохранённое
                             clearSessionState();
-                            console.log('Сессия не активна, очищаем');
                         }
                     })
                     .catch(() => {
                         clearSessionState();
                     });
             }
+
+            // Автозаполнение кода из URL
+            if (urlParams.get('session')) {
+                document.getElementById('sessionCode').value = urlParams.get('session');
+                document.getElementById('studentName').focus();
+            }
         });
+
+        // Обработчик восстановления
+        socket.on('rejoin-state', (data) => {
+            document.getElementById('quiz-title-display').textContent = data.quizTitle;
+            document.getElementById('score-display').textContent = data.score;
+            document.getElementById('progress-display').textContent = `${data.currentQuestion + 1}/${data.totalQuestions}`;
+            document.getElementById('progress-bar').style.width = ((data.currentQuestion + 1) / data.totalQuestions * 100) + '%';
+
+            score = data.score;
+            totalQuestions = data.totalQuestions;
+            currentQuestionIndex = data.currentQuestion;
+            answers = new Array(data.totalQuestions).fill(undefined);
+
+            if (data.answers) {
+                data.answers.forEach(a => {
+                    answers[a.questionIndex] = a.isCorrect;
+                });
+            }
+
+            saveSessionState();
+        });
+
+socket.on('rejoin-failed', (data) => {
+    alert('Не удалось восстановить сессию: ' + data.reason);
+    clearSessionState();
+    location.reload();
+});
 
         // Автозаполнение из URL
         const urlParams = new URLSearchParams(window.location.search);

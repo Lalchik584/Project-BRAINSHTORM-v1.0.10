@@ -207,6 +207,86 @@ function startQuestion(session, questionIndex) {
     
     session.currentTimer = timerInterval;
 }
+
+    socket.on('student-rejoin', (data) => {
+        const { sessionCode, studentId, studentName } = data;
+        const session = activeSessions.get(sessionCode);
+        
+        if (!session || session.status === 'completed') {
+            socket.emit('rejoin-failed', { reason: 'Сессия не найдена или завершена' });
+            return;
+        }
+        
+        // Восстанавливаем ученика
+        const oldStudent = session.students.get(studentId);
+        if (oldStudent) {
+            // Обновляем socketId
+            oldStudent.socketId = socket.id;
+            session.students.set(studentId, oldStudent);
+        } else {
+            // Создаём заново
+            session.students.set(studentId, {
+                id: studentId,
+                name: studentName,
+                socketId: socket.id,
+                joinedAt: new Date().toISOString()
+            });
+            if (!session.scores.has(studentId)) {
+                session.scores.set(studentId, 0);
+            }
+            if (!session.studentAnswers.has(studentId)) {
+                session.studentAnswers.set(studentId, []);
+            }
+        }
+        
+        socket.join(sessionCode);
+        socket.sessionCode = sessionCode;
+        socket.studentId = studentId;
+        
+        // Отправляем текущее состояние
+        const currentScore = session.scores.get(studentId) || 0;
+        const currentAnswers = session.studentAnswers.get(studentId) || [];
+        
+        socket.emit('rejoin-state', {
+            sessionCode,
+            studentId,
+            studentName,
+            status: session.status,
+            currentQuestion: session.currentQuestion,
+            totalQuestions: session.quiz.questions.length,
+            score: currentScore,
+            answers: currentAnswers,
+            quizTitle: session.quiz.title
+        });
+        
+        // Если квиз уже идёт — отправляем текущий вопрос
+        if (session.status === 'active') {
+            const question = session.quiz.questions[session.currentQuestion];
+            if (question) {
+                let wrongAnswers = [];
+                if (Array.isArray(question.wrongAnswers)) {
+                    wrongAnswers = [...question.wrongAnswers];
+                } else if (typeof question.wrongAnswers === 'string') {
+                    wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
+                }
+                const allOptions = [question.correctAnswer, ...wrongAnswers];
+                const shuffledOptions = shuffleArray(allOptions);
+                
+                socket.emit('question-started', {
+                    questionIndex: session.currentQuestion,
+                    question: {
+                        question: question.question,
+                        options: shuffledOptions,
+                        timeLimit: question.timeLimit || 30
+                    },
+                    timeLimit: question.timeLimit || 30
+                });
+            }
+        }
+        
+        console.log(`🔄 ${studentName} переподключился к сессии ${sessionCode}`);
+    });
+
 function endQuestion(session, questionIndex) {
     if (session.currentTimer) {
         clearInterval(session.currentTimer);

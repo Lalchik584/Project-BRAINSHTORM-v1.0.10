@@ -435,25 +435,26 @@
             <button class="change-btn" id="change-answer-btn" onclick="unlockAnswer()" style="display: none;">🔄 Изменить ответ</button>
         </div>
 
-        <div id="results-room" class="results-room">
-            <h1>🏁 Квиз завершен!</h1>
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="final-score">0</div>
-                    <div class="stat-label">итоговый счет</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="final-correct">0</div>
-                    <div class="stat-label">правильных</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="final-wrong">0</div>
-                    <div class="stat-label">ошибок</div>
-                </div>
+    <div id="results-room" class="results-room">
+        <h1>🏁 Квиз завершен!</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="final-score">0</div>
+                <div class="stat-label">итоговый счет</div>
             </div>
-            <div id="results-details" style="margin: 30px 0;"></div>
-            <button class="btn" onclick="location.reload()">🔄 Новый квиз</button>
+            <div class="stat-card">
+                <div class="stat-number" id="final-correct">0</div>
+                <div class="stat-label">правильных</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="final-wrong">0</div>
+                <div class="stat-label">ошибок</div>
+            </div>
         </div>
+        <div id="results-details" style="margin: 30px 0;"></div>
+        <button class="btn" onclick="shareResult()" style="background: #1DA1F2; margin: 15px 0;">📤 Поделиться результатом</button>
+        <div id="share-message" style="color: #ffcc00; font-size: 0.5em; text-align: center; display: none; margin: 10px 0;">✅ Результат скопирован!</div>
+        <button class="btn" onclick="location.reload()">🔄 Новый квиз</button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -891,6 +892,24 @@ soundToggle.onclick = function() {
     this.textContent = enabled ? '🔊' : '🔇';
 };
 document.body.appendChild(soundToggle);
+
+    function shareResult() {
+        const score = document.getElementById('final-score').textContent;
+        const correct = document.getElementById('final-correct').textContent;
+        const wrong = document.getElementById('final-wrong').textContent;
+        const total = parseInt(correct) + parseInt(wrong);
+        const percent = total > 0 ? Math.round(parseInt(correct) / total * 100) : 0;
+    
+        const text = `🧠 Я прошёл квиз на платформе МОЗГОШТОРМ!\n📊 Результат: ${correct}/${total} (${percent}%)\n⭐ Баллов: ${score}\n\nПопробуй и ты: мозгошторм.рф`;
+    
+        navigator.clipboard.writeText(text).then(() => {
+            const msg = document.getElementById('share-message');
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 2000);
+        }).catch(() => {
+            alert('Скопируйте вручную:\n\n' + text);
+        });
+    }
 </script>
 </body>
 </html>

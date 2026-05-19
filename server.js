@@ -206,102 +206,6 @@ function startQuestion(session, questionIndex) {
     }, 200);
     
     session.currentTimer = timerInterval;
-}
-
-    socket.on('student-rejoin', (data) => {
-        const { sessionCode, studentId, studentName } = data;
-        const session = activeSessions.get(sessionCode);
-        
-        if (!session || session.status === 'completed') {
-            socket.emit('rejoin-failed', { reason: 'Сессия не найдена или завершена' });
-            return;
-        }
-        
-        // Восстанавливаем ученика
-        const oldStudent = session.students.get(studentId);
-        if (oldStudent) {
-            // Обновляем socketId
-            oldStudent.socketId = socket.id;
-            session.students.set(studentId, oldStudent);
-        } else {
-            // Создаём заново
-            session.students.set(studentId, {
-                id: studentId,
-                name: studentName,
-                socketId: socket.id,
-                joinedAt: new Date().toISOString()
-            });
-            if (!session.scores.has(studentId)) {
-                session.scores.set(studentId, 0);
-            }
-            if (!session.studentAnswers.has(studentId)) {
-                session.studentAnswers.set(studentId, []);
-            }
-        }
-        
-        socket.join(sessionCode);
-        socket.sessionCode = sessionCode;
-        socket.studentId = studentId;
-        
-        // Отправляем текущее состояние
-        const currentScore = session.scores.get(studentId) || 0;
-        const currentAnswers = session.studentAnswers.get(studentId) || [];
-        
-        socket.emit('rejoin-state', {
-            sessionCode,
-            studentId,
-            studentName,
-            status: session.status,
-            currentQuestion: session.currentQuestion,
-            totalQuestions: session.quiz.questions.length,
-            score: currentScore,
-            answers: currentAnswers,
-            quizTitle: session.quiz.title
-        });
-        
-        // Если квиз уже идёт — отправляем текущий вопрос
-        if (session.status === 'active') {
-            const question = session.quiz.questions[session.currentQuestion];
-            if (question) {
-                let wrongAnswers = [];
-                if (Array.isArray(question.wrongAnswers)) {
-                    wrongAnswers = [...question.wrongAnswers];
-                } else if (typeof question.wrongAnswers === 'string') {
-                    wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
-                }
-                const allOptions = [question.correctAnswer, ...wrongAnswers];
-                const shuffledOptions = shuffleArray(allOptions);
-                
-                socket.emit('question-started', {
-                    questionIndex: session.currentQuestion,
-                    question: {
-                        question: question.question,
-                        options: shuffledOptions,
-                        timeLimit: question.timeLimit || 30
-                    },
-                    timeLimit: question.timeLimit || 30
-                });
-            }
-        }
-        
-        console.log(`🔄 ${studentName} переподключился к сессии ${sessionCode}`);
-    });
-
-function endQuestion(session, questionIndex) {
-    if (session.currentTimer) {
-        clearInterval(session.currentTimer);
-        session.currentTimer = null;
-    }
-    
-    const question = session.quiz.questions[questionIndex];
-    const answers = session.answers.get(questionIndex) || new Map();
-    const totalCorrect = Array.from(answers.values()).filter(a => a.isCorrect).length;
-    
-    io.to(session.code).emit('question-ended', {
-        questionIndex,
-        correctAnswer: question.correctAnswer,
-        totalCorrect
-    });
     
     setTimeout(() => {
         const nextIndex = questionIndex + 1;
@@ -598,47 +502,44 @@ io.on('connection', (socket) => {
         }
     });
 
-  socket.on('start-quiz', (data) => {
-      // Поддержка старого формата (просто код) и нового (объект с флагом)
-      const sessionCode = typeof data === 'string' ? data : data.sessionCode;
-      const shuffleQuestions = typeof data === 'object' ? data.shuffleQuestions : false;
+    socket.on('start-quiz', (data) => {
+        const sessionCode = typeof data === 'string' ? data : data.sessionCode;
+        const shuffleQuestions = typeof data === 'object' ? data.shuffleQuestions : false;
     
-      const session = activeSessions.get(sessionCode);
-      if (session && session.teacher === socket.id) {
-          if (session.logger) {
-              session.logger.addEvent('quiz_started', {
-                  totalStudents: session.students.size,
-                  totalQuestions: session.quiz.questions.length,
-                  shuffleQuestions: shuffleQuestions,
-                  shuffleOptions: true
-              });
-          }
+        const session = activeSessions.get(sessionCode);
+        if (session && session.teacher === socket.id) {
+            if (session.logger) {
+                session.logger.addEvent('quiz_started', {
+                    totalStudents: session.students.size,
+                    totalQuestions: session.quiz.questions.length,
+                    shuffleQuestions: shuffleQuestions,
+                    shuffleOptions: true
+                });
+            }
         
-        // Сохраняем оригинальный порядок вопросов
-          session.originalQuestions = [...session.quiz.questions];
-          session.shuffleQuestions = shuffleQuestions;
+            session.originalQuestions = [...session.quiz.questions];
+            session.shuffleQuestions = shuffleQuestions;
         
-        // Перемешиваем вопросы один раз для всей сессии
-          if (session.shuffleQuestions) {
-              session.originalQuestions = shuffleArray(session.originalQuestions);
-          }
+            if (session.shuffleQuestions) {
+                session.originalQuestions = shuffleArray(session.originalQuestions);
+            }
         
-          session.status = 'active';
-          session.currentQuestion = 0;
+            session.status = 'active';
+            session.currentQuestion = 0;
         
-          session.scores.clear();
-          session.studentAnswers.clear();
-          session.students.forEach((_, studentId) => {
-              session.scores.set(studentId, 0);
-              session.studentAnswers.set(studentId, []);
-          });
-          session.answers.clear();
+            session.scores.clear();
+            session.studentAnswers.clear();
+            session.students.forEach((_, studentId) => {
+                session.scores.set(studentId, 0);
+                session.studentAnswers.set(studentId, []);
+            });
+            session.answers.clear();
         
-          io.to(sessionCode).emit('quiz-started');
+            io.to(sessionCode).emit('quiz-started');
         
-          setTimeout(() => startQuestion(session, 0), 3000);
-      }
-  });
+            setTimeout(() => startQuestion(session, 0), 3000);
+        }
+    });
 
     socket.on('student-answer', (data) => {
         const { sessionCode, questionIndex, answerIndex, answerText, timeLeft } = data;
@@ -705,6 +606,80 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('student-rejoin', (data) => {
+        const { sessionCode, studentId, studentName } = data;
+        const session = activeSessions.get(sessionCode);
+        
+        if (!session || session.status === 'completed') {
+            socket.emit('rejoin-failed', { reason: 'Сессия не найдена или завершена' });
+            return;
+        }
+        
+        const oldStudent = session.students.get(studentId);
+        if (oldStudent) {
+            oldStudent.socketId = socket.id;
+            session.students.set(studentId, oldStudent);
+        } else {
+            session.students.set(studentId, {
+                id: studentId,
+                name: studentName,
+                socketId: socket.id,
+                joinedAt: new Date().toISOString()
+            });
+            if (!session.scores.has(studentId)) {
+                session.scores.set(studentId, 0);
+            }
+            if (!session.studentAnswers.has(studentId)) {
+                session.studentAnswers.set(studentId, []);
+            }
+        }
+        
+        socket.join(sessionCode);
+        socket.sessionCode = sessionCode;
+        socket.studentId = studentId;
+        
+        const currentScore = session.scores.get(studentId) || 0;
+        const currentAnswers = session.studentAnswers.get(studentId) || [];
+        
+        socket.emit('rejoin-state', {
+            sessionCode,
+            studentId,
+            studentName,
+            status: session.status,
+            currentQuestion: session.currentQuestion,
+            totalQuestions: session.quiz.questions.length,
+            score: currentScore,
+            answers: currentAnswers,
+            quizTitle: session.quiz.title
+        });
+        
+        if (session.status === 'active') {
+            const question = session.quiz.questions[session.currentQuestion];
+            if (question) {
+                let wrongAnswers = [];
+                if (Array.isArray(question.wrongAnswers)) {
+                    wrongAnswers = [...question.wrongAnswers];
+                } else if (typeof question.wrongAnswers === 'string') {
+                    wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
+                }
+                const allOptions = [question.correctAnswer, ...wrongAnswers];
+                const shuffledOptions = shuffleArray(allOptions);
+                
+                socket.emit('question-started', {
+                    questionIndex: session.currentQuestion,
+                    question: {
+                        question: question.question,
+                        options: shuffledOptions,
+                        timeLimit: question.timeLimit || 30
+                    },
+                    timeLimit: question.timeLimit || 30
+                });
+            }
+        }
+        
+        console.log(`🔄 ${studentName} переподключился к сессии ${sessionCode}`);
+    });
+
     socket.on('disconnect', () => {
         if (socket.sessionCode && socket.studentId) {
             const session = activeSessions.get(socket.sessionCode);
@@ -718,148 +693,4 @@ io.on('connection', (socket) => {
         }
         console.log('🔌 Отключился:', socket.id);
     });
-});
-
-function sendDetailedStats(session) {
-    if (!session.teacher) return;
-    
-    const studentScores = new Map();
-    session.studentAnswers.forEach((answers, studentId) => {
-        let total = 0;
-        answers.forEach(answer => {
-            if (answer.isCorrect) total += 10;
-        });
-        studentScores.set(studentId, total);
-    });
-    
-    const stats = {
-        totalStudents: session.students.size,
-        questions: session.quiz.questions.map((q, idx) => ({
-            text: q.question,
-            correctAnswer: q.correctAnswer,
-            answers: session.answers.get(idx) ? 
-                Array.from(session.answers.get(idx).entries()) : []
-        })),
-        studentDetails: Array.from(session.studentAnswers.entries()).map(([studentId, answers]) => {
-            const student = session.students.get(studentId);
-            const score = studentScores.get(studentId) || 0;
-            return {
-                studentId,
-                name: student?.name || `Ученик ${studentId.slice(0, 6)}`,
-                answers,
-                score: score
-            };
-        })
-    };
-    
-    io.to(session.teacher).emit('detailed-stats', stats);
-}
-
-// ========== DEVLOG С БЕЗОПАСНОЙ АВТОРИЗАЦИЕЙ ==========
-const DEVLOG_FILE = path.join(__dirname, 'devlog.json');
-const ADMIN_PASSWORD = "Форест_Блекуэл";  // Хранится ТОЛЬКО на сервере!
-
-function loadDevlog() {
-    try {
-        if (fs.existsSync(DEVLOG_FILE)) {
-            const data = fs.readFileSync(DEVLOG_FILE, 'utf8');
-            return JSON.parse(data);
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки DevLog:', error);
-    }
-    return [];
-}
-
-function saveDevlog(entries) {
-    try {
-        fs.writeFileSync(DEVLOG_FILE, JSON.stringify(entries, null, 2));
-        console.log(`✅ Сохранено ${entries.length} записей в DevLog`);
-    } catch (error) {
-        console.error('Ошибка сохранения DevLog:', error);
-    }
-}
-
-// Проверка пароля админа (безопасно!)
-app.post('/api/admin/check', (req, res) => {
-    const { password } = req.body;
-    
-    if (password === ADMIN_PASSWORD) {
-        res.json({ success: true });
-    } else {
-        res.json({ success: false });
-    }
-});
-
-// Получить все записи (доступно всем)
-app.get('/api/devlog', (req, res) => {
-    const entries = loadDevlog();
-    res.json({ success: true, entries });
-});
-
-// Добавить запись (только с правильным паролем)
-app.post('/api/devlog', (req, res) => {
-    const { id, title, content, date, version, adminPassword } = req.body;
-    
-    // Проверка пароля
-    if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
-    }
-    
-    if (!title || !content) {
-        return res.status(400).json({ success: false, error: 'Некорректные данные' });
-    }
-    
-    const entries = loadDevlog();
-    entries.push({ id, title, content, date, version });
-    saveDevlog(entries);
-    
-    console.log(`📝 Добавлена запись в DevLog: ${title}`);
-    res.json({ success: true });
-});
-
-// Удалить запись (только с правильным паролем)
-app.delete('/api/devlog/:id', (req, res) => {
-    const { id } = req.params;
-    const { adminPassword } = req.body;
-    
-    if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
-    }
-    
-    let entries = loadDevlog();
-    entries = entries.filter(e => e.id !== id);
-    saveDevlog(entries);
-    res.json({ success: true });
-});
-
-// Удаление отзыва (только для админа)
-app.delete('/api/feedback/:id', (req, res) => {
-    const { id } = req.params;
-    const { adminPassword } = req.body;
-    
-    if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(403).json({ success: false, error: 'Доступ запрещён' });
-    }
-    
-    let feedbacks = loadFeedbacks();
-    const newFeedbacks = feedbacks.filter(f => f.id !== id);
-    
-    if (feedbacks.length === newFeedbacks.length) {
-        return res.status(404).json({ success: false, error: 'Отзыв не найден' });
-    }
-    
-    saveFeedbacks(newFeedbacks);
-    res.json({ success: true });
-});
-
-server.listen(PORT, HOST, () => {
-    console.log('🎯 ================================');
-    console.log('🎯 BRAINSHTORM SERVER STARTED');
-    console.log('🎯 ================================');
-    console.log(`🌍 Локальный доступ: http://localhost:${PORT}`);
-    console.log(`📁 База данных: ${DB_FILE}`);
-    console.log(`📁 Отзывы: ${FEEDBACK_FILE}`);
-    console.log(`📊 Загружено квизов: ${quizzes.length}`);
-    console.log('🎯 ================================');
 });

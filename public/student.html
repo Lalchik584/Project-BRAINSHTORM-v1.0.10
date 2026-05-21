@@ -527,13 +527,15 @@
                         totalQuestions = data.session.quiz.questions.length;
                         
                         socket.emit('student-join', { sessionCode, studentName });
-                        // Сохраняем ID после получения от сервера
-                        setTimeout(() => {
+                        
+                        // Сохраняем studentId после получения от сервера
+                        const checkId = setInterval(() => {
                             if (socket.studentId) {
                                 studentId = socket.studentId;
                                 saveSessionState();
+                                clearInterval(checkId);
                             }
-                        }, 500);
+                        }, 200);
                         
                         document.getElementById('join-section').style.display = 'none';
                         document.getElementById('waiting-room').style.display = 'block';

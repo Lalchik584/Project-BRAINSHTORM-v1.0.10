@@ -625,7 +625,76 @@ io.on('connection', (socket) => {
         }
     });
 
+            socket.on('student-rejoin', (data) => {
+        const { sessionCode, studentId, studentName } = data;
+        const session = activeSessions.get(sessionCode);
+        
+        if (!session || session.status === 'completed') {
+            socket.emit('rejoin-failed', { reason: 'Сессия не найдена или завершена' });
+            return;
+        }
+        
+        const oldStudent = session.students.get(studentId);
+        if (oldStudent) {
+            oldStudent.socketId = socket.id;
+        } else {
+            session.students.set(studentId, {
+                id: studentId,
+                name: studentName,
+                socketId: socket.id,
+                joinedAt: new Date().toISOString()
+            });
+            if (!session.scores.has(studentId)) {
+                session.scores.set(studentId, 0);
+            }
+            if (!session.studentAnswers.has(studentId)) {
+                session.studentAnswers.set(studentId, []);
+            }
+        }
+        
+        socket.join(sessionCode);
+        socket.sessionCode = sessionCode;
+        socket.studentId = studentId;
+        
+        const currentScore = session.scores.get(studentId) || 0;
+        
+        socket.emit('rejoin-state', {
+            score: currentScore,
+            currentQuestion: session.currentQuestion,
+            totalQuestions: session.quiz.questions.length,
+            quizTitle: session.quiz.title,
+            status: session.status
+        });
+        
+        if (session.status === 'active') {
+            const question = session.quiz.questions[session.currentQuestion];
+            if (question) {
+                let wrongAnswers = [];
+                if (Array.isArray(question.wrongAnswers)) {
+                    wrongAnswers = [...question.wrongAnswers];
+                } else if (typeof question.wrongAnswers === 'string') {
+                    wrongAnswers = question.wrongAnswers.split(',').map(s => s.trim()).filter(s => s);
+                }
+                const allOptions = [question.correctAnswer, ...wrongAnswers];
+                const shuffledOptions = shuffleArray(allOptions);
+                
+                socket.emit('question-started', {
+                    questionIndex: session.currentQuestion,
+                    question: {
+                        question: question.question,
+                        options: shuffledOptions,
+                        timeLimit: question.timeLimit || 30
+                    },
+                    timeLimit: question.timeLimit || 30
+                });
+            }
+        }
+        
+        console.log(`🔄 ${studentName} переподключился к ${sessionCode}`);
+    });
+
     socket.on('disconnect', () => {
+
         if (socket.sessionCode && socket.studentId) {
             const session = activeSessions.get(socket.sessionCode);
             if (session) {

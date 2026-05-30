@@ -528,15 +528,6 @@
                         
                         socket.emit('student-join', { sessionCode, studentName });
                         
-                        // Сохраняем studentId после получения от сервера
-                        const checkId = setInterval(() => {
-                            if (socket.studentId) {
-                                studentId = socket.studentId;
-                                saveSessionState();
-                                clearInterval(checkId);
-                            }
-                        }, 200);
-                        
                         document.getElementById('join-section').style.display = 'none';
                         document.getElementById('waiting-room').style.display = 'block';
                         
@@ -558,6 +549,12 @@
         }
 
         // ========== СОКЕТЫ ==========
+
+        socket.on('your-student-id', (data) => {
+            studentId = data.studentId;
+            saveSessionState();
+        });
+        
         socket.on('student-joined', (data) => {
             if (!document.getElementById('student-' + data.student.id)) {
                 addStudentToList(data.student);

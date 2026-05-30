@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-with, initial-scale=1.0">
     <title>Ученик - МОЗГОШТОРМ</title>
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
@@ -834,18 +834,36 @@
             document.getElementById('score-display').textContent = data.score;
             document.getElementById('progress-display').textContent = `${data.currentQuestion + 1}/${data.totalQuestions}`;
             document.getElementById('progress-bar').style.width = ((data.currentQuestion + 1) / data.totalQuestions * 100) + '%';
-
+            
             score = data.score;
             totalQuestions = data.totalQuestions;
             currentQuestionIndex = data.currentQuestion;
             answers = new Array(data.totalQuestions).fill(undefined);
-
+            
             if (data.answers) {
                 data.answers.forEach(a => {
                     answers[a.questionIndex] = a.isCorrect;
                 });
+                
+                // Если уже ответил на текущий вопрос — блокируем кнопки
+                const currentAnswer = data.answers.find(a => a.questionIndex === data.currentQuestion);
+                if (currentAnswer) {
+                    answerLocked = true;
+                    setTimeout(() => {
+                        const options = document.querySelectorAll('.option-btn');
+                        options.forEach(btn => {
+                            const text = btn.textContent.substring(3);
+                            if (text === currentAnswer.answerText) {
+                                btn.classList.add('selected');
+                                if (currentAnswer.isCorrect) btn.classList.add('correct');
+                                else btn.classList.add('wrong');
+                            }
+                            btn.disabled = true;
+                        });
+                    }, 300);
+                }
             }
-
+            
             saveSessionState();
         });
 

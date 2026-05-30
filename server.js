@@ -515,6 +515,7 @@ io.on('connection', (socket) => {
             });
             
             console.log(`👨‍🎓 ${studentName} присоединился к ${sessionCode}`);
+            socket.emit('your-student-id', { studentId });
         }
     });
 

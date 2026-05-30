@@ -567,6 +567,13 @@ io.on('connection', (socket) => {
         
         if (session && session.status === 'active' && session.currentQuestion === questionIndex) {
             const studentId = socket.studentId;
+            
+            // Проверяем, не отвечал ли уже ученик на этот вопрос
+            const questionAnswers = session.answers.get(questionIndex);
+            if (questionAnswers && questionAnswers.has(studentId)) {
+                return; // Уже ответил — игнорируем повторный ответ
+            }
+            
             const question = session.quiz.questions[questionIndex];
             
             if (!session.answers.has(questionIndex)) {

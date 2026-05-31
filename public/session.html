@@ -375,6 +375,33 @@
             font-size: 0.6em;
         }
 
+        .reactions-container {
+            position: fixed;
+            right: 20px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 8px;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .reaction-item {
+            background: #0a001a;
+            border: 2px solid #ffcc00;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #fff;
+            font-size: 0.5em;
+            animation: reactionUp 2s ease-out forwards;
+        }
+        @keyframes reactionUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(0.5); }
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             h1 { font-size: 1.2em; }
@@ -759,6 +786,26 @@
         }
 
         document.getElementById('export-excel-btn')?.addEventListener('click', exportToXLSX);
+
+        let reactionsEnabled = true;
+
+        socket.on('new-reaction', (data) => {
+            if (!reactionsEnabled) return;
+    
+            const container = document.getElementById('reactions-container');
+            const el = document.createElement('div');
+            el.className = 'reaction-item';
+            el.innerHTML = `<img src="/images/reactions/${data.emoji}.png" style="width: 24px; height: 24px;"> ${data.studentName}`;
+            container.appendChild(el);
+    
+            setTimeout(() => el.remove(), 2000);
+        });
+
+        function toggleReactions() {
+            reactionsEnabled = !reactionsEnabled;
+            document.getElementById('toggle-reactions-btn').textContent = reactionsEnabled ? '🔔' : '🔕';
+        }
     </script>
+    <div class="reactions-container" id="reactions-container"></div>
 </body>
 </html>

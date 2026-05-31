@@ -320,6 +320,18 @@
             margin-top: 5px;
         }
 
+        .emoji-btn {
+            background: #1a0033;
+            border: 2px solid #d70bf2;
+            cursor: pointer;
+            padding: 5px 8px;
+        transition: all 0.05s linear;
+        }
+        .emoji-btn:hover {
+            background: #7b058c;
+            transform: scale(1.2);
+        }
+
         .change-btn {
             background: #ffc107;
             color: #333;
@@ -433,6 +445,27 @@
             <div id="options-container"></div>
             <div id="feedback-container"></div>
             <button class="change-btn" id="change-answer-btn" onclick="unlockAnswer()" style="display: none;">🔄 Изменить ответ</button>
+
+            <div class="emoji-reactions" style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <button class="emoji-btn" onclick="sendReaction('reaction1')">
+                    <img src="/images/reactions/reaction1.png" style="width: 32px; height: 32px;">
+                </button>
+                <button class="emoji-btn" onclick="sendReaction('reaction2')">
+                    <img src="/images/reactions/reaction2.png" style="width: 32px; height: 32px;">
+                </button>
+                <button class="emoji-btn" onclick="sendReaction('reaction3')">
+                    <img src="/images/reactions/reaction3.png" style="width: 32px; height: 32px;">
+                </button>
+                <button class="emoji-btn" onclick="sendReaction('reaction4')">
+                    <img src="/images/reactions/reaction4.png" style="width: 32px; height: 32px;">
+                </button>
+                <button class="emoji-btn" onclick="sendReaction('reaction5')">
+                    <img src="/images/reactions/reaction5.png" style="width: 32px; height: 32px;">
+                </button>
+                <button class="emoji-btn" onclick="sendReaction('reaction6')">
+                    <img src="/images/reactions/reaction6.png" style="width: 32px; height: 32px;">
+                </button>
+            </div>
         </div>
 
     <div id="results-room" class="results-room">
@@ -500,6 +533,16 @@
         }
 
         // ========== ВХОД ==========
+
+        function sendReaction(emoji) {
+            socket.emit('student-reaction', {
+                sessionCode,
+                studentId,
+                studentName,
+                emoji
+            });
+        }
+        
         function joinSession() {
             // Очищаем старую сессию при новом входе
             clearSessionState();

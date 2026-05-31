@@ -701,6 +701,18 @@ io.on('connection', (socket) => {
         console.log(`🔄 ${studentName} переподключился к ${sessionCode}`);
     });
 
+      socket.on('student-reaction', (data) => {
+        const { sessionCode, studentName, emoji } = data;
+        const session = activeSessions.get(sessionCode);
+        if (session && session.teacher) {
+            io.to(session.teacher).emit('new-reaction', {
+                studentName,
+                emoji,
+                timestamp: Date.now()
+            });
+        }
+    });
+  
     socket.on('disconnect', () => {
 
         if (socket.sessionCode && socket.studentId) {

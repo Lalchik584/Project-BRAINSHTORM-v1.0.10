@@ -235,6 +235,28 @@ function endQuestion(session, questionIndex) {
 
 function endQuiz(session) {
     session.status = 'completed';
+    if (session.logger) {
+        const results = Array.from(session.scores.entries()).map(([id, score]) => ({
+            studentId: id,
+            name: session.students.get(id)?.name || "Неизвестный",
+            score: score
+        }));
+        session.logger.addEvent("quiz_ended", {
+            finalResults: results,
+            totalQuestions: session.quiz.questions.length
+        });
+    }
+    if (session.logger) {
+        const results = Array.from(session.scores.entries()).map(([id, score]) => ({
+            studentId: id,
+            name: session.students.get(id)?.name || "Неизвестный",
+            score: score
+        }));
+        session.logger.addEvent("quiz_ended", {
+            finalResults: results,
+            totalQuestions: session.quiz.questions.length
+        });
+    }
     
     const finalResults = Array.from(session.scores.entries())
         .map(([studentId, score]) => ({
@@ -515,6 +537,18 @@ io.on('connection', (socket) => {
             });
             
             console.log(`👨‍🎓 ${studentName} присоединился к ${sessionCode}`);
+            if (session.logger) {
+                session.logger.addEvent("student_joined", {
+                    studentId: studentId,
+                    studentName: studentName
+                });
+            }
+            if (session.logger) {
+                session.logger.addEvent("student_joined", {
+                    studentId: studentId,
+                    studentName: studentName
+                });
+            }
             socket.emit('your-student-id', { studentId });
         }
     });
@@ -545,6 +579,18 @@ io.on('connection', (socket) => {
           }
         
           session.status = 'active';
+            if (session.logger) {
+                session.logger.addEvent("quiz_started", {
+                    totalStudents: session.students.size,
+                    totalQuestions: session.quiz.questions.length
+                });
+            }
+            if (session.logger) {
+                session.logger.addEvent("quiz_started", {
+                    totalStudents: session.students.size,
+                    totalQuestions: session.quiz.questions.length
+                });
+            }
           session.currentQuestion = 0;
         
           session.scores.clear();
@@ -630,6 +676,28 @@ io.on('connection', (socket) => {
             }
             
             sendDetailedStats(session);
+            if (session.logger) {
+                const answerStudent = session.students.get(socket.studentId);
+                session.logger.addEvent("student_answer", {
+                    studentId: socket.studentId,
+                    studentName: answerStudent?.name || "Неизвестный",
+                    questionIndex: questionIndex,
+                    answerText: answerText,
+                    isCorrect: isCorrect,
+                    timeLeft: timeLeft
+                });
+            }
+            if (session.logger) {
+                const answerStudent = session.students.get(socket.studentId);
+                session.logger.addEvent("student_answer", {
+                    studentId: socket.studentId,
+                    studentName: answerStudent?.name || "Неизвестный",
+                    questionIndex: questionIndex,
+                    answerText: answerText,
+                    isCorrect: isCorrect,
+                    timeLeft: timeLeft
+                });
+            }
         }
     });
 
@@ -718,6 +786,18 @@ io.on('connection', (socket) => {
         if (socket.sessionCode && socket.studentId) {
             const session = activeSessions.get(socket.sessionCode);
             if (session) {
+            if (session.logger) {
+                session.logger.addEvent("student_disconnected", {
+                    studentId: socket.studentId,
+                    studentName: session.students.get(socket.studentId)?.name || "Неизвестный"
+                });
+            }
+            if (session.logger) {
+                session.logger.addEvent("student_disconnected", {
+                    studentId: socket.studentId,
+                    studentName: session.students.get(socket.studentId)?.name || "Неизвестный"
+                });
+            }
                 session.students.delete(socket.studentId);
                 io.to(socket.sessionCode).emit('student-left', {
                     studentId: socket.studentId,
